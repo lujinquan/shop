@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+    <title>微信小程序</title>
+    <link rel="stylesheet" href="./resource/unpkg/element-ui@2.12.0/lib/theme-chalk/index.css">
+    <script src="./resource/unpkg/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script src="./resource/unpkg/vue@2.6.10/dist/vue.js"></script>
+    <script src="./resource/unpkg/element-ui@2.12.0/lib/index.js"></script>
+    <script src="./resource/unpkg/qs@6.5.2/dist/qs.js"></script>
+    <script src="./resource/unpkg/axios@0.18.0/dist/axios.min.js"></script>
+    <script src="./resource/unpkg/vue-line-clamp@1.2.4/dist/vue-line-clamp.umd.js"></script>
+    <script>
+        const _scriptUrl = '/seller.php';
+        const _baseUrl = '{$url}';
+    </script>
+    <script src="./resource/js/common.js"></script>
+    <script src="./resource/js/dayjs.min.js"></script>
+</head>
+<body>
+
+<style>
+    .table-body {
+        padding: 40px 20px 20px;
+        background-color: #fff;
+    }
+
+    .outline {
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 32px;
+        height: 32px;
+        color: #F56E6E;
+        cursor: pointer;
+        font-size: 24px;
+        margin: 0 5px;
+    }
+</style>
+
+<div id="app" v-cloak>
+    <el-card shadow="never" style="border:0" class="box-card" body-style="background-color: #f3f3f3;padding: 10px 0 0;">
+        <div slot="header">
+            <div>
+                <span>{{preTitle}}小程序发布</span>
+                <div style="float: right;margin-top: -5px">
+                    <el-button type="primary" size="small" @click="getAppQrcode" :loading="app_qrcode_loading">
+                        获取小程序二维码
+                    </el-button>
+                </div>
+            </div>
+        </div>
+        <div class="table-body">
+            <el-steps :active="step" finish-status="success" align-center
+                      style="border-bottom: 1px solid #ebeef5;padding-bottom: 20px">
+                <el-step title="扫描二维码登录"></el-step>
+                <el-step title="预览小程序"></el-step>
+                <el-step title="上传成功"></el-step>
+            </el-steps>
+            <div style="text-align: center; padding: 20px 0">
+
+				<el-row type="flex" class="row-bg" justify="center" v-if="!login_qrcode">
+				<el-col :span="4" style="padding-bottom: 20px" v-if="!login_qrcode">
+				<div style="margin-bottom: 12px;" v-if="!login_qrcode">版本备注</div>
+				<el-input  v-model.trim="desc" v-if="!login_qrcode" ></el-input>
+				</el-col v-if="!login_qrcode">
+				</el-row v-if="!login_qrcode">
+
+                <el-button type="primary" @click="login" :loading="upload_loading" v-if="!login_qrcode">获取登录二维码
+                </el-button>
+
+                <div style="text-align: center" v-if="login_qrcode && !preview_qrcode">
+                    <img :src="login_qrcode"
+                         style="width: 150px;height: 150px; border: 1px solid #e2e2e2;margin-bottom: 12px">
+                    <div style="margin-bottom: 12px;">请使用微信扫码登录</div>
+                    <div style="color: #909399;">
+                        <div>扫码登录后大约会有10秒左右延时，请您耐心等待。</div>
+                        <div>您的微信号必须是该小程序的管理员或者开发者才可扫码登录。</div>
+                    </div>
+                </div>
+                <div style="text-align: center" v-if="preview_qrcode">
+                    <img :src="preview_qrcode"
+                         style="width: 150px;height: 150px; border: 1px solid #e2e2e2;margin-bottom: 12px">
+                    <div style="margin-bottom: 12px;">扫描二维码可以预览小程序</div>
+                    <el-button type="primary" @click="upload" :loading="upload_loading" v-if="!upload_success">上传小程序
+                    </el-button>
+                    <div v-else>
+                        <div style="margin-bottom: 12px">
+                            <span>上传成功！</span>
+                            <span>请登录微信小程序平台（</span>
+                            <a href="https://mp.weixin.qq.com/" target="_blank">https://mp.weixin.qq.com/</a>
+                            <span>）发布小程序</span>
+                        </div>
+                        <div style="margin-bottom: 12px">
+                            <div>版本号：{{version}}</div>
+                            <div>描述：{{desc}}</div>
+                        </div>
+                        <div>
+                            <img style="max-width: 100%;height: auto;border: 1px dashed #35b635;"
+                                 src="./resource/wxapp/assets/upload-tip.png">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </el-card>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                jumpAppidDialogVisible: false,
+                saveJumpAppidLoading: false,
+                app_qrcode_loading: false,
+                app_qrcode: false,
+                step: 0,
+                upload_loading: false,
+                login_qrcode: false,
+                preview_qrcode: false,
+                upload_success: false,
+                version: '',
+                desc: '',
+            };
+        },
+        methods: {
+            getAppQrcode() {
+                let html = '';
+                if (this.app_qrcode) {
+                    html = '<div style="text-align: center;"><img src='
+                        + this.app_qrcode
+                        + ' style="width: 200px;"></div>';
+                    this.$alert(html, '小程序码', {
+                        dangerouslyUseHTMLString: true
+                    });
+                    return;
+                }
+                this.app_qrcode_loading = true;
+                this.$request({
+                    params: {
+                        s: 'plugin/wxapp/app-upload/app-qrcode',
+                    },
+                }).then(e => {
+                    this.app_qrcode_loading = false;
+                    if (e.data.code === 0) {
+                        this.app_qrcode = e.data.data.qrcode;
+                        html = '<div style="text-align: center;"><img src='
+                            + this.app_qrcode
+                            + ' style="width: 200px;"></div>';
+                        this.$alert(html, '小程序码', {
+                            dangerouslyUseHTMLString: true
+                        });
+                    } else {
+                        this.$alert(e.data.msg, '提示');
+                    }
+                }).catch(e => {
+                    this.app_qrcode_loading = false;
+                });
+            },
+            login() {
+                this.upload_loading = true;
+                this.$request({
+                    params: {
+                        s: 'weprogram/login',
+						desc: this.desc,
+                    },
+                }).then(e => {
+                    this.upload_loading = false;
+                    if (e.data.code === 0) {
+                        this.login_qrcode = e.data.data.qrcode;
+                        setTimeout(() => {
+                            this.preview();
+                        }, 2000);
+                    } else {
+                        this.$alert(e.data.msg, '提示', {
+                            callback() {
+                                location.reload();
+                            },
+                        });
+                    }
+                }).catch(e => {
+                    this.upload_loading = false;
+                });
+            },
+            preview() {
+                this.$request({
+                    params: {
+                        s: 'weprogram/preview',
+                    },
+                }).then(e => {
+                    if (e.data.code === 0) {
+                        if (e.data.data.qrcode) {
+                            this.preview_qrcode = e.data.data.qrcode;
+                            this.step = 1;
+                        } else if (e.data.data.retry && e.data.data.retry === 1) {
+                            setTimeout(() => {
+                                this.preview();
+                            }, 2000);
+                        }
+                    } else {
+                        this.$alert(e.data.msg, '提示', {
+                            callback() {
+                                location.reload();
+                            },
+                        });
+                    }
+                }).catch(e => {
+                });
+            },
+            upload() {
+                this.upload_loading = true;
+                this.$request({
+                    params: {
+                        s: 'weprogram/upload',
+                    },
+                }).then(e => {
+                    this.upload_loading = false;
+                    if (e.data.code === 0) {
+                        this.step = 3;
+                        this.upload_success = true;
+                        this.version = e.data.data.version;
+                        this.desc = e.data.data.desc;
+                    } else {
+                        this.$alert(e.data.msg, '提示');
+                    }
+                }).catch(e => {
+                    this.upload_loading = false;
+                });
+            },
+        },
+    });
+</script>
+
+</body>
+</html>
