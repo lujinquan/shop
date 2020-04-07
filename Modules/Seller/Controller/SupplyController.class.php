@@ -328,6 +328,33 @@ class SupplyController extends CommonController {
 		$pindex = max(1, intval($_GPC['page']));
 		$psize = 20;
 		
+		
+		$searchtime = I('request.searchtime','');
+		
+		$time = I('request.time');
+		
+		$starttime = isset($time['start']) ? strtotime($time['start']) : strtotime(date('Y-m-d'.' 00:00:00'));
+		$endtime = isset($time['end']) ? strtotime($time['end']) : strtotime(date('Y-m-d'.' 23:59:59'));
+		
+		$this->starttime = $starttime;
+		$this->endtime = $endtime;
+		$this->searchtime = $searchtime;
+		
+		
+		if( !empty($searchtime) )
+		{
+		    switch( $searchtime )
+		    {
+		        case 'create':
+		            //下单时间 date_added
+		            $condition .= " and addtime >={$starttime} and addtime <= {$endtime}";
+		            break;
+		       
+		    }
+		}
+		
+		
+		
 		$sql = 'SELECT * FROM ' . C('DB_PREFIX'). "lionfish_supply_commiss_order                 
 						WHERE  " . $condition . ' order by id desc  ';
 						
@@ -368,6 +395,7 @@ class SupplyController extends CommonController {
 					array('title' => '订单id', 'field' => 'order_id', 'width' => 16),
 					array('title' => '商品名称', 'field' => 'goods_name', 'width' => 32),
 					array('title' => '金额', 'field' => 'total_money', 'width' => 16),
+					array('title' => '运费', 'field' => 'shipping_fare', 'width' => 16),
 					array('title' => '团长佣金', 'field' => 'head_commiss_money', 'width' => 16),
 					array('title' => '服务费比例', 'field' => 'comunity_blili', 'width' => 16),
 					array('title' => '服务费金额', 'field' => 'fuwu_money', 'width' => 16),
@@ -383,6 +411,7 @@ class SupplyController extends CommonController {
 				$tmp_exval['order_id'] = $val['order_id'];
 				$tmp_exval['goods_name'] = $val['goods_name'].$val['option_sku'];
 				$tmp_exval['total_money'] = $val['total_money'];
+				$tmp_exval['shipping_fare'] = $val['shipping_fare'];
 				$tmp_exval['head_commiss_money'] = '-'.$val['head_commiss_money'];
 				$tmp_exval['comunity_blili'] = $val['comunity_blili'].'%';
 				$tmp_exval['fuwu_money'] = '-'.( round($val['total_money']*$val['comunity_blili']/100,2));
@@ -880,7 +909,7 @@ class SupplyController extends CommonController {
 	public function zhenquery()
 	{
 	   
-	    $kwd =  I('get.keyword','','trim');
+	    $kwd =  I('request.keyword','','trim');
 	    
 		$is_ajax =  I('request.is_ajax',0,'intval');
 		

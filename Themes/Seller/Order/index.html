@@ -1114,6 +1114,7 @@ $(function(){
 				var a = form_data.replace('c=order&a=index','');
 				var s = a.replace('c=communityhead&a=distributionorder','');
 				
+				s = s.replace('c=distribution&a=distributionorder','');
 				
 				
 				$.post("{:U('order/export_form', array('sec' => 1) )}", s, function(shtml){

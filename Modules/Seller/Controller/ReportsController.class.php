@@ -78,14 +78,10 @@ class ReportsController extends CommonController{
 						$daytuikuan =0;
 					}
 					
-					//退款单数
-				    $daytui = $day_info3[0]['count'];
-					//退款金额
-					$daytuikuan = $day_info3[0]['total']+$day_info3[0]['shipping_fare']-$day_info3[0]['voucher_credit']-$day_info3[0]['fullreduction_money'];		
 					
-					
-				//每天取消单数 
-				$day_info4 = M()->query("select count( * ) as count,sum(total) as total,sum(shipping_fare) as shipping_fare,sum(voucher_credit) as voucher_credit,sum(fullreduction_money) as fullreduction_money,sum(score_for_money) as score_for_money from ".C('DB_PREFIX')."lionfish_comshop_order where date_added > ".$day['egt']." and date_added < ".$day['lt']." ".$condition." and (order_status_id  = 5)");
+					//每天取消单数 
+					$day_info4 = M()->query("select count( * ) as count,sum(total) as total,sum(shipping_fare) as shipping_fare,sum(voucher_credit) as voucher_credit,sum(fullreduction_money) as fullreduction_money,sum(score_for_money) as score_for_money from ".C('DB_PREFIX')."lionfish_comshop_order 
+							where date_added > ".$day['egt']." and date_added < ".$day['lt']." ".$condition." and (order_status_id  = 5)");
 					
 					if($day_info4){	
 						$dayqu = 0;
@@ -98,9 +94,37 @@ class ReportsController extends CommonController{
 					$dayquxiao = $day_info4[0]['total']+$day_info4[0]['shipping_fare']-$day_info4[0]['voucher_credit']-$day_info4[0]['fullreduction_money'];
 					
 					
+					//退款中 金额
+					$daywait_refund_money_arr = M()->query("select sum(ref_money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_refund 
+							where state =0 and addtime >= ".$day['egt']." and addtime < ".$day['lt']."  ");
+					
+					$daywait_refund_money = $daywait_refund_money_arr[0]['total_money'];
+					
+					//退款中  订单数量
+					$daywait_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_refund where state =0 and addtime >= ".$day['egt']." 
+						and addtime < ".$day['lt']."   ");
+					
+					$daywait_refund_count = count($daywait_refund_arr);
+					
+					//已退款 金额
+					$dayhas_refund_money_arr = M()->query("select sum(money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime >= ".$day['egt']." 
+						and addtime < ".$day['lt']."  ");
+					
+					$dayhas_refund_money = $dayhas_refund_money_arr[0]['total_money'];
+					
+					//已退款 订单数量
+					$dayhas_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime >= ".$day['egt']." 
+						and addtime < ".$day['lt']."  group by order_id ");
+					
+					$dayhas_refund_count = count($dayhas_refund_arr);
+					
+					
+					
 					$daylist[$key] = array( 
-						'daytui' => $daytui,
-						'daytuikuan' => $daytuikuan,
+						'daywait_refund_money' => $daywait_refund_money,
+						'daywait_refund_count' => $daywait_refund_count,
+						'dayhas_refund_money' => $dayhas_refund_money,
+						'dayhas_refund_count' => $dayhas_refund_count,
 						'dayqu' => $dayqu,
 						'dayquxiao' => $dayquxiao,
 						
@@ -115,17 +139,38 @@ class ReportsController extends CommonController{
 				$list2[] = array_merge($v,$daylist[$k]);  
 			}  
 			
-			//退款
-			$cancel_info = M()->query("select from_unixtime( date_added, '%Y-%m-%d' ) as date, count( * ) as count,sum(total) as total,sum(shipping_fare) as shipping_fare,sum(voucher_credit) as voucher_credit,sum(fullreduction_money) as fullreduction_money,sum(score_for_money) as score_for_money from ".C('DB_PREFIX')."lionfish_comshop_order where date_added > ".$thisweek['egt']." and date_added < ".$thisweek['lt']." ".$condition." and (order_status_id in (7,8,9,10,12,13)) group by date order by date asc");
+			
+			//退款中 金额
+			$wait_refund_money_arr = M()->query("select sum(ref_money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_refund 
+					where state =0 and addtime > ".$thisweek['egt']." and addtime < ".$thisweek['lt']."  ");
+			
+			$wait_refund_money = $wait_refund_money_arr[0]['total_money'];
+			
+			//退款中  订单数量
+			$wait_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_refund where state =0 and addtime > ".$thisweek['egt']." 
+				and addtime < ".$thisweek['lt']."   ");
+			
+			$wait_refund_count = count($wait_refund_arr);
+			
+			//已退款 金额
+			$has_refund_money_arr = M()->query("select sum(money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime > ".$thisweek['egt']." 
+				and addtime < ".$thisweek['lt']."  ");
+			
+			$has_refund_money = $has_refund_money_arr[0]['total_money'];
+			
+			//已退款 订单数量
+			$has_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime > ".$thisweek['egt']." 
+				and addtime < ".$thisweek['lt']."  group by order_id ");
+			
+			$has_refund_count = count($has_refund_arr);
+			
+			$this->wait_refund_money = $wait_refund_money;
+			$this->wait_refund_count = $wait_refund_count;
+			$this->has_refund_money = $has_refund_money;
+			$this->has_refund_count = $has_refund_count;
 			
 			
-			$zongtuishu =0;
-			$tuikuan =0;
-			foreach($cancel_info as $val2) {
-					
-				    $zongtuishu += $val2['count'];
-					$tuikuan += $val2['total']+$val2['shipping_fare']-$val2['voucher_credit']-$val2['fullreduction_money'];		
-			}
+			
 
 			
 			//小计
@@ -193,10 +238,6 @@ class ReportsController extends CommonController{
 						$daytuikuan =0;
 					}
 					
-					//退款单数
-				    $daytui = $day_info3[0]['count'];
-					//退款金额
-					$daytuikuan = $day_info3[0]['total']+$day_info3[0]['shipping_fare']-$day_info3[0]['voucher_credit']-$day_info3[0]['fullreduction_money'];		
 					
 					
 				//每天取消单数 
@@ -213,9 +254,37 @@ class ReportsController extends CommonController{
 					$dayquxiao = $day_info4[0]['total']+$day_info4[0]['shipping_fare']-$day_info4[0]['voucher_credit']-$day_info4[0]['fullreduction_money'];
 					
 					
+					//退款中 金额
+					$daywait_refund_money_arr = M()->query("select sum(ref_money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_refund 
+							where state =0 and addtime >= ".$day['egt']." and addtime < ".$day['lt']."  ");
+					
+					$daywait_refund_money = $daywait_refund_money_arr[0]['total_money'];
+					
+					//退款中  订单数量
+					$daywait_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_refund where state =0 and addtime >= ".$day['egt']." 
+						and addtime < ".$day['lt']."   ");
+					
+					$daywait_refund_count = count($daywait_refund_arr);
+					
+					//已退款 金额
+					$dayhas_refund_money_arr = M()->query("select sum(money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime >= ".$day['egt']." 
+						and addtime < ".$day['lt']."  ");
+					
+					$dayhas_refund_money = $dayhas_refund_money_arr[0]['total_money'];
+					
+					//已退款 订单数量
+					$dayhas_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime >= ".$day['egt']." 
+						and addtime < ".$day['lt']."  group by order_id ");
+					
+					$dayhas_refund_count = count($dayhas_refund_arr);
+					
+					
+					
 					$daylist[$key] = array( 
-						'daytui' => $daytui,
-						'daytuikuan' => $daytuikuan,
+						'daywait_refund_money' => $daywait_refund_money,
+						'daywait_refund_count' => $daywait_refund_count,
+						'dayhas_refund_money' => $dayhas_refund_money,
+						'dayhas_refund_count' => $dayhas_refund_count,
 						'dayqu' => $dayqu,
 						'dayquxiao' => $dayquxiao,
 						
@@ -230,8 +299,39 @@ class ReportsController extends CommonController{
 				$list2[] = array_merge($v,$daylist[$k]);  
 			}  
 			
+			//退款中 金额
+			$wait_refund_money_arr = M()->query("select sum(ref_money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_refund 
+					where state =0 and addtime > ".$lastweek['egt']." and addtime < ".$lastweek['lt']."  ");
+			
+			$wait_refund_money = $wait_refund_money_arr[0]['total_money'];
+			
+			//退款中  订单数量
+			$wait_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_refund where state =0 and addtime > ".$lastweek['egt']." 
+				and addtime < ".$lastweek['lt']."   ");
+			
+			$wait_refund_count = count($wait_refund_arr);
+			
+			//已退款 金额
+			$has_refund_money_arr = M()->query("select sum(money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime > ".$lastweek['egt']." 
+				and addtime < ".$lastweek['lt']."  ");
+			
+			$has_refund_money = $has_refund_money_arr[0]['total_money'];
+			
+			//已退款 订单数量
+			$has_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime > ".$lastweek['egt']." 
+				and addtime < ".$lastweek['lt']."  group by order_id ");
+			
+			$has_refund_count = count($has_refund_arr);
+			
+			$this->wait_refund_money = $wait_refund_money;
+			$this->wait_refund_count = $wait_refund_count;
+			$this->has_refund_money = $has_refund_money;
+			$this->has_refund_count = $has_refund_count;
+			
+			
 			//退款
-			$cancel_info = M()->query("select from_unixtime( date_added, '%Y-%m-%d' ) as date, count( * ) as count,sum(total) as total,sum(shipping_fare) as shipping_fare,sum(voucher_credit) as voucher_credit,sum(fullreduction_money) as fullreduction_money,sum(score_for_money) as score_for_money from ".C('DB_PREFIX')."lionfish_comshop_order where date_added > ".$lastweek['egt']." and date_added < ".$lastweek['lt']." ".$condition." and (order_status_id in (7,8,9,10,12,13)) group by date order by date asc");
+			$cancel_info = M()->query("select from_unixtime( date_added, '%Y-%m-%d' ) as date, count( * ) as count,sum(total) as total,sum(shipping_fare) as shipping_fare,sum(voucher_credit) as voucher_credit,sum(fullreduction_money) as fullreduction_money,sum(score_for_money) as score_for_money from ".C('DB_PREFIX')."lionfish_comshop_order 
+			where date_added > ".$lastweek['egt']." and date_added < ".$lastweek['lt']." ".$condition." and (order_status_id in (7,8,9,10,12,13)) group by date order by date asc");
 			
 			
 			$zongtuishu =0;
@@ -308,10 +408,6 @@ class ReportsController extends CommonController{
 						$daytuikuan =0;
 					}
 					
-					//退款单数
-				    $daytui = $day_info3[0]['count'];
-					//退款金额
-					$daytuikuan = $day_info3[0]['total']+$day_info3[0]['shipping_fare']-$day_info3[0]['voucher_credit']-$day_info3[0]['fullreduction_money'];		
 					
 					
 				//每天取消单数 
@@ -328,9 +424,37 @@ class ReportsController extends CommonController{
 					$dayquxiao = $day_info4[0]['total']+$day_info4[0]['shipping_fare']-$day_info4[0]['voucher_credit']-$day_info4[0]['fullreduction_money'];
 					
 					
+					//退款中 金额
+					$daywait_refund_money_arr = M()->query("select sum(ref_money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_refund 
+							where state =0 and addtime >= ".$day['egt']." and addtime < ".$day['lt']."  ");
+					
+					$daywait_refund_money = $daywait_refund_money_arr[0]['total_money'];
+					
+					//退款中  订单数量
+					$daywait_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_refund where state =0 and addtime >= ".$day['egt']." 
+						and addtime < ".$day['lt']."   ");
+					
+					$daywait_refund_count = count($daywait_refund_arr);
+					
+					//已退款 金额
+					$dayhas_refund_money_arr = M()->query("select sum(money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime >= ".$day['egt']." 
+						and addtime < ".$day['lt']."  ");
+					
+					$dayhas_refund_money = $dayhas_refund_money_arr[0]['total_money'];
+					
+					//已退款 订单数量
+					$dayhas_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime >= ".$day['egt']." 
+						and addtime < ".$day['lt']."  group by order_id ");
+					
+					$dayhas_refund_count = count($dayhas_refund_arr);
+					
+					
+					
 					$daylist[$key] = array( 
-						'daytui' => $daytui,
-						'daytuikuan' => $daytuikuan,
+						'daywait_refund_money' => $daywait_refund_money,
+						'daywait_refund_count' => $daywait_refund_count,
+						'dayhas_refund_money' => $dayhas_refund_money,
+						'dayhas_refund_count' => $dayhas_refund_count,
 						'dayqu' => $dayqu,
 						'dayquxiao' => $dayquxiao,
 						
@@ -346,9 +470,39 @@ class ReportsController extends CommonController{
 			}  
 			
 
+			//退款中 金额
+			$wait_refund_money_arr = M()->query("select sum(ref_money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_refund 
+					where state =0 and addtime > ".$thismonth['egt']." and addtime < ".$thismonth['lt']."  ");
+			
+			$wait_refund_money = $wait_refund_money_arr[0]['total_money'];
+			
+			//退款中  订单数量
+			$wait_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_refund where state =0 and addtime > ".$thismonth['egt']." 
+				and addtime < ".$thismonth['lt']."   ");
+			
+			$wait_refund_count = count($wait_refund_arr);
+			
+			//已退款 金额
+			$has_refund_money_arr = M()->query("select sum(money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime > ".$thismonth['egt']." 
+				and addtime < ".$thismonth['lt']."  ");
+			
+			$has_refund_money = $has_refund_money_arr[0]['total_money'];
+			
+			//已退款 订单数量
+			$has_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime > ".$thismonth['egt']." 
+				and addtime < ".$thismonth['lt']."  group by order_id ");
+			
+			$has_refund_count = count($has_refund_arr);
+			
+			$this->wait_refund_money = $wait_refund_money;
+			$this->wait_refund_count = $wait_refund_count;
+			$this->has_refund_money = $has_refund_money;
+			$this->has_refund_count = $has_refund_count;
+			
 
 			//退款
-			$cancel_info = M()->query("select from_unixtime( date_added, '%Y-%m-%d' ) as date, count( * ) as count,sum(total) as total,sum(shipping_fare) as shipping_fare,sum(voucher_credit) as voucher_credit,sum(fullreduction_money) as fullreduction_money,sum(score_for_money) as score_for_money from ".C('DB_PREFIX')."lionfish_comshop_order where date_added > ".$thismonth['egt']." and date_added < ".$thismonth['lt']." ".$condition." and (order_status_id in (7,8,9,10,12,13)) group by date order by date asc");
+			$cancel_info = M()->query("select from_unixtime( date_added, '%Y-%m-%d' ) as date, count( * ) as count,sum(total) as total,sum(shipping_fare) as shipping_fare,sum(voucher_credit) as voucher_credit,sum(fullreduction_money) as fullreduction_money,sum(score_for_money) as score_for_money from 
+			".C('DB_PREFIX')."lionfish_comshop_order where date_added > ".$thismonth['egt']." and date_added < ".$thismonth['lt']." ".$condition." and (order_status_id in (7,8,9,10,12,13)) group by date order by date asc");
 			
 			
 			$zongtuishu =0;
@@ -458,15 +612,38 @@ class ReportsController extends CommonController{
 						$dayquxiao =0;
 					}
 					
-					//取消单数
-				    $dayqu = $day_info4[0]['count'];
-					//取消金额
-					$dayquxiao = $day_info4[0]['total']+$day_info4[0]['shipping_fare']-$day_info4[0]['voucher_credit']-$day_info4[0]['fullreduction_money'];
+					
+					//退款中 金额
+					$daywait_refund_money_arr = M()->query("select sum(ref_money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_refund 
+							where state =0 and addtime >= ".$day['egt']." and addtime < ".$day['lt']."  ");
+					
+					$daywait_refund_money = $daywait_refund_money_arr[0]['total_money'];
+					
+					//退款中  订单数量
+					$daywait_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_refund where state =0 and addtime >= ".$day['egt']." 
+						and addtime < ".$day['lt']."   ");
+					
+					$daywait_refund_count = count($daywait_refund_arr);
+					
+					//已退款 金额
+					$dayhas_refund_money_arr = M()->query("select sum(money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime >= ".$day['egt']." 
+						and addtime < ".$day['lt']."  ");
+					
+					$dayhas_refund_money = $dayhas_refund_money_arr[0]['total_money'];
+					
+					//已退款 订单数量
+					$dayhas_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime >= ".$day['egt']." 
+						and addtime < ".$day['lt']."  group by order_id ");
+					
+					$dayhas_refund_count = count($dayhas_refund_arr);
+					
 					
 					
 					$daylist[$key] = array( 
-						'daytui' => $daytui,
-						'daytuikuan' => $daytuikuan,
+						'daywait_refund_money' => $daywait_refund_money,
+						'daywait_refund_count' => $daywait_refund_count,
+						'dayhas_refund_money' => $dayhas_refund_money,
+						'dayhas_refund_count' => $dayhas_refund_count,
 						'dayqu' => $dayqu,
 						'dayquxiao' => $dayquxiao,
 						
@@ -482,9 +659,39 @@ class ReportsController extends CommonController{
 			}  
 			
 
-
+			//退款中 金额
+			$wait_refund_money_arr = M()->query("select sum(ref_money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_refund 
+					where state =0 and addtime > ".$lastmonth['egt']." and addtime < ".$lastmonth['lt']."  ");
+			
+			$wait_refund_money = $wait_refund_money_arr[0]['total_money'];
+			
+			//退款中  订单数量
+			$wait_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_refund where state =0 and addtime > ".$lastmonth['egt']." 
+				and addtime < ".$lastmonth['lt']."   ");
+			
+			$wait_refund_count = count($wait_refund_arr);
+			
+			//已退款 金额
+			$has_refund_money_arr = M()->query("select sum(money) as total_money from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime > ".$lastmonth['egt']." 
+				and addtime < ".$lastmonth['lt']."  ");
+			
+			$has_refund_money = $has_refund_money_arr[0]['total_money'];
+			
+			//已退款 订单数量
+			$has_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where addtime > ".$lastmonth['egt']." 
+				and addtime < ".$lastmonth['lt']."  group by order_id ");
+			
+			$has_refund_count = count($has_refund_arr);
+			
+			$this->wait_refund_money = $wait_refund_money;
+			$this->wait_refund_count = $wait_refund_count;
+			$this->has_refund_money = $has_refund_money;
+			$this->has_refund_count = $has_refund_count;
+			
+			
 			//退款
-			$cancel_info = M()->query("select from_unixtime( date_added, '%Y-%m-%d' ) as date, count( * ) as count,sum(total) as total,sum(shipping_fare) as shipping_fare,sum(voucher_credit) as voucher_credit,sum(fullreduction_money) as fullreduction_money,sum(score_for_money) as score_for_money from ".C('DB_PREFIX')."lionfish_comshop_order where date_added > ".$lastmonth['egt']." and date_added < ".$lastmonth['lt']." ".$condition." and (order_status_id in (7,8,9,10,12,13)) group by date order by date asc");
+			$cancel_info = M()->query("select from_unixtime( date_added, '%Y-%m-%d' ) as date, count( * ) as count,sum(total) as total,sum(shipping_fare) as shipping_fare,sum(voucher_credit) as voucher_credit,sum(fullreduction_money) as fullreduction_money,sum(score_for_money) as score_for_money from ".C('DB_PREFIX')."lionfish_comshop_order 
+					where date_added > ".$lastmonth['egt']." and date_added < ".$lastmonth['lt']." ".$condition." and (order_status_id in (7,8,9,10,12,13)) group by date order by date asc");
 			
 			
 			$zongtuishu =0;
@@ -528,13 +735,19 @@ class ReportsController extends CommonController{
 					array('title' => '下单日期', 'field' => 'date', 'width' => 32),
 					array('title' => '订单数', 'field' => 'count', 'width' => 32),
 					array('title' => '下单金额', 'field' => 'order_amount', 'width' => 32),
-					array('title' => '退款笔数', 'field' => 'daytui', 'width' => 32),
-					array('title' => '退款金额', 'field' => 'daytuikuan', 'width' => 32),
+					
+					array('title' => '等待退款笔数', 'field' => 'daywait_refund_count', 'width' => 32),
+					array('title' => '等待退款金额', 'field' => 'daywait_refund_money', 'width' => 32),
+					array('title' => '已退款笔数', 'field' => 'dayhas_refund_count', 'width' => 32),
+					array('title' => '已退款金额', 'field' => 'dayhas_refund_money', 'width' => 32),
+					
 					array('title' => '取消笔数', 'field' => 'dayqu', 'width' => 32),
 					array('title' => '取消金额', 'field' => 'dayquxiao', 'width' => 32),
 					array('title' => '小计', 'field' => 'order_ji', 'width' => 32),
 			);
 			
+			
+						
 			$exportlist = array();
 			
 			foreach($list2 as $k => $w){
@@ -546,8 +759,12 @@ class ReportsController extends CommonController{
 				$order_amount = sprintf("%.2f",$order_amount);
 									  
 				$tmp_exval['order_amount'] = $order_amount;
-				$tmp_exval['daytui'] = $w['daytui'];
-				$tmp_exval['daytuikuan'] = $w['daytuikuan'];
+				
+				$tmp_exval['daywait_refund_count'] = $w['daywait_refund_count'];
+				$tmp_exval['daywait_refund_money'] = $w['daywait_refund_money'];
+				$tmp_exval['dayhas_refund_count'] = $w['dayhas_refund_count'];
+				$tmp_exval['dayhas_refund_money'] = $w['dayhas_refund_money'];
+				
 				$tmp_exval['dayqu'] = $w['dayqu'];
 				
 				$w["dayquxiao"] = sprintf("%.2f",$w["dayquxiao"]);
@@ -987,6 +1204,8 @@ class ReportsController extends CommonController{
 		
 		$data = array();
 		
+		
+		
 		$data = $this->head_order_analys($keyword,$searchtime , $starttime , $endtime );
 		
 		
@@ -1003,7 +1222,7 @@ class ReportsController extends CommonController{
 	}
 	
 	
-	private function head_order_analys()
+	private function head_order_analys($keyword,$searchtime , $starttime , $endtime)
 	{
 		$_GPC = I('request.');
 		
@@ -1445,20 +1664,45 @@ class ReportsController extends CommonController{
 				$sum_order_paymoney = M('lionfish_comshop_order')->where("head_id = {$head_id} and order_status_id in(1,4,6,7,11,14) {$where}")->sum('total+shipping_fare-voucher_credit-fullreduction_money');
 				
 				$tmp['sum_order_paymoney'] = $sum_order_paymoney;
-				//退款量(退款成功的)
-				$refund_order_count_arr = M()->query("SELECT  count( DISTINCT(ref_id) ) as count FROM ".C('DB_PREFIX').
-								"lionfish_comshop_order_refund WHERE  head_id = {$head_id} and state = 3 {$refund_where} ");
 				
-				$refund_order_count = $refund_order_count_arr[0]['count'];
+				
+				$tp_od_list = M('lionfish_comshop_order')->field('order_id')->where(" head_id = {$head_id}  {$where} ")->select();
+				 
+				
+				if( !empty($tp_od_list) )
+				{
+					$tp_od_arr = array();
+					
+					foreach( $tp_od_list as $tp_val )
+					{
+						$tp_od_arr[] = $tp_val['order_id'];
+					}
+					
+					
+					$has_refund_arr = M()->query("select order_id from ".C('DB_PREFIX')."lionfish_comshop_order_goods_refund where order_id in( ".implode(',', $tp_od_arr )." )   group by order_id ");
+					
+					$refund_order_count = count($has_refund_arr);
+			
+					//退款额(元)
+					$refund_order_money = M('lionfish_comshop_order_goods_refund')->where(array('order_id' => array('in', $tp_od_arr) ))->sum('money');
+					
+				
+				}else{
+					$refund_order_count = 0;
+					$refund_order_money = 0;
+					
+				}
+				
+				
+				//$where .= " and date_added >= {$starttime} and date_added <= {$endtime} ";
+				
 				
 				$tmp['refund_order_count'] = $refund_order_count;
-				//退款额(元)
-				$refund_order_money = M('lionfish_comshop_order_refund')->where("head_id = {$head_id} and state = 3 {$refund_where}")->sum('ref_money');
-				
-				
 				$tmp['refund_order_money'] = $refund_order_money;
 				//净销售额(元) 销售额  -   退款额  =  净销售额
-				$real_sale_money = round($sum_order_paymoney - $refund_order_money,2);
+				
+				
+				$real_sale_money = round($sum_order_paymoney ,2);
 				
 				$tmp['real_sale_money'] = $real_sale_money;
 				

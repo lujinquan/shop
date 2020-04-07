@@ -551,7 +551,7 @@ class GoodsController extends CommonController {
 		
 		$now_time = time();
 		
-		if( isset($notify_order_list_time) && $notify_order_list_time >0 && $now_time - $notify_order_list_time > 3600 )
+		if(  isset($notify_order_list_time) && $notify_order_list_time >0 && $now_time - $notify_order_list_time < 3600 )
 		{
 			$result_list = S('notify_order_list');
 			if( !isset($result_list) || empty($result_list) )
@@ -568,7 +568,7 @@ class GoodsController extends CommonController {
 			}
 			
 		}else{
-			$notify_order_list = M('lionfish_comshop_notify_order')->order('rand()')->limit(100)->select();
+			$notify_order_list = M('lionfish_comshop_notify_order')->order('rand()')->group('member_id')->limit(100)->select();
 		
 		
 			$result = array();
@@ -677,9 +677,12 @@ class GoodsController extends CommonController {
 		$pin_id = isset($gpc['pin_id']) ? $gpc['pin_id'] : 0;
 		$token = $gpc['token'];
 		
-		
+		$needauth = false;
 		$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
-		
+		if(  empty($weprogram_token) ||  empty($weprogram_token['member_id']) )
+		{
+			$needauth = true;
+		}
 		
 		$member_id = $weprogram_token['member_id'];
 		
@@ -693,11 +696,11 @@ class GoodsController extends CommonController {
 	
 		$goods_arr =  M()->query($sql);
 		$goods = $goods_arr[0];
-		
+
+		$goods['nogoods'] = false;
+		if(empty($goods_arr[0])) { $goods['nogoods'] = true; }
 		
 		$goods['goods_id'] = $id;
-		
-		
 		
 		$is_open_fullreduction = D('Home/Front')->get_config_by_name('is_open_fullreduction');
 		$full_money = D('Home/Front')->get_config_by_name('full_money');
@@ -810,9 +813,19 @@ class GoodsController extends CommonController {
 		$goods['levelprice'] = $goods_price_arr['levelprice']; // 会员等级价格
 		$goods['is_mb_level_buy'] = $goods_price_arr['is_mb_level_buy']; //是否 会员等级 可享受
 		
-		$goods['price'] = $goods_price_arr['price'];
-		
-        $price_dol = explode('.', $goods_price_arr['price']);
+		if($goods['type'] == 'integral')
+		{
+		    $goods['price'] = round($goods_price_arr['price'], 0);
+		    $goods['productprice'] = round($goods['productprice'], 0);
+			
+		    $price_dol = explode(' ', $goods_price_arr['price']);
+			
+			$price_dol[0] = round($price_dol[0], 0);
+			
+		}else{
+		    $goods['price'] = $goods_price_arr['price'];
+		    $price_dol = explode('.', $goods_price_arr['price']);
+		}
 		
 		$goods['price_front'] = $price_dol[0];
 		$goods['price_after'] = isset($price_dol[1]) ? $price_dol[1] : '';
@@ -1429,7 +1442,8 @@ class GoodsController extends CommonController {
 			'need_subscript_template' => $need_subscript_template,
 			'is_hide_details_count' => $is_hide_details_count,
 			'is_open_goods_full_video' => $is_open_goods_full_video,
-			'goods_details_title_bg' => $goods_details_title_bg
+			'goods_details_title_bg' => $goods_details_title_bg,
+			'needauth' => $needauth
         ));
         die();
     }

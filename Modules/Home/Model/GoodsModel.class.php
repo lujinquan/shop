@@ -901,9 +901,19 @@ class GoodsModel extends Model{
 		return $result;
 	}
 	
-	
-	
-	
-	
+	/**
+	 * 前端已售单位自定义
+	 * @return [string] [自定义值，默认件]
+	 */
+	public function get_sale_unit()
+	{
+		$isnull_goods_sale_unit =  D('Home/Front')->get_config_by_name('isnull_goods_sale_unit');
+		if($isnull_goods_sale_unit==1) {
+			return '';
+		} else {
+			$goods_sale_unit =  D('Home/Front')->get_config_by_name('goods_sale_unit');
+			return $goods_sale_unit ? $goods_sale_unit : '件';
+		}
+	}
 	
 }

@@ -57,7 +57,7 @@ class StatisticsController extends CommonController{
 					$total_where = " and supply_id= ".$supper_info['id'];
 					
 					$order_ids_list = M()->query("select og.order_id,o.total,og.shipping_fare,og.voucher_credit,og.fullreduction_money from ".C('DB_PREFIX').
-										"lionfish_comshop_order_goods as og , ".C('DB_PREFIX')."lionfish_comshop_order as o  where  og.order_id =o.order_id  and og.supply_id = ".$supper_info['id']." and o.pay_time > {$today_time} and o.order_status_id in (1,4,6,7,11,14) ");
+										"lionfish_comshop_order_goods as og , ".C('DB_PREFIX')."lionfish_comshop_order as o  where  og.order_id =o.order_id  and og.supply_id = ".$supper_info['id']." and o.pay_time > {$today_time} and o.type <> 'integral' and o.order_status_id in (1,4,6,7,11,14) ");
 					$order_ids_arr = array();
 					
 					foreach($order_ids_list as $vv)
@@ -81,7 +81,7 @@ class StatisticsController extends CommonController{
 					$result['today_pay_money'] = sprintf("%.2f",$today_pay_money);
 					
 				}else{
-					$today_pay_where = " {$total_where} and pay_time > {$today_time} and order_status_id in (1,4,6,7,11,14) ";
+					$today_pay_where = " {$total_where} and pay_time > {$today_time} and type <> 'integral' and order_status_id in (1,4,6,7,11,14) ";
 					$today_pay_order_count =  D('Seller/Order')->get_order_count($today_pay_where);
 					$result['today_pay_order_count'] = $today_pay_order_count;
 					
@@ -115,14 +115,20 @@ class StatisticsController extends CommonController{
 					$result['total_tixian_money'] = sprintf("%.2f",$total_tixian_money_all - $total_tixian_money_service_fare);
 					
 					
-					$total_commiss_money_all = M('lionfish_community_head_tixian_order')->where( "state = 1" )->sum('money');
-					
-					
-					$total_commiss_money_service_fare = M('lionfish_community_head_tixian_order')->where("state = 1")->sum('service_charge');
-					
-					
+					/**
+					$total_commiss_money_all =  pdo_fetchcolumn('SELECT sum(money) as total_money FROM ' . tablename('lionfish_community_head_tixian_order') . 
+				    ' WHERE uniacid= '.$_W['uniacid'] . "  and state = 1 ");
+					$total_commiss_money_service_fare =  pdo_fetchcolumn('SELECT sum(service_charge) as total_service_charge FROM ' . tablename('lionfish_community_head_tixian_order') . 
+				    ' WHERE uniacid= '.$_W['uniacid'] . "  and state = 1 ");
 					
 					$result['total_commiss_money'] = sprintf("%.2f",$total_commiss_money_all - $total_commiss_money_service_fare);
+					**/
+					
+					$total_commiss_money_all = M('lionfish_community_head_commiss_order')->where( "state = 1 or state =0" )->sum('money');
+					
+					$result['total_commiss_money'] = sprintf("%.2f",$total_commiss_money_all);
+					
+					
 					
 					
 					
@@ -635,22 +641,33 @@ class StatisticsController extends CommonController{
 		{
 			$begin_time = strtotime( date('Y-m').'-01 00:00:00' );
 			$date_month =date('Y-m',$begin_time);
+			
+			$end_time = time();
 		}else{
 			//$begin_time= strtotime( date("Y-m", strtotime("-1 month")) .'-01 00:00:00' );
+			//2020-02-01 10:32:28
+			
+			$month_begin_time = strtotime( date('Y-m').'-01 00:00:00' );
 			
 			$begin_time= strtotime( "first day of last month" ) ;
 			
 			$date_month =date('Y-m',$begin_time);
+			
+			$begin_time = strtotime( $date_month.'-01 00:00:00' );
+			
+			$end_time = $month_begin_time -1;
+			
+			
 		}
 		
 		
-		$end_time = time();
+		
 		
 		//lionfish_comshop_order  1 4 6 11 14  date_added
 		
-		$sql = "SELECT og.goods_id,og.name ,og.quantity as total_quantity,sum( og.total + og.shipping_fare - og.voucher_credit - og.fullreduction_money ) as total   
+		$sql = "SELECT og.goods_id,og.name ,sum(og.quantity) as total_quantity,sum( og.total + og.shipping_fare - og.voucher_credit - og.fullreduction_money - og.score_for_money ) as total   
 				FROM ".C('DB_PREFIX')."lionfish_comshop_order_goods as og ,".C('DB_PREFIX')."lionfish_comshop_order as o 
-				where og.order_id = o.order_id and o.date_added >= {$begin_time} and o.date_added <={$end_time}  and o.order_status_id in(1,4,6,11,14) group by og.goods_id order by total desc limit 10 ";
+				where og.order_id = o.order_id  and o.type != 'integral' and o.date_added >= {$begin_time} and o.date_added <={$end_time}  and o.order_status_id in(1,4,6,11,14) group by og.goods_id order by total desc limit 10 ";
 		
 		$list = M()->query($sql);			
 		
@@ -672,6 +689,10 @@ class StatisticsController extends CommonController{
 			$list[$key] = $val;
 		}
 		
+		 $last_index_sort = array_column($list, 'total_quantity');
+         array_multisort($last_index_sort, SORT_DESC, $list);
+				
+				
 		$total = sprintf('%.2f',$total);
 		
 		echo json_encode( array('code' => 0, 'list' => $list, 'total_quantity' => $total_quantity,'total' => $total,'month' => $date_month) );

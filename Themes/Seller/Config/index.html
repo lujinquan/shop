@@ -388,6 +388,23 @@
 				</div>
 				
 				<div class="layui-form-item">
+					<label class="layui-form-label">技术支持</label>
+					<div class="layui-input-block">
+						<input type="text" name="parameter[technical_support]" class="layui-input" value="{$data['technical_support']}" />
+						<span class='layui-form-mid'>可填写 "狮子鱼版权所有"。与备案号一起显示在网站登录界面正下方</span>
+					</div>
+				</div>
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label">备案号</label>
+					<div class="layui-input-block">
+						<input type="text" name="parameter[record_number]" class="layui-input" value="{$data['record_number']}" />
+						<span class='layui-form-mid'>点击备案号会链接到工信部官网首页（beian.miit.gov.cn）</span>
+						
+					</div>
+				</div>
+				
+				<div class="layui-form-item">
 					<label class="layui-form-label"> </label>
 					<div class="layui-input-block">
 						<input type="submit" value="提交" lay-submit lay-filter="formDemo" class="btn btn-primary"  />

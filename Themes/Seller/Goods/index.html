@@ -136,11 +136,13 @@
 		</div>
 		
 		<div class="layui-card-body" style="padding:15px;">
-			<form action="" method="get" class="form-horizontal form-search layui-form" role="form">
+			<form action="" id="searchform" method="get" class="form-horizontal form-search layui-form" role="form">
 				<input type="hidden" name="c" value="goods" />
 				<input type="hidden" name="a" value="index" />
 				<input type="hidden" name="type" value="{$type}" />
 				
+				<input type="hidden" name="sortfield" id="sortfield" value="{$sortfield}" />
+				<input type="hidden" name="sortby" id="sortby" value="{$sortby}" />
 				<div class="layui-form-item">
 				  <div class="layui-inline">
 					<div class="layui-input-inline" >
@@ -246,7 +248,24 @@
 									<th style="">活动时间</th>
 									<th style="width: 120px;">价格</th>
 									<th style="width: 80px;">销量</th>
-									<th style="width: 80px;">库存</th>
+									<th style="width: 120px;">
+										<a href="{:U('goods/index', array('sortby' =>$sortby,'sortfield' => 'total','keyword'=>$keyword,'cate' =>$cate,'searchtime'=>$searchtime,'sort_starttime'=>$starttime,'sort_endtime'=>$endtime, 'type' =>$type,  ) )}" >
+										<span>库存</span>
+										<span class="layui-table-sort layui-inline" lay-sort="<?php echo ($sortfield == 'total' ? $sortby :''); ?>">
+											<i class="layui-edge layui-table-sort-asc" title="升序"></i>
+											<i class="layui-edge layui-table-sort-desc" title="降序"></i>
+										</span>
+										</a>
+									</th>
+									<th style="width: 120px;"> 
+										<a href="{:U('goods/index', array('sortby' =>$sortby,'sortfield' => 'day_salescount','keyword'=>$keyword,'cate' =>$cate,'searchtime'=>$searchtime,'sort_starttime'=>$starttime,'sort_endtime'=>$endtime, 'type' =>$type,  ) )}" >
+										<span>每日销量</span>
+										<span class="layui-table-sort layui-inline" lay-sort="<?php echo ($sortfield == 'day_salescount' ? $sortby :''); ?>" >
+											<i class="layui-edge layui-table-sort-asc" title="升序"></i>
+											<i class="layui-edge layui-table-sort-desc" title="降序"></i>
+										</span>
+										</a>
+									</th>
 									<?php if($is_open_fullreduction == 1 && $is_fullreduce){ ?>
 									<th  style="width:120px;" >是否满减</th>
 									<?php } ?>
@@ -305,8 +324,21 @@
 										<span class="line-text">[同城配送]</span>
 										<?php } ?>
 										
+										
 										<?php if( $item['is_seckill'] == 1 ){ ?>
 										<span class="text-danger">[整点秒杀]</span>
+										<?php } ?>
+										
+										<?php if($item['is_new_buy'] == 1){ ?>
+										<span class="line-text">[新人专享]</a>
+										<?php } ?>
+										
+										<?php if($item['is_only_express'] == 1){ ?>
+										<span class="line-text">[仅快递]</a>
+										<?php } ?>
+										
+										<?php if($item['is_spike_buy'] == 1){ ?>
+										<span class="text-danger">[限时秒杀]</a>
 										<?php } ?>
 										
 										<?php if($item['supply_id'] <=0){ ?><span class="text">[自营<?php if( !empty($item['supply_name']) ){ ?>{$item['supply_name']}<?php } ?>]</span><?php }else if( !empty($item['supply_name']) ){ ?><span class="text">[{$item['supply_name']}]</span><?php } ?>
@@ -335,9 +367,7 @@
 										<?php } ?>
 										
 										
-										<?php if($item['is_new_buy'] == 1){ ?>
-										<span class="line-text">新人专享</a>
-										<?php } ?>
+										
 										
 										
 									</span>
@@ -397,7 +427,17 @@
 										<span class="text-danger">{$item['total']}</span>
 									</a>
 							   <?php } ?>
+							   <?php if($open_redis_server == 1){ ?>
+							   <br/>
+							   redis库存{$item['redis_total']}
+							   <a href="{:U('goods/show_logs', array('goods_id' => $item['id'] ))}" target="_blank"></a>
+							   <?php } ?>
 							</td>
+							
+							
+							
+							
+							<td>{$item['day_salescount']}</td>
 							
 							<?php if($is_open_fullreduction == 1 && $is_fullreduce){ ?>
 								<td >
@@ -553,7 +593,7 @@
 										</div>
 									</div>
 								</td>
-								<td colspan="5" style="text-align: right">
+								<td colspan="6" style="text-align: right">
 									{$pager}
 								</td>
 							</tr>
@@ -1639,6 +1679,10 @@ var heads_page = 1;
             }
         }, 'json');
     })
+	
+	$('.layui-table-sort').click(function(){
+		$(this).attr('lay-sort','asc');
+	})
 	
 	$("body").delegate(".modal-fenlei","click",function(){
 	

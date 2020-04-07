@@ -1954,6 +1954,7 @@ class PingoodsModel {
 			$quantity_order_data['type'] = 0;
 			$quantity_order_data['last_quantity'] = $tp_goods['quantity'];
 			$quantity_order_data['addtime'] = time();
+			$quantity_order_data['adddate'] = date('Y-m-d H:i:s');
 			
 			M('lionfish_comshop_order_quantity_order')->add($quantity_order_data);
 			
@@ -1990,6 +1991,7 @@ class PingoodsModel {
 			$quantity_order_data['type'] = 1;
 			$quantity_order_data['last_quantity'] = $tp_goods['quantity'];
 			$quantity_order_data['addtime'] = time();
+			$quantity_order_data['adddate'] = date('Y-m-d H:i:s');
 			
 			M('lionfish_comshop_order_quantity_order')->add($quantity_order_data);
 			

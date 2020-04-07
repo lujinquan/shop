@@ -161,6 +161,20 @@ class SupplyModel{
 			
 			$money = $money - $head_commiss_money - $member_commiss_money;
 			
+			$shipping_fare = 0;
+			if( $order_goods_info['supply_id'] > 0 )
+			{
+				$su_info = M('lionfish_comshop_supply')->where( array('id' => $order_goods_info['supply_id'] ) )->find();
+				
+				if( $su_info['type'] == 1 )
+				{
+					$shipping_fare = $order_goods_info['shipping_fare'];
+					
+					$money +=  $shipping_fare;
+				}
+				//$order_goods_info['supply_id']
+			}
+			
 			//end
 			
 			if($money <=0)
@@ -179,6 +193,7 @@ class SupplyModel{
 			$ins_data['member_commiss_money'] = $member_commiss_money;
 			$ins_data['head_commiss_money'] = $head_commiss_money;
 			$ins_data['money'] = $money;
+			$ins_data['shipping_fare'] = $shipping_fare;
 			$ins_data['addtime'] = time();
 			
 			M('lionfish_supply_commiss_order')->add( $ins_data );

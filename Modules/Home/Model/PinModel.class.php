@@ -400,7 +400,7 @@ class PinModel extends Model{
 				$weixin_template_order_buy = D('Home/Front')->get_config_by_name('weixin_template_order_buy');
 				if( !empty($weixin_appid) && !empty($weixin_template_order_buy) )
 				{
-					$head_pathinfo = "lionfish_comshop/pages/groupCenter/groupDetail?groupOrderId=".$pin_order['order_id'];
+					$head_pathinfo = "lionfish_comshop/moduleA/groupCenter/groupDetail?groupOrderId=".$pin_order['order_id'];
 					
 					$weixin_template_order = array(
 											'appid' => $weixin_appid,
@@ -451,7 +451,7 @@ class PinModel extends Model{
 				$weixin_template_order_buy = D('Home/Front')->get_config_by_name('weixin_template_order_buy');
 				if( !empty($weixin_appid) && !empty($weixin_template_order_buy) )
 				{
-					$head_pathinfo = "lionfish_comshop/pages/groupCenter/groupDetail?groupOrderId=".$pin_order['order_id'];
+					$head_pathinfo = "lionfish_comshop/moduleA/groupCenter/groupDetail?groupOrderId=".$pin_order['order_id'];
 					
 					$platform_send_info = array(
 											'appid' => $weixin_appid,

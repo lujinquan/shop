@@ -58,8 +58,18 @@
         		<input type="hidden" name="c" value="supply" />
                 <input type="hidden" name="a" value="floworder" />
                 
+				<div class="layui-input-inline" style="width:100px;">
+						<select name='searchtime' lay-ignore  class='layui-input layui-unselect' style="width:100px;padding:0 5px;"  id="searchtime">
+							<option value=''>不按时间</option>
+							<option value='create' <?php if(  $searchtime=='create'){ ?>selected<?php } ?>>下单时间</option>
+						</select>
+					</div>
+					<div class="layui-input-inline" style="width:280px;">
+						{:tpl_form_field_daterange('time', array('starttime'=>date('Y-m-d H:i', $starttime),'endtime'=>date('Y-m-d H:i', $endtime)),true);}
+					</div>
                 <div class="layui-form-item">
     				<div class="layui-input-inline layui-btn-group">
+						<button class="layui-btn layui-btn-sm unbtn_export" data-export="0" type="submit"> 搜索</button>
     					<button type="submit" name="export" value="1" class="layui-btn layui-btn-sm layui-btn-warm">导出</button>
     				</div>
                 </div>
@@ -106,7 +116,7 @@
 							</td>
 							
 							<td> 
-								￥{$row['total_money']}
+								￥{$row['total_money']}<?php if( !empty($row['shipping_fare']) && $row['shipping_fare'] > 0 ){ ?>(运费：{$row['shipping_fare']}元)<?php } ?>
                             </td>
 							<?php if( !empty($commiss_level) && $commiss_level >0){ ?>
 							<td> 

@@ -32,9 +32,20 @@ class IndexController extends CommonController {
 		{
 			//切换到新后台，
 			cookie('is_new_backadmin',1);
+			
+			$data = array();
+			$data['is_new_backadmin'] = 1;
+			
+			D('Seller/Config')->update($data);
+			
 		}else if( $is_new == 2 ){
 			//切换到旧后台，
 			cookie('is_new_backadmin',2);
+			
+			$data = array();
+			$data['is_new_backadmin'] = 2;
+				
+			D('Seller/Config')->update($data);
 		}
 		
 		$is_show_notice = true;
@@ -51,7 +62,7 @@ class IndexController extends CommonController {
 		
 		$this->is_show_notice001 = $is_show_notice001;
 		
-		$is_new_backadmin = cookie('is_new_backadmin');
+		$is_new_backadmin = D('Home/Front')->get_config_by_name('is_new_backadmin');
 		
 		if( empty($is_new_backadmin) || $is_new_backadmin == 2 )
 		{

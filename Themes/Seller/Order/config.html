@@ -64,6 +64,8 @@
 			<div class="col-sm-10 col-xs-12" id="radPickupDateTip">  
 				<label class="radio-inline"><input type="radio"  name="data[shop_limit_buy_distance]" <?php if( !isset($data['shop_limit_buy_distance']) || $data['shop_limit_buy_distance'] ==0 ){ ?> checked <?php } ?> value="0" title="不限制" /><span class="fake-radio" ></span></label>
 				<label  class="radio-inline"><input type="radio"  name="data[shop_limit_buy_distance]" <?php if( isset($data['shop_limit_buy_distance']) && $data['shop_limit_buy_distance'] ==1 ){ ?> checked <?php } ?> value="1" title="限制" /><span class="fake-radio" ></span></label>
+			
+				<span style="clear:both;" class='help-block'>只对团长配送方式有效</span>
 			</div>
 		</div>
 		<div class="layui-form-item" id="txtPickupDateTip" style="<?php if( isset($data['shop_buy_distance']) && $data['shop_limit_buy_distance'] ==1){ ?>display:block;<?php  }else{  ?>display: none;<?php } ?>">

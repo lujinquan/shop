@@ -146,7 +146,7 @@
             <county name="宁国市" code="341881" />
         </city>
     </province>
-    <province name="北京市" code="110000">
+    <province name="北京" code="110000">
         <city name="北京市" code="110100">
             <county name="东城区" code="110101" />
             <county name="西城区" code="110102" />
@@ -166,7 +166,7 @@
             <county name="延庆县" code="110229" />
         </city>
     </province>
-    <province name="重庆市" code="500000">
+    <province name="重庆" code="500000">
         <city name="重庆市" code="500100">
             <county name="万州区" code="500101" />
             <county name="涪陵区" code="500102" />
@@ -2288,6 +2288,7 @@
             <county name="杭锦旗" code="150625" />
             <county name="乌审旗" code="150626" />
             <county name="伊金霍洛旗" code="150627" />
+			<county name="康巴什区" code="150628" />
         </city>
         <city name="呼伦贝尔市" code="150700">
             <county name="海拉尔区" code="150702" />
@@ -2624,7 +2625,7 @@
             <county name="东明县" code="371728" />
         </city>
     </province>
-    <province name="上海市" code="310000">
+    <province name="上海" code="310000">
         <city name="上海市" code="310100">
             <county name="黄浦区" code="310101" />
             <county name="徐汇区" code="310104" />

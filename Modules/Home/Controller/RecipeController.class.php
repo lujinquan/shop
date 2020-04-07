@@ -611,8 +611,10 @@ class RecipeController extends CommonController {
 		}else{
 			$recipe_info['recipe_ingredients'] = array();
 		}
+
+		$is_open_recipe_full_video = D('Home/Front')->get_config_by_name('is_open_recipe_full_video');
 		
-		echo json_encode( array('code' => 0, 'data' => $recipe_info) );
+		echo json_encode( array('code' => 0, 'data' => $recipe_info, 'is_open_recipe_full_video'=>$is_open_recipe_full_video) );
 		die();
 	}
 	

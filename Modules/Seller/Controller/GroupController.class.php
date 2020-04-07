@@ -831,7 +831,7 @@ class GroupController extends CommonController{
 		{
 			
 			$sql = "select count(o.order_id) as count from ".C('DB_PREFIX')."lionfish_comshop_pin_order as po,".C('DB_PREFIX')."lionfish_comshop_order as o   
-	           where po.order_id= o.order_id and po.pin_id = ".$val['pin_id']." and o.order_status_id in(1,2,4,6,7,8,9,10) ";
+	           where po.order_id= o.order_id and po.pin_id = ".$val['pin_id']." and o.order_status_id in(1,2,4,6,7,8,9,10,11) ";
 			
 			$count_arr = M()->query($sql);
 			
@@ -919,7 +919,7 @@ class GroupController extends CommonController{
 		$this->list = $list; 
 		 
 	    $pin_buy_sql = "select count(o.order_id) as count from ".C('DB_PREFIX')."lionfish_comshop_pin_order as p,".C('DB_PREFIX')."lionfish_comshop_order as o,".C('DB_PREFIX')."lionfish_comshop_order_goods as og 
-			where p.order_id= o.order_id and p.order_id = og.order_id and p.pin_id = {$pin_id}  and o.order_status_id in(1,2,4,6,7,8,9,10)  
+			where p.order_id= o.order_id and p.order_id = og.order_id and p.pin_id = {$pin_id}  and o.order_status_id in(1,2,4,6,7,8,9,10,11)  
 	    ";
 		
 		$pin_buy_count_arr = M()->query($pin_buy_sql );

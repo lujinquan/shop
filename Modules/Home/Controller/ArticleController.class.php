@@ -60,8 +60,8 @@ class ArticleController extends CommonController {
 		
 		if( empty($member_info) )
 		{
-			echo json_encode( array('code' => 1) );
-			die();
+			// echo json_encode( array('code' => 1) );
+			// die();
 		}
 
 		

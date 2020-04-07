@@ -153,6 +153,30 @@ class CommonorderModel{
 		
 	}
 	
+	/**
+		每日订单-商品购买记录每日销量
+	**/
+	public function inc_daygoods_buy( $goods_id, $quantity )
+	{
+		
+		M('lionfish_comshop_goods')->where( array('id' => $goods_id ) )->setInc('day_salescount', $quantity);
+		
+	}
+	/**
+		每日订单-商品退款每日销量
+	**/
+	public function dec_daygoods_refund( $goods_id, $quantity )
+	{
+		M('lionfish_comshop_goods')->where( array('id' => $goods_id ) )->setInc('day_salescount', -$quantity);
+	}
+	
+	/**
+		清理商品 每日销量
+	**/
+	public function clear_goods_daysales()
+	{
+		M('lionfish_comshop_goods')->where( "1=1" )->save( array('day_salescount' => 0 ) );
+	}
 	
 	/**
 		插入子订单退款
@@ -168,6 +192,14 @@ class CommonorderModel{
 		
 		//order_status_id
 		$order_info = M('lionfish_comshop_order')->where( array('order_id' => $order_id ) )->find();
+		
+		$now_begin_time = strtotime( date('Y-m-d'.' 00:00:00') );
+		$now_end_time = $now_begin_time + 86400;
+		
+		if( $order_info['pay_time'] >= $now_begin_time && $order_info['pay_time'] < $now_end_time  )
+		{
+			$this->dec_daygoods_refund( $order_goods_info['goods_id'], $real_refund_quantity );
+		}
 		
 		$refund_data = array();
 		$refund_data['order_goods_id'] = $order_goods_id;

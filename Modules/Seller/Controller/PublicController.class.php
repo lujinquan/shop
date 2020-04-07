@@ -25,6 +25,10 @@ class PublicController extends \Think\Controller {
 	    }
         C($config); //添加配置
 		
+		$data = D('Seller/Config')->get_all_config();
+
+		$this->technical_support = $data['technical_support'];
+		$this->record_number = $data['record_number'];
 		
         if(IS_POST){
     	

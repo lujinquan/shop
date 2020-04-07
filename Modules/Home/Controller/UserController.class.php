@@ -2238,11 +2238,11 @@ class UserController extends CommonController {
 			$member_info['has_get_count'] = $has_get_count;
 			
 			//判断是否有提货码，没有就生成 hexiao_qrcod
-			//  lionfish_comshop/pages/groupCenter/pendingDeliveryOrders?memberId=49
+			//  lionfish_comshop/moduleA/groupCenter/pendingDeliveryOrders?memberId=49
 			
 			if( empty($member_info['hexiao_qrcod']))
 			{
-				$path = "lionfish_comshop/pages/groupCenter/pendingDeliveryOrders";
+				$path = "lionfish_comshop/moduleA/groupCenter/pendingDeliveryOrders";
 				$hexiao_qrcod = D('Home/Pingoods')->_get_commmon_wxqrcode($path, $member_id);
 				
 				if( empty($hexiao_qrcod) )
@@ -2480,8 +2480,6 @@ class UserController extends CommonController {
 		//签到奖励  end
 		
 		$result['commiss_diy_name'] = D('Home/Front')->get_config_by_name('commiss_diy_name');
-		
-		
 		
 		echo json_encode(  $result );
 		die();
@@ -3041,6 +3039,9 @@ class UserController extends CommonController {
 		
 		$user_top_font_color = D('Home/Front')->get_config_by_name('user_top_font_color');
 		$excharge_nav_name = D('Home/Front')->get_config_by_name('excharge_nav_name');
+
+		$hide_community_change_btn = D('Home/Front')->get_config_by_name('hide_community_change_btn');
+		$hide_community_change_word = D('Home/Front')->get_config_by_name('hide_community_change_word');
 		
 		echo json_encode(
 			array(
@@ -3065,7 +3066,9 @@ class UserController extends CommonController {
 				'default_head_info'  => $default_head_info,
 				'is_open_solitaire'  => $is_open_solitaire,
 				'user_top_font_color' => $user_top_font_color,
-				'excharge_nav_name' => $excharge_nav_name
+				'excharge_nav_name' => $excharge_nav_name,
+				'hide_community_change_btn' => $hide_community_change_btn,
+				'hide_community_change_word' => $hide_community_change_word
 			)
 		);
 

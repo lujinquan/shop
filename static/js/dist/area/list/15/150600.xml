@@ -116,5 +116,11 @@
     <street name="伊金霍洛旗札萨克物流园区" code="150627406" />
     <street name="鄂尔多斯空港物流园区" code="150627407" />
 </county>
+<county name="康巴什" code="150628">
+    <street name="哈巴格希街道" code="150628100" />
+	<street name="青春山街道" code="150628101" />
+	<street name="滨河街道" code="150628102" />
+	<street name="康新街道" code="150628103" />
+</county>
 </city>
 </address>

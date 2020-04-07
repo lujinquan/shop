@@ -645,6 +645,7 @@ class OrderModel{
 						
 						$list = M()->query( $sql );
 						
+						
 					
 						$look_member_arr = array();
 						$area_arr = array();
@@ -751,6 +752,16 @@ class OrderModel{
 
 								}
 								
+								//has_refund_quantity has_refund_money
+								//$val['order_id'], $val['order_goods_id']
+								
+								$has_refund_quantity = D('Seller/Commonorder')->refund_order_goods_quantity( $val['order_id'], $val['order_goods_id'] );
+								
+								$tmp_exval['has_refund_quantity'] = $has_refund_quantity;
+								
+								$has_refund_money = D('Seller/Commonorder')->get_order_goods_refund_money( $val['order_id'], $val['order_goods_id'] );
+								
+								$tmp_exval['has_refund_money'] = $has_refund_money;
 								
 								
 								if(!empty($val['head_id'])){
@@ -2154,6 +2165,170 @@ class OrderModel{
 		return $list;
 	}
 	
+	public function goods_express()
+	{
+		$_GPC = I('request.');
+
+		$order_id = $_GPC['order_id'];// I('get.order_id',0);
+
+		
+		$order_info = M('lionfish_comshop_order')->where( array('order_id' => $order_id ) )->find();
+		
+		$now_time = time();
+
+		if($now_time - $order_info['shipping_cha_time'] >= 43200 || true)
+
+		{
+
+			//即时查询接口
+						
+			$seller_express = M('lionfish_comshop_express')->where( array('id' => $order_info['shipping_method'] ) )->find();
+			
+			
+			if(!empty($seller_express['simplecode']))
+			{
+
+				//887406591556327434  YTO
+
+				//TODO...
+
+				$ebuss_info = D('Home/Front')->get_config_by_name('kdniao_id');
+
+				$exappkey = D('Home/Front')->get_config_by_name('kdniao_api_key');
+				
+
+				$req_url = "http://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx";
+
+				$requestData= "{'OrderCode':'".$order_id."','ShipperCode':'".$seller_express['simplecode']."','LogisticCode':'". $order_info['shipping_no']."'}";
+
+				$datas = array(
+
+					'EBusinessID' => $ebuss_info,
+
+					'RequestType' => '1002',
+
+					'RequestData' => urlencode($requestData) ,
+
+					'DataType' => '2',
+
+				);
+
+				$datas['DataSign'] = $this->encrypt($requestData, $exappkey);
+
+				$result=$this->sendPost($req_url, $datas);	
+
+				
+				$result = json_decode($result);
+
+				
+				
+				//根据公司业务处理返回的信息......
+
+				//Traces
+
+				if(!empty($result->Traces))
+				{
+					$order_info['shipping_traces'] = serialize($result->Traces);
+
+					$up_data = array('shipping_cha_time' => time(), 'shipping_traces' => $order_info['shipping_traces']);
+					
+					M('lionfish_comshop_order')->where( array('order_id' => $order_id ) )->save( $up_data );
+				}					
+
+			}
+
+		}
+
+		//ims_ 
+		
+		$order_goods = M('lionfish_comshop_order_goods')->where( array('order_id' => $order_id ) )->find();
+		
+		$goods_info = array();
+
+		$goods_info = D('Home/Pingoods')->get_goods_images($order_goods['goods_id']);
+		
+		
+		$goods_info['image'] = tomedia($goods_info['image']);
+						
+		$seller_express = M('lionfish_comshop_express')->where( array('id' => $order_info['shipping_method'] ) )->find();				
+		
+		$order_info['shipping_traces'] =  unserialize($order_info['shipping_traces']) ; 
+		$order_express = array('code' => 0, 'seller_express' => $seller_express, 'goods_info' => $goods_info, 'order_info' => $order_info);
+		return	$order_express;
+
+	}
+	
+	function encrypt($data, $appkey) {
+
+		return urlencode(base64_encode(md5($data.$appkey)));
+
+	}
+	
+	function sendPost($url, $datas) {
+
+		$temps = array();	
+
+		foreach ($datas as $key => $value) {
+
+			$temps[] = sprintf('%s=%s', $key, $value);		
+
+		}	
+
+		$post_data = implode('&', $temps);
+
+		$url_info = parse_url($url);
+
+		if(empty($url_info['port']))
+
+		{
+
+			$url_info['port']=80;	
+
+		}
+
+		$httpheader = "POST " . $url_info['path'] . " HTTP/1.0\r\n";
+
+		$httpheader.= "Host:" . $url_info['host'] . "\r\n";
+
+		$httpheader.= "Content-Type:application/x-www-form-urlencoded\r\n";
+
+		$httpheader.= "Content-Length:" . strlen($post_data) . "\r\n";
+
+		$httpheader.= "Connection:close\r\n\r\n";
+
+		$httpheader.= $post_data;
+
+		$fd = fsockopen($url_info['host'], $url_info['port']);
+
+		fwrite($fd, $httpheader);
+
+		$gets = "";
+
+		$headerFlag = true;
+
+		while (!feof($fd)) {
+
+			if (($header = @fgets($fd)) && ($header == "\r\n" || $header == "\n")) {
+
+				break;
+
+			}
+
+		}
+
+		while (!feof($fd)) {
+
+			$gets.= fread($fd, 128);
+
+		}
+
+		fclose($fd);  
+
+		
+
+		return $gets;
+
+	}
 	
 }
 ?>

@@ -192,6 +192,7 @@
 												自提
 											<?php }elseif( $item['delivery'] == 'express'  ){ ?>
 												快递<?php if( !empty($express_info['name'])){ ?>({$express_info['name']} <?php if( !empty($item['shipping_no'])){ ?>快递单号：{$item['shipping_no']}<?php } ?>)<?php } ?> 
+												<a class="text-primary" data-toggle="ajaxModal" href="javascript:;" data-href="{:U('order/express', array('order_id' => $item['order_id']))}" >查看物流</a>
 											<?php }elseif( $item['delivery'] == 'tuanz_send'  ){ ?>
 												团长配送
 											<?php  }else{  ?>
@@ -589,7 +590,7 @@
 										<span class="label label-default">退款失败</span>
 									<?php  } ?>
 									<br/><br/>
-									<a class="btn btn-primary btn-xs " lay-href="{:U('order/oprefund', array('id' => $item['order_id'], 'ref_id' => $goods['refund_info']['ref_id'] ))}" target="_blank">退款详情</a>
+									<a class="btn btn-primary btn-xs " href="{:U('order/oprefund', array('id' => $item['order_id'], 'ref_id' => $goods['refund_info']['ref_id'] ))}" >退款详情</a>
 									
 								<?php  }else if($goods['is_refund_state'] == 0 && in_array( $item['order_status_id'], array(1,4,6,10,11,12,14)) && $is_can_nowrfund_order   ){ ?>
 									<a class='btn op btn-primary btn-xs'  data-toggle="ajaxModal" href="javascript:;" data-href="{:U('order/oprefund_goods_do', array('id' => $item['order_id'], 'order_goods_id' => $goods['order_goods_id'] ))}" >

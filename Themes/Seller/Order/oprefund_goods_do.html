@@ -70,6 +70,8 @@
 						  if($free_tongji < 0){
 							$free_tongji = 0;
 						  }
+						
+						 $refund_one_money = round( $free_tongji/$total_quantity , 2);
 					?>
 					<?php if( !empty( $score_for_money ) && $score_for_money > 0 ){ ?>
 					<p class="lh30"><label class="w100">积分抵扣：</label>￥{$score_for_money}</p>
@@ -78,7 +80,7 @@
 						
 					<p class="lh30">
 						<label class="w100">退款金额：</label>
-						<input type="text" style="padding:2px;height:25px;border: 1px solid #ccc;" name="refund_money" id="refund_money" placeholder="退款金额" value="{:round($free_tongji ,2)}"  />
+						<input type="text" style="padding:2px;height:25px;border: 1px solid #ccc;" name="refund_money" id="refund_money" placeholder="退款金额" value="0"  />
 					</p>
 					
 					<div style="height:8px;"></div>
@@ -104,7 +106,7 @@
 					<p class="line_p">
 						<label class="w100">其他操作：</label>
 						<input type="checkbox" id="is_back_sellcount" checked name="is_back_sellcount" value ="1"  />&nbsp;
-						退库存以及减销量&nbsp;<input type="text" name="refund_quantity" id="refund_quantity" style="padding:2px;height:25px;border: 1px solid #ccc;width:100px;" value="{$total_quantity}" />&nbsp;个(最多可退{$total_quantity}个)
+						退库存以及减销量&nbsp;<input type="text" name="refund_quantity" id="refund_quantity" style="padding:2px;height:25px;border: 1px solid #ccc;width:100px;" value="0" />&nbsp;个(最多可退{$total_quantity}个)
 					</p>
 					<p style="line-height:26px;font-size:13px;">佣金：<span class="label label-success">{$commiss_state}</span></p>
 					<p style="margin-top:10px;line-height:16px;font-size:12px;color:#9e9696;">
@@ -126,7 +128,13 @@
 var free_tongji = {$free_tongji};
 var shipping_fare = {$shipping_fare};
 
+var  refund_one_money = {$refund_one_money};
 $(function(){
+
+	$('.ref_goods').click(function(){
+		sum_refund_money_quantity();
+	})
+	
 	$('#ck_opgoodsrefund').click(function(){
 		
 		var ck_arr = [];
@@ -170,6 +178,7 @@ $(function(){
 		}else{
 			$(".ref_goods").prop("checked", false);
 		}
+		sum_refund_money_quantity();
 	})
 
 	$('#is_refund_shippingfare').click(function(){
@@ -194,6 +203,47 @@ $(function(){
 	})
 
 })
+
+function sum_refund_money_quantity()
+{
+	var ck_arr = [];
+		
+	$('.ref_goods').each(function(){
+	
+		if( $(this).is(':checked') ) {
+			ck_arr.push(1);
+		}
+	})
+	
+	var refund_count = ck_arr.length;
+	
+	var can_refund_money = (refund_count * refund_one_money).toFixed(2);
+	
+	if( $('#is_refund_shippingfare').is(':checked') )
+	{
+		can_refund_money = can_refund_money + parseFloat(shipping_fare);
+		
+		
+		if( can_refund_money > free_tongji + shipping_fare )
+		{
+			can_refund_money = free_tongji + shipping_fare;
+		}
+	
+	}else{
+		
+		if( can_refund_money > free_tongji )
+		{
+			can_refund_money = free_tongji;
+		}
+	}
+	
+	can_refund_money = Math.floor(can_refund_money *100)/100;
+	
+	$('#refund_money').val(can_refund_money);
+	$('#refund_quantity').val(refund_count);
+	
+
+}
 
 
 </script>

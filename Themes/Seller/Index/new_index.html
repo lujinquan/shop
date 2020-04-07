@@ -58,7 +58,14 @@
 					</a>
 				  </li>
 				  
-				  
+				  <?php if (!defined('ROLE') || ROLE != 'agenter' ) { ?>
+				  <li class="layui-nav-item" lay-unselect id="new_msg" style=""> 
+					<a href="<?php echo U('system/auth_upgrade'); ?>" target="_blank" layadmin-event="message" style="margin-top:14px;margin-right:8px;padding-left:5px;padding-right:10px;" class="layui-btn layui-btn-xs" lay-text="检测更新" >
+					  
+					  <!-- 如果有新消息，则显示小圆点 -->
+					</a>
+				  </li>
+				  <?php } ?>
 		  
 				<li class="layui-nav-item layui-hide-xs" lay-unselect style="display:none;">
 					<a href="javascript:;" layadmin-event="theme">

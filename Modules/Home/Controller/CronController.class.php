@@ -59,6 +59,17 @@ class CronController extends CommonController {
 		
 		$url = $url."/index.php?s=/Cron/statement";
 		
+		//begin 
+		$today_zero_time = strtotime( date('Y-m-d').' 00:00:00' );
+		
+		$clear_goodsdaysales  = S('clear_goodsdaysales');
+		if( !isset($today_zero_time) || $clear_goodsdaysales != $today_zero_time )
+		{
+		    D('Seller/Commonorder')->clear_goods_daysales();
+		    S('clear_goodsdaysales', $today_zero_time );
+		}
+		//end
+		
 		
 		$lasttimestatement  = S('statementorder');  
 		

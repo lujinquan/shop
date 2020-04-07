@@ -261,6 +261,7 @@ class CommunityheadController extends CommonController {
 				array('title' => 'ID', 'field' => 'member_id', 'width' => 12),
 				array('title' => '微信用户名', 'field' => 'username', 'width' => 12),
 			    array('title' => '团长名称', 'field' => 'head_name', 'width' => 12),
+			    array('title' => '小区名称', 'field' => 'community_name', 'width' => 12),
 				array('title' => '联系方式', 'field' => 'head_mobile', 'width' => 12),
 				array('title' => '在售商品数量', 'field' => 'goods_count', 'width' => 24),
 				array('title' => 'openid', 'field' => 'we_openid', 'width' => 24),
@@ -1523,20 +1524,20 @@ class CommunityheadController extends CommonController {
 					}else if($row['type'] == 2){ 	
 							$row['bankname'] = "微信零钱";
 							
-							$row['bankusername'] = $row['community_head_commiss']['bankusername'];
+							$row['bankusername'] = $row['bankusername'];
 					 }else if($row['type'] == 3){ 		
 							$row['bankname'] = "支付宝";
-							$row['bankusername'] = $row['community_head_commiss']['bankusername'];
-							$row['bankaccount'] = "\t".$row['community_head_commiss']['bankaccount'];
+							$row['bankusername'] = $row['bankusername'];
+							$row['bankaccount'] = "\t".$row['bankaccount'];
 					}else if($row['type'] == 4){ 
-							$row['bankname'] = $row['community_head_commiss']['bankname'];
-							$row['bankusername'] = $row['community_head_commiss']['bankusername'];
-							$row['bankaccount'] = "\t".$row['community_head_commiss']['bankaccount'];
+							$row['bankname'] = $row['bankname'];
+							$row['bankusername'] = $row['bankusername'];
+							$row['bankaccount'] = "\t".$row['bankaccount'];
 					} 
 				}else{ 
-						$row['bankname'] = $row['community_head_commiss']['bankname'];
-						$row['bankusername'] = $row['community_head_commiss']['bankusername'];
-						$row['bankaccount'] = "\t".$row['community_head_commiss']['bankaccount'];
+						$row['bankname'] = $row['bankname'];
+						$row['bankusername'] = $row['bankusername'];
+						$row['bankaccount'] = "\t".$row['bankaccount'];
 				} 
 				
 				$row['get_money'] = $row['money']-$row['service_charge'];

@@ -289,7 +289,7 @@ class CommunityController extends CommonController {
 		
 		if( empty($community_zhitui_qrcode_json)  )
 		{
-			$path = "lionfish_comshop/pages/groupCenter/apply";
+			$path = "lionfish_comshop/moduleA/groupCenter/apply";
 			$zhitui_qrcod = D('Home/Pingoods')->_get_commmon_wxqrcode($path, $head_id);
 			
 			if( empty($zhitui_qrcod) )
@@ -320,7 +320,7 @@ class CommunityController extends CommonController {
 			if( $community_zhitui_qrcode_arr['express_time'] < time() )
 			{
 				
-				$path = "lionfish_comshop/pages/groupCenter/apply";
+				$path = "lionfish_comshop/moduleA/groupCenter/apply";
 				$zhitui_qrcod = D('Home/Pingoods')->_get_commmon_wxqrcode($path, $head_id);
 				
 				
@@ -394,7 +394,7 @@ class CommunityController extends CommonController {
 		if( empty($community_memberbind_qrcode) )
 		{
 			
-			$path = "lionfish_comshop/pages/groupCenter/bind_member_hexiao";
+			$path = "lionfish_comshop/moduleA/groupCenter/bind_member_hexiao";
 			$hexiao_qrcod = D('Home/Pingoods')->_get_commmon_wxqrcode($path, $head_id);
 			
 			$data = array();
@@ -414,7 +414,7 @@ class CommunityController extends CommonController {
 			
 			if($hexiao_data['time'] + 600 < time() )
 			{
-				$path = "lionfish_comshop/pages/groupCenter/bind_member_hexiao";
+				$path = "lionfish_comshop/moduleA/groupCenter/bind_member_hexiao";
 				$hexiao_qrcod = D('Home/Pingoods')->_get_commmon_wxqrcode($path, $head_id);
 				
 				$data = array();

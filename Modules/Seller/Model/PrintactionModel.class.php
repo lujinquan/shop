@@ -333,6 +333,29 @@ class PrintactionModel
 			}
 			
 			
+			$delivery_tuanzshipping_name = D('Home/Front')->get_config_by_name('delivery_tuanzshipping_name');//团长配送
+			
+			if( empty($delivery_tuanzshipping_name) )
+			{
+				$delivery_tuanzshipping_name = '';
+			}
+
+			$delivery_express_name = D('Home/Front')->get_config_by_name('delivery_express_name');//快递配送
+
+			if( empty($delivery_express_name) )
+			{
+				$delivery_express_name = '';
+			}
+
+			$delivery_ziti_name = D('Home/Front')->get_config_by_name('delivery_ziti_name');//到点自提
+
+			if(  empty($delivery_ziti_name) )
+			{
+				$delivery_ziti_name = '';
+			}
+			
+			
+			
 			$shoname = D('Home/Front')->get_config_by_name('shoname');
 			
 			
@@ -354,14 +377,16 @@ class PrintactionModel
 					$last_print_time = time();
 				
 					$sup_key = 'last_print_index'.$supply_id;
+					$sup_key2 = 'last_print_time'.$supply_id;
 					
-					D('Seller/Config')->update( array( $sup_key => $last_print_index, 'last_print_time' => $last_print_time) );
+					D('Seller/Config')->update( array( $sup_key => $last_print_index, $sup_key2 => $last_print_time) );
 				}else if($last_print_time > $now_time) {
 					$last_print_index = empty($last_print_index) ? 1: $last_print_index+1;
 					
 					$sup_key = 'last_print_index'.$supply_id;
+					$sup_key2 = 'last_print_time'.$supply_id;
 					
-					D('Seller/Config')->update( array( $sup_key => $last_print_index, 'last_print_time' => time() ) );
+					D('Seller/Config')->update( array( $sup_key => $last_print_index, $sup_key2 => time() ) );
 				}
 					
 					
@@ -439,7 +464,13 @@ class PrintactionModel
 					        
 					    }else{
 					        $orderInfo .= '收货地址:'.$order_info['shipping_address']."\n";
-						  $orderInfo .= '配送方式:团员自提'."\n";//团长配送
+							
+							if( !empty($delivery_ziti_name) )
+							{
+								$orderInfo .= '配送方式:'.$delivery_ziti_name."\n";//团长配送
+							}else{
+								$orderInfo .= '配送方式:团员自提'."\n";//团长配送
+							}
 					    }
 					    
 					    
@@ -459,7 +490,13 @@ class PrintactionModel
 						
 						$orderInfo .= '送货地址:'.$order_info['tuan_send_address']."\n";
 						
-						$orderInfo .= '配送方式:'.$owner_name.'送货上门'."\n";//团长配送
+						if( !empty($delivery_tuanzshipping_name) )
+						{
+							$orderInfo .= '配送方式:'.$delivery_tuanzshipping_name.''."\n";//团长配送
+						}else{
+							$orderInfo .= '配送方式:'.$owner_name.'送货上门'."\n";//团长配送
+						}
+						
 					}else{
 						
 						$province_info = D('Home/Front')->get_area_info($order_info['shipping_province_id']);
@@ -470,7 +507,13 @@ class PrintactionModel
 						
 						$orderInfo .= '收货地址:'.$sp_address.$order_info['shipping_address']."\n";	
 						
-						$orderInfo .= '配送方式:快递'."\n";
+						if( !empty($delivery_express_name) )
+						{
+							$orderInfo .= '配送方式:'.$delivery_express_name."\n";
+						}else{
+							$orderInfo .= '配送方式:快递'."\n";
+						}
+						
 					}
 					
 					
@@ -777,10 +820,14 @@ class PrintactionModel
 					        $orderInfo .= '配送方式:门店核销<BR>';//团长配送
 					    }else{
 					       $orderInfo .= '收货地址:'.$order_info['shipping_address'].'<BR>';
-						$orderInfo .= '配送方式:团员自提<BR>';//团长配送
+							
+							if( !empty($delivery_ziti_name) )
+							{
+								$orderInfo .= '配送方式:'.$delivery_ziti_name.'<BR>';//团长配送
+							}else{
+								$orderInfo .= '配送方式:团员自提<BR>';//团长配送
+							}
 					    }
-					    
-						
 						
 					}else if( $order_info['delivery'] == 'tuanz_send'){
 						
@@ -796,7 +843,13 @@ class PrintactionModel
 						
 						$orderInfo .= '送货地址:'.$order_info['tuan_send_address'].'<BR>';
 						
-						$orderInfo .= '配送方式:'.$owner_name.'送货上门<BR>';//团长配送
+						if( !empty($delivery_tuanzshipping_name) )
+						{
+							$orderInfo .= '配送方式:'.$delivery_tuanzshipping_name.'<BR>';//团长配送
+						}else{
+							$orderInfo .= '配送方式:'.$owner_name.'送货上门<BR>';//团长配送
+						}
+						
 					}else{
 						
 						$province_info = D('Home/Front')->get_area_info($order_info['shipping_province_id']);
@@ -805,9 +858,14 @@ class PrintactionModel
 						
 						$sp_address = $province_info['name'].$city_info['name'].$area_info['name'];
 						
-						$orderInfo .= '收货地址:'.$sp_address.$order_info['shipping_address']."\n";	
+						$orderInfo .= '收货地址:'.$sp_address.$order_info['shipping_address']."<BR>";	
 						
-						$orderInfo .= '配送方式:快递<BR>';
+						if( !empty($delivery_express_name) )
+						{
+							$orderInfo .= '配送方式:'.$delivery_express_name.'<BR>';
+						}else{
+							$orderInfo .= '配送方式:快递<BR>';
+						}
 					}
 					
 					$orderInfo .= '-------------商品---------------<BR>';
@@ -930,7 +988,7 @@ class PrintactionModel
 						{
 							$zhognjian_ge .= ' ';
 						}
-						$orderInfo .= '积分抵：'.$zhognjian_ge.'-'.sprintf('%.2f',$score_for_money).'元'."\n";
+						$orderInfo .= '积分抵：'.$zhognjian_ge.'-'.sprintf('%.2f',$score_for_money).'元'."<BR>";
 					}
 					
 					
@@ -975,10 +1033,10 @@ class PrintactionModel
 							
 							if( $order_info['delivery'] == 'tuanz_send')
 							{
-								$orderInfo .= $placeorder_tuan_name.'：'.$zhognjian_ge.'+'.sprintf('%.2f',$fare_shipping_free).'元'."\n";
+								$orderInfo .= $placeorder_tuan_name.'：'.$zhognjian_ge.'+'.sprintf('%.2f',$fare_shipping_free).'元'."<BR>";
 							}else if( $order_info['delivery'] == 'express')
 							{
-								$orderInfo .= $placeorder_trans_name.'：'.$zhognjian_ge.'+'.sprintf('%.2f',$fare_shipping_free).'元'."\n";
+								$orderInfo .= $placeorder_trans_name.'：'.$zhognjian_ge.'+'.sprintf('%.2f',$fare_shipping_free).'元'."<BR>";
 							}
 						}
 						if( !empty($fare_shipping_free) && $fare_shipping_free >0)
@@ -990,7 +1048,7 @@ class PrintactionModel
 							{
 								$zhognjian_ge .= ' ';
 							}
-							$orderInfo .= '满'.$man_e_money.'免运费：'.$zhognjian_ge.'-'.sprintf('%.2f',$fare_shipping_free).'元'."\n";
+							$orderInfo .= '满'.$man_e_money.'免运费：'.$zhognjian_ge.'-'.sprintf('%.2f',$fare_shipping_free).'元'."<BR>";
 						}
 					}else{
 						if( !empty($shipping_fare) && $shipping_fare >0)
@@ -1097,6 +1155,31 @@ class PrintactionModel
 			}
 			
 			
+			
+			
+			
+			$delivery_tuanzshipping_name = D('Home/Front')->get_config_by_name('delivery_tuanzshipping_name');//团长配送
+			
+			if( empty($delivery_tuanzshipping_name) )
+			{
+				$delivery_tuanzshipping_name = '';
+			}
+			
+			$delivery_express_name = D('Home/Front')->get_config_by_name('delivery_express_name');//快递配送
+			
+			if( empty($delivery_express_name) )
+			{
+				$delivery_express_name = '';
+			}
+			
+			$delivery_ziti_name = D('Home/Front')->get_config_by_name('delivery_ziti_name');//到点自提
+			
+			if(  empty($delivery_ziti_name) )
+			{
+				$delivery_ziti_name = '';
+			}
+			
+			
 			$placeorder_trans_name = D('Home/Front')->get_config_by_name('placeorder_trans_name');//快递费
 			
 			if( !isset($placeorder_trans_name) || empty($placeorder_trans_name) )
@@ -1186,14 +1269,14 @@ class PrintactionModel
 				require_once $lib_path."/Yilianyun/Lib/Autoloader.php";
 			
 			
-				$yilian_client_id = D('Home/Front')->get_config_by_name('yilian_client_id', $uniacid);
-				$yilian_client_key = D('Home/Front')->get_config_by_name('yilian_client_key' , $uniacid);
+				$yilian_client_id = D('Home/Front')->get_config_by_name('yilian_client_id');
+				$yilian_client_key = D('Home/Front')->get_config_by_name('yilian_client_key' );
 			
 				$config = new YlyConfig($yilian_client_id, $yilian_client_key);
 			
 				$token = $this->_get_yilian_access_token($yilian_client_id,$yilian_client_key);
 				
-				$yilian_machine_code = D('Home/Front')->get_config_by_name('yilian_machine_code' , $uniacid);
+				$yilian_machine_code = D('Home/Front')->get_config_by_name('yilian_machine_code' );
 				
 				$print = new PrintService($token['access_token'], $config);
 				
@@ -1202,7 +1285,7 @@ class PrintactionModel
 				//<MN>1</MN>
 				//$data = $print->index($yilian_machine_code,'打印内容排版可看Demo下的callback.php','558');
 				//-------------------------------------------------------------------------------------------
-				$yilian_print_lian = D('Home/Front')->get_config_by_name('yilian_print_lian', $uniacid);
+				$yilian_print_lian = D('Home/Front')->get_config_by_name('yilian_print_lian');
 				
 				if( empty($yilian_print_lian) ||  $yilian_print_lian < 1)
 				{
@@ -1257,7 +1340,12 @@ class PrintactionModel
 				        $orderInfo .= '配送方式:门店核销'."\n";//团长配送
 				    }else{
 				        $orderInfo .= '收货地址:'.$order_info['shipping_address']."\n";
-				        $orderInfo .= '配送方式:团员自提'."\n";//团长配送
+						if( !empty($delivery_ziti_name) )
+						{
+							$orderInfo .= '配送方式:'.$delivery_ziti_name."\n";//团长配送
+						}else{
+							$orderInfo .= '配送方式:团员自提'."\n";//团长配送
+						}
 				    }
 					
 				}else if( $order_info['delivery'] == 'tuanz_send'){
@@ -1276,7 +1364,13 @@ class PrintactionModel
 					
 					$orderInfo .= '送货地址:'.$order_info['tuan_send_address']."\n";
 					
-					$orderInfo .= '配送方式:'.$owner_name.'送货上门'."\n";//团长配送
+					if( !empty($delivery_tuanzshipping_name) )
+					{
+						$orderInfo .= '配送方式:'.$delivery_tuanzshipping_name.''."\n";//团长配送
+					}else{
+						$orderInfo .= '配送方式:'.$owner_name.'送货上门'."\n";//团长配送
+					}
+					
 				}else{
 					$province_info = D('Home/Front')->get_area_info($order_info['shipping_province_id']);
 					$city_info = D('Home/Front')->get_area_info($order_info['shipping_city_id']);
@@ -1285,8 +1379,13 @@ class PrintactionModel
 					$sp_address = $province_info['name'].$city_info['name'].$area_info['name'];
 						
 					$orderInfo .= '收货地址:'.$sp_address.$order_info['shipping_address']."\n";	
-						
-					$orderInfo .= '配送方式:快递'."\n";
+					
+					if( !empty($delivery_express_name) )
+					{
+						$orderInfo .= '配送方式:'.$delivery_express_name."\n";
+					}else{
+						$orderInfo .= '配送方式:快递'."\n";
+					}
 				}
 				
 				
@@ -1583,7 +1682,14 @@ class PrintactionModel
 				        $orderInfo .= '配送方式:门店核销<BR>';//团长配送
 				    }else{
 				       $orderInfo .= '收货地址:'.$order_info['shipping_address'].'<BR>';
-					   $orderInfo .= '配送方式:团员自提<BR>';//团长配送
+					   
+					   if( !empty($delivery_ziti_name) )
+					   {
+						   $orderInfo .= '配送方式:'.$delivery_ziti_name.'<BR>';//团长配送 
+					   }else{
+						    $orderInfo .= '配送方式:团员自提<BR>';//团长配送
+					   }
+					  
 				    }
 				    
 					
@@ -1593,7 +1699,13 @@ class PrintactionModel
 					
 					$orderInfo .= '送货地址:'.$order_info['tuan_send_address'].'<BR>';
 					
-					$orderInfo .= '<L>配送方式:'.$owner_name.'送货上门</L><BR>';//团长配送
+					if( !empty($delivery_tuanzshipping_name) )
+					{
+						$orderInfo .= '<L>配送方式:'.$delivery_tuanzshipping_name.'</L><BR>';//团长配送
+					}else{
+						$orderInfo .= '<L>配送方式:'.$owner_name.'送货上门</L><BR>';//团长配送
+					}
+					
 				}else{
 					
 					$province_info = D('Home/Front')->get_area_info($order_info['shipping_province_id']);
@@ -1601,9 +1713,16 @@ class PrintactionModel
 					$area_info = D('Home/Front')->get_area_info($order_info['shipping_country_id']);
 					//name
 					$sp_address = $province_info['name'].$city_info['name'].$area_info['name'];
-					$orderInfo .= '收货地址:'.$sp_address.$order_info['shipping_address']."\n";
+					$orderInfo .= '收货地址:'.$sp_address.$order_info['shipping_address']."<BR>";
 					
-					$orderInfo .= '<L>配送方式:快递</L><BR>';
+					
+					
+					if( !empty($delivery_express_name) )
+					{
+						$orderInfo .= '<L>配送方式:'.$delivery_express_name.'</L><BR>';
+					}else{
+						$orderInfo .= '<L>配送方式:快递</L><BR>';
+					}
 				}
 				
 				
@@ -1772,10 +1891,10 @@ class PrintactionModel
 						
 						if( $order_info['delivery'] == 'tuanz_send')
 						{
-							$orderInfo .= $placeorder_tuan_name.'：'.$zhognjian_ge.'+'.sprintf('%.2f',$fare_shipping_free).'元'."\n";
+							$orderInfo .= $placeorder_tuan_name.'：'.$zhognjian_ge.'+'.sprintf('%.2f',$fare_shipping_free).'元'."<BR>";
 						}else if( $order_info['delivery'] == 'express')
 						{
-							$orderInfo .= $placeorder_trans_name.'：'.$zhognjian_ge.'+'.sprintf('%.2f',$fare_shipping_free).'元'."\n";
+							$orderInfo .= $placeorder_trans_name.'：'.$zhognjian_ge.'+'.sprintf('%.2f',$fare_shipping_free).'元'."<BR>";
 						}
 						
 					}
@@ -1788,7 +1907,7 @@ class PrintactionModel
 						{
 							$zhognjian_ge .= ' ';
 						}
-						$orderInfo .= '满'.$man_e_money.'免运费：'.$zhognjian_ge.'-'.sprintf('%.2f',$fare_shipping_free).'元'."\n";
+						$orderInfo .= '满'.$man_e_money.'免运费：'.$zhognjian_ge.'-'.sprintf('%.2f',$fare_shipping_free).'元'."<BR>";
 					}
 				}else{
 					if( !empty($shipping_fare) && $shipping_fare >0)
@@ -1851,13 +1970,14 @@ class PrintactionModel
 				$orderInfo .= '<CB>**#'.$last_print_index.'  完**</CB><BR>';
 				
 				
-				$feier_print_lian = D('Home/Front')->get_config_by_name('feier_print_lian', $uniacid);
+				$feier_print_lian = D('Home/Front')->get_config_by_name('feier_print_lian');
 				
 				if( empty($feier_print_lian) ||  $feier_print_lian < 1)
 				{
 					$feier_print_lian = 1;
 				}
 				
+			
 				
 				$print_result = $this->wp_print($orderInfo, $feier_print_lian, $feier_print_sn);
 				
@@ -1878,6 +1998,8 @@ class PrintactionModel
 
 				用户取消订单
 			**/
+			
+			
 			$print_result2 = $this->print_supply_order($order_id, $supply_goods_info, $title);
 			
 			if( !$is_print  )

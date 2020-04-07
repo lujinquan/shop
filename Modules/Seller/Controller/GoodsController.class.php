@@ -31,13 +31,23 @@ class GoodsController extends CommonController{
 		
 		$starttime_arr = I('get.time');
 		
-		
-		
 		$starttime = isset($starttime_arr['start']) ? strtotime($starttime_arr['start']) : strtotime(date('Y-m-d'.' 00:00:00'));
 		
 		$endtime = isset($starttime_arr['end']) ? strtotime($starttime_arr['end']) : strtotime(date('Y-m-d'.' 23:59:59'));
 		
 		
+		$sort_starttime = I('get.sort_starttime');
+		$sort_endtime = I('get.sort_endtime');
+		
+		if( isset($sort_starttime) && $sort_starttime > 0 )   
+		{
+		    $starttime = $sort_starttime;
+		}
+		
+		if( isset($sort_endtime) && $sort_endtime > 0 )
+		{
+		    $endtime = $sort_endtime;
+		}
 		
 		
 		$this->starttime = $starttime;
@@ -222,7 +232,16 @@ class GoodsController extends CommonController{
 		$total = $total_arr[0]['count'];
 		
 		
+		//'sortby' =>$sortby,'sortfield' => 'day_salescount',
 		
+		$sortby = I('get.sortby');
+		$sortfield = I('get.sortfield');
+		
+		$this->sortfield = $sortfield;
+		
+		$sortby = (!empty($sortby) ? ($sortby== 'asc' ?'desc':'asc') : ( !empty($sortfield) ? 'desc':'' ) );
+		
+		$this->sortby = $sortby;
 		
 		$pager = pagination2($total, $pindex, $psize);
 		
@@ -232,11 +251,24 @@ class GoodsController extends CommonController{
 		
 			if( empty($index_sort_method) || $index_sort_method == 0 )
 			{
+			    $sort_way = 'g.istop DESC, g.settoptime DESC, g.`id` DESC';
+			    
+			    if( !empty($sortfield) )
+			    {
+			        $sort_way = ' g.'.$sortfield.' '.$sortby.' , '.$sort_way;
+			    }
+			    
 				$sql = 'SELECT g.* FROM ' .C('DB_PREFIX'). 'lionfish_comshop_goods g '  .$sqlcondition . $condition . ' 
-					ORDER BY  g.istop DESC, g.settoptime DESC, g.`id` DESC  ';
+					ORDER BY   '.$sort_way.' ';
 			}else{
+			    $sort_way = 'g.index_sort DESC, g.`id` DESC';
+			    
+			    if( !empty($sortfield) )
+			    {
+			        $sort_way = ' g.'.$sortfield.' '.$sortby.' ,'.$sort_way;
+			    }
 				$sql = 'SELECT g.* FROM ' .C('DB_PREFIX'). 'lionfish_comshop_goods g '  .$sqlcondition . $condition . ' 
-					ORDER BY  g.index_sort DESC, g.`id` DESC  ';
+					ORDER BY  '.$sort_way.'  ';
 			}
 
             if(I('export') != 1) { // 如果导出excel 就显示全部
@@ -247,6 +279,15 @@ class GoodsController extends CommonController{
 			
 			$list = M()->query($sql);
 			
+			$open_redis_server = D('Home/Front')->get_config_by_name('open_redis_server');
+			
+			if( isset($open_redis_server) && $open_redis_server >0 )
+			{
+			    $open_redis_server = 1;
+			}else{
+			    $open_redis_server = 0;
+			}
+			$this->open_redis_server = $open_redis_server;
 			
 			foreach ($list as $key => &$value ) {
 				
@@ -265,15 +306,25 @@ class GoodsController extends CommonController{
 				}
 				
 				//is_take_fullreduction print_sub_title
-				$gd_common = M('lionfish_comshop_good_common')->field('is_take_fullreduction,supply_id,is_only_distribution,is_only_hexiao,print_sub_title')->where( array('goods_id' => $value['id']) )->find();
+				$gd_common = M('lionfish_comshop_good_common')->field('is_take_fullreduction,supply_id,is_only_distribution,is_spike_buy,is_only_express,is_only_hexiao,print_sub_title')->where( array('goods_id' => $value['id']) )->find();
 				
 				//print_sub_title
 				$value['print_sub_title'] =  $gd_common['print_sub_title'];
+				
+				//判断是否开启redis
+				if( $open_redis_server == 1 )
+				{
+				    $value['redis_total'] = D('Seller/Redisorder')->get_goods_total_quantity( $value['id'] );
+				}
 				
 				
 				$value['is_take_fullreduction'] =  $gd_common['is_take_fullreduction'];
 				$value['is_only_hexiao'] =  $gd_common['is_only_hexiao'];
 				$value['is_only_distribution'] =  $gd_common['is_only_distribution'];
+				
+				$value['is_spike_buy'] =  $gd_common['is_spike_buy'];
+				$value['is_only_express'] =  $gd_common['is_only_express'];
+				
 				
 				$value['supply_name'] = '';
 				$value['supply_type'] = '0';
@@ -558,6 +609,11 @@ class GoodsController extends CommonController{
                 'width' => 24
             ) ,
             array(
+                'title' => '每日销量',
+                'field' => 'day_salescount',
+                'width' => 24
+            ) ,
+            array(
                 'title' => '1上架/0下架',
                 'field' => 'grounding',
                 'width' => 24
@@ -716,6 +772,15 @@ class GoodsController extends CommonController{
 		}
 		
 		$this->display();
+	}
+	
+	
+	public function show_logs()
+	{
+	    $goods_id = I('get.goods_id');
+	    
+	    D('Seller/Redisorder')->show_logs($goods_id);
+	    
 	}
 	
 	public function tagsstate()

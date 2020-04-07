@@ -2133,6 +2133,7 @@ class CarController extends CommonController {
 			if($d_goods['shipping']==0)
 			{
 				$is_moban = true;
+				$val['is_moban'] = true;
 				$total_weight += $d_goods['weight']*$d_goods['quantity'];
 				$total_quantity += $d_goods['quantity'];
 			}
@@ -2354,9 +2355,9 @@ class CarController extends CommonController {
 			
 			foreach($seller_goodss as $store_id => $val)
 			{
-				
+				//$val['is_moban'] = true;
 				$store_shipping_fare = 0;
-				if($is_moban)
+				if(  isset($val['is_moban']) && $val['is_moban'] )
 				{
 					$store_shipping_fare = D('Home/Transport')->calc_transport($shipping_default['id'], $val['total_quantity'],$val['total_weight'], $mb_city_id );
 					
@@ -2385,7 +2386,7 @@ class CarController extends CommonController {
 			foreach($seller_goodss as $store_id => $val)
 			{
 				$store_shipping_fare = 0;
-				if($is_moban)
+				if(isset($val['is_moban']) && $val['is_moban'])
 				{
 					$store_shipping_fare = D('Home/Transport')->calc_transport($shipping_default['id'], $val['total_quantity'],$val['total_weight'], $address['city_id'] );
 				
@@ -2647,6 +2648,8 @@ class CarController extends CommonController {
 	{
 		if( $member_info['score'] > 0 )
 		{
+			$score_can_max = $store_buy_total_money - $voucher_price - $reduce_money;
+			
 			//计算能兑换多少钱
 			$score_forbuy_money = D('Home/Front')->get_config_by_name('score_forbuy_money');
 			//只有兑换比例大于0才能允许兑换
@@ -2654,13 +2657,13 @@ class CarController extends CommonController {
 			{
 				$score_for_money = round( $member_info['score'] / $score_forbuy_money ,2);
 				
-				if( $store_buy_total_money < $score_for_money )
+				if( $score_can_max < $score_for_money )
 				{
-					$score_for_money = $store_buy_total_money;
-					$bue_use_score = $store_buy_total_money * $score_forbuy_money;
+					$score_for_money = $score_can_max;
+					$bue_use_score = $score_can_max * $score_forbuy_money;
 				}
 				
-				$max_store_buy_total_money = round( ($score_forbuy_money_maxbi * $store_buy_total_money) /100,2);
+				$max_store_buy_total_money = round( ($score_forbuy_money_maxbi * $score_can_max) /100,2);
 				
 				if($score_for_money > $max_store_buy_total_money)
 				{
@@ -3473,7 +3476,7 @@ public function sub_order()
 		$order_goods_total_money = 0;
 		$goods_data = array();
 		
-		
+		$is_moban = false;
 		//comment_arr comment_arr
 		
 		foreach($vv as $key => $good)
@@ -3893,7 +3896,7 @@ public function sub_order()
 				//没必要扣积分了，单价已经是0
 			}else{
 				//只能抵扣扣除优惠券部分的金额
-				$del_money = $order_total - $data['voucher_credit'];
+				$del_money = $order_total - $data['voucher_credit']  - $reduce_money;
 				
 				if( $score_for_money >= $del_money)
 				{

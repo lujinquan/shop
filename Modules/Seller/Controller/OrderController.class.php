@@ -569,11 +569,13 @@ class OrderController extends CommonController{
 						
 					}else{
 						
+						$or_gd_info = M('lionfish_comshop_order_goods')->field('name')->where( array('order_goods_id' => $order_goods_id )  )->find();
+						
 						$order_history = array();
 						$order_history['order_id'] = $id;
 						$order_history['order_status_id'] = 19;
 						$order_history['notify'] = 0;
-						$order_history['comment'] =  '后台子订单退款，退款商品：'.$real_refund_quantity.'个，退库存/销量数量'.$refund_quantity.'个，退款金额'.$refund_money.'元';
+						$order_history['comment'] =  '后台子订单退款，退款商品：'.$or_gd_info['name'].'，'.$real_refund_quantity.'个，退库存/销量数量'.$refund_quantity.'个，退款金额'.$refund_money.'元';
 						$order_history['date_added'] = time();
 						
 						M('lionfish_comshop_order_history')->add( $order_history );
@@ -1359,6 +1361,19 @@ class OrderController extends CommonController{
 		$this->display();
 	}
 	
+	//查看物流
+	public function express(){
+		$_GPC = I('request.');
+		$order_id = $_GPC['order_id'];
+		
+		$express_list = D('Seller/Order')->goods_express($order_id);
+		
+		
+		$new_array = json_decode(json_encode($express_list['order_info']['shipping_traces']), true);
+		$new_array = array_reverse($new_array);
+		$this->list = $new_array;
+		$this->display();
+	}
 	
 	public function refund_mult()
 	{

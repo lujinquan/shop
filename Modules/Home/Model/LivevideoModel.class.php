@@ -65,7 +65,8 @@ class LivevideoModel {
 					continue;
 				}
 
-				if(!empty($wxlive) && empty(unserialize($wxlive['live_replay'])) && $room['live_status']=='103') {
+				$live_replay_lv = unserialize($wxlive['live_replay']);
+				if(!empty($wxlive) && empty($live_replay_lv) && $room['live_status']=='103') {
 					$this->syncLiveReplay($room['roomid']);
 				}
 				$model->where( array('roomid' => $room['roomid'] ) )->save($updateData);

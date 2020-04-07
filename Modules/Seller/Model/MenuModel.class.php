@@ -955,6 +955,7 @@ class MenuModel{
 	{
 		if(SELLERUID != 1)
 		{
+			
 			$seller_info = M('seller')->field('s_role_id')->where( array('s_id' => SELLERUID ) )->find();
 			
 			$perm_role = M('lionfish_comshop_perm_role')->where( array('id' => $seller_info['s_role_id']) )->find();
@@ -962,6 +963,8 @@ class MenuModel{
 			$perms_str = $perm_role['perms2'];
 			
 			$new_route = str_replace('/','.', $route);
+			
+			
 			
 			if( strpos($perms_str, $new_route) !== false )
 			{

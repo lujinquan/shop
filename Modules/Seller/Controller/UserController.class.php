@@ -145,8 +145,10 @@ class UserController extends CommonController{
 		if ($gpc['export'] == '1') {
 			
 			foreach ($list as &$row) {
+			    
+			    
 			    //推荐人  总店
-			    $row['share_name'] = $row['share_name'] == 0 ? '总店':$row['share_name'];
+			    $row['share_name'] = $row['share_name'] == '' ? '总店': $row['share_name'];
 			    $row['create_time'] = date('Y-m-d H:i:s', $row['create_time']);
 			    //状态
 			    $row['isblack'] = $row['isblack'] == 1 ? '禁用':'启用';
@@ -156,7 +158,7 @@ class UserController extends CommonController{
 				$row['ordermoney'] = $row['ordermoney'] == 0 ?  0 : $row['ordermoney'];
 			}
 			
-			unset($row);
+			//unset($row);
 			
 			$columns = array(
 				array('title' => 'ID', 'field' => 'member_id', 'width' => 12),

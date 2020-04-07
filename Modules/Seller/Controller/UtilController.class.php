@@ -27,8 +27,8 @@ class UtilController extends CommonController{
                 'list' => array(
                     array('name' => '商城首页', 'url' => '/lionfish_comshop/pages/index/index', 'url_wxapp' => '/lionfish_comshop/pages/index/index'),
                     array('name' => '购物车', 'url' => '/lionfish_comshop/pages/order/shopCart', 'url_wxapp' => '/lionfish_comshop/pages/order/shopCart'),
-                    array('name' => '团长申请页面', 'url' => '/lionfish_comshop/pages/groupCenter/apply', 'url_wxapp' => '/lionfish_comshop/pages/groupCenter/apply'),
-					array('name' => '团长申请介绍页面', 'url' => '/lionfish_comshop/pages/groupCenter/recruit', 'url_wxapp' => '/lionfish_comshop/pages/groupCenter/recruit'),
+                    array('name' => '团长申请页面', 'url' => '/lionfish_comshop/moduleA/apply', 'url_wxapp' => '/lionfish_comshop/moduleA/apply'),
+					array('name' => '团长申请介绍页面', 'url' => '/lionfish_comshop/moduleA/groupCenter/recruit', 'url_wxapp' => '/lionfish_comshop/moduleA/groupCenter/recruit'),
 					
 					array('name' => '供应商申请页面', 'url' => '/lionfish_comshop/pages/supply/apply', 'url_wxapp' => '/lionfish_comshop/pages/supply/apply'),
 					array('name' => '供应商介绍页面地址', 'url' => '/lionfish_comshop/pages/supply/recruit', 'url_wxapp' => '/lionfish_comshop/pages/supply/recruit'),

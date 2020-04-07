@@ -297,7 +297,11 @@ class UserModel{
 		}
 		
 		
+		
+		
 		$flow_data['money'] = $num;
+		
+		
 		
 		$flow_data['remark'] = $remark;
 		
@@ -305,6 +309,10 @@ class UserModel{
 		$flow_data['add_time'] = time();
 		
 		M()->execute( $up_sql );
+		
+		$member_info2 = M('lionfish_comshop_member')->field('account_money')->where( array('member_id' => $member_id) )->find();
+		
+		$flow_data['operate_end_yuer'] = $member_info2['account_money'];
 		
 		M('lionfish_comshop_member_charge_flow')->add($flow_data);
 	}

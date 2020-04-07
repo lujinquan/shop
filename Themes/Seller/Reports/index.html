@@ -106,7 +106,7 @@
 		display:inline-block; 
 		text-align:center;
 		height:130px;
-		width:210px;
+		width:168px;
 		margin-right: .5%;
 		padding: 35px 0;
 		border-radius:15px;
@@ -115,7 +115,7 @@
 		display:inline-block; 
 		text-align:center;
 		height:45px;
-		width:200px;
+		width:10%;
 		padding: 5px 0;
 	} 
 	.b{
@@ -170,10 +170,7 @@
 					<b class="b">{$zongdanshu}</b>
 					<span class="span">订单笔数</span>
 				</div> 
-				<div class="div-inline" style="background: rgb(81, 194, 132);">
-					<?php if( empty($zongtuishu)){ ?> <b class="b">0</b> <?php }else{ ?><b class="b">{$zongtuishu}</b><?php } ?>
-					<span class="span">退款笔数</span>
-				</div> 
+				
 				<div class="div-inline" style="background: rgb(171,130,255);">
 					<?php if( empty($quxiaoshu)){ ?> <b class="b">0</b> <?php }else{ ?><b class="b">{$quxiaoshu}</b><?php } ?>
 					<span class="span">取消笔数</span>
@@ -185,13 +182,32 @@
 					<b class="b">{$zongxiadan}</b>
 					<span class="span">下单金额</span>
 				</div> 
+				
+				
+				<div class="div-inline" style="background: rgb(81, 194, 132);">
+					<?php if( empty($wait_refund_count)){ ?> <b class="b">0</b> <?php }else{ ?><b class="b">{$wait_refund_count}</b><?php } ?>
+					<span class="span">申请退款笔数</span>
+				</div> 
 				<div class="div-inline" style="background: rgb(80, 164, 254);">
 					<?php	
-						$tuikuan = sprintf("%.2f",$tuikuan);
+						$wait_refund_money = sprintf("%.2f",$wait_refund_money);
 					?>
-					<?php if( empty($tuikuan)){ ?> <b class="b">0</b> <?php }else{ ?><b class="b">{$tuikuan}</b><?php } ?>
-					<span class="span">退款金额</span>
+					<?php if( empty($wait_refund_money)){ ?> <b class="b">0</b> <?php }else{ ?><b class="b">{$wait_refund_money}</b><?php } ?>
+					<span class="span">申请退款金额</span>
 				</div>
+				
+				<div class="div-inline" style="background: rgb(81, 194, 132);">
+					<?php if( empty($has_refund_count)){ ?> <b class="b">0</b> <?php }else{ ?><b class="b">{$has_refund_count}</b><?php } ?>
+					<span class="span">已退款笔数</span>
+				</div> 
+				<div class="div-inline" style="background: rgb(80, 164, 254);">
+					<?php	
+						$has_refund_money = sprintf("%.2f",$has_refund_money);
+					?>
+					<?php if( empty($has_refund_money)){ ?> <b class="b">0</b> <?php }else{ ?><b class="b">{$has_refund_money}</b><?php } ?>
+					<span class="span">已退款金额</span>
+				</div>
+				
 				<div class="div-inline" style="background: rgb(208, 109, 106);">
 					<?php	
 						$quxiao = sprintf("%.2f",$quxiao);
@@ -218,14 +234,18 @@
 						<table cellpadding="0" cellspacing="0" border="0" style="background-color:#fff;">
                            
                              <tr>
-                               <th class="div-inline2" style="font-size:14px;font-weight:bold;">下单日期</th>
-							   <th class="div-inline2" style="font-size:14px;font-weight:bold;">订单数</th>
-							   <th class="div-inline2" style="font-size:14px;font-weight:bold;">下单金额</th>
-							   <th class="div-inline2" style="font-size:14px;font-weight:bold;">退款笔数</th>
-							   <th class="div-inline2" style="font-size:14px;font-weight:bold;">退款金额</th>
-							   <th class="div-inline2" style="font-size:14px;font-weight:bold;">取消笔数</th>
-							   <th class="div-inline2" style="font-size:14px;font-weight:bold;">取消金额</th>
-							   <th class="div-inline2" style="font-size:14px;font-weight:bold;">小计</th>
+                               <th class="div-inline2" style="font-size:15px;font-weight:bold;">下单日期</th>
+							   <th class="div-inline2" style="font-size:15px;font-weight:bold;">订单数</th>
+							   <th class="div-inline2" style="font-size:15px;font-weight:bold;">下单金额</th>
+							   
+							   
+							   <th class="div-inline2" style="font-size:15px;font-weight:bold;">等待退款笔数</th>
+							   <th class="div-inline2" style="font-size:15px;font-weight:bold;">等待退款金额</th>
+							   <th class="div-inline2" style="font-size:15px;font-weight:bold;">已退款笔数</th>
+							   <th class="div-inline2" style="font-size:15px;font-weight:bold;">已退款金额</th>
+							   <th class="div-inline2" style="font-size:15px;font-weight:bold;">取消笔数</th>
+							   <th class="div-inline2" style="font-size:15px;font-weight:bold;">取消金额</th>
+							   <th class="div-inline2" style="font-size:15px;font-weight:bold;">小计</th>
                              <tr>
                             
                         </table>
@@ -244,12 +264,18 @@
 									?>	
 									<th width="15%" class="div-inline2">{$order_amount}</th>
 
-									<th width="15%" class="div-inline2">{$w["daytui"]}</th>
+									<th  class="div-inline2">{$w["daywait_refund_count"]}</th>
 									<?php	
-									  $w["daytuikuan"] = sprintf("%.2f",$w["daytuikuan"]);
+									  $w["daywait_refund_money"] = sprintf("%.2f",$w["daywait_refund_money"]);
 									?>
-									<th width="15%" class="div-inline2">{$w["daytuikuan"]}</th>
-
+									<th  class="div-inline2">{$w["daywait_refund_money"]}</th>
+									
+									<th  class="div-inline2">{$w["dayhas_refund_count"]}</th>
+									<?php	
+									  $w["dayhas_refund_money"] = sprintf("%.2f",$w["dayhas_refund_money"]);
+									?>
+									<th  class="div-inline2">{$w["dayhas_refund_money"]}</th>
+									
 									<th width="15%" class="div-inline2">{$w["dayqu"]}</th>
 									
 									<?php	

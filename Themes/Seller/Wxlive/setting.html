@@ -54,46 +54,6 @@
 		<div class="layui-card-body" style="padding:15px;">
 			<form action="" method="post" class="layui-form" lay-filter="component-layui-form-item" enctype="multipart/form-data" >
 				<div class="layui-form-item">
-					<label class="layui-form-label">小程序直播组件</label>
-					<div class="layui-input-block">
-						<div>
-							<p>1.首先确认小程序是否有直播权限，可点击查看<a class="text-primary" target="_blank" href="https://developers.weixin.qq.com/community/develop/doc/000a06014745f00d95f9e03d951401?highLine=%25E7%259B%25B4%25E6%2592%25AD%25E7%25BB%2584%25E4%25BB%25B6">服务商接入指引</a>，若有请进行第二步；</p>
-							<p>2.用微信开发者工具打开在根目录下的 <code>app.json</code> 文件，在167行左右加入以下这段代码：</p>
-							<!-- <pre> -->
-								<code>
-								,"plugins": {
-								        "live-player-plugin": {
-								          "version": "1.0.1",
-								          "provider": "wx2b03c6e691cd7370"
-								        }
-								    }
-								</code>
-							<!-- </pre> -->
-							<p><font class="text-danger">*注意：</font>代码前面那个逗号不能漏掉。version后面的参数对应的是小程序直播的版本，后期官方会更新，要改成相应版本号。</p>
-							<p>加完之后部分代码如下:</p>
-<pre class="layui-code">
-{
-	"name": "moduleB",
-	"root": "lionfish_comshop/moduleB",
-	"pages": [
-		"index/index",
-	    "writeoff/index",
-	    "index/auth",
-	    "live/index"
-	],
-	"plugins": {
-	    "live-player-plugin": {
-	      	"version": "1.0.1",
-	      	"provider": "wx2b03c6e691cd7370"
-	    }
-	}
-}
-</pre>
-						</div>
-					</div>
-				</div>
-
-				<div class="layui-form-item">
 					<label class="layui-form-label">直播列表导航名称</label>
 					<div class="layui-input-block">
 						<input type="text" name="parameter[live_nav_name]" class="layui-input" value="{$data['live_nav_name']}" />

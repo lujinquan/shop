@@ -457,6 +457,12 @@ class SigninrewardController extends CommonController {
 					$tmp_data['skuImage'] = tomedia($good_image['image']);
 				}
 				$price_arr = D('Home/Pingoods')->get_goods_price($val['id'], $member_id);
+				
+				
+				$price_arr['price'] = round($price_arr['price'],0);
+				$price_arr['card_price'] = round($price_arr['card_price'],0);
+				$price_arr['levelprice'] = round($price_arr['levelprice'],0);
+				
 				$price = $price_arr['price'];
 				
 				if( $pageNum == 1 )
@@ -464,7 +470,7 @@ class SigninrewardController extends CommonController {
 					$copy_text_arr[] = array('goods_name' => $val['goodsname'], 'price' => $price);
 				}
 				
-				$tmp_data['actPrice'] = explode('.', $price);
+				$tmp_data['actPrice'] = explode(' ', $price);
 				$tmp_data['card_price'] = $price_arr['card_price'];
 				
 				$tmp_data['levelprice'] = $price_arr['levelprice']; // 会员等级价格

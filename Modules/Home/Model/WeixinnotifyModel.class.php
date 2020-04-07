@@ -51,7 +51,36 @@ class WeixinnotifyModel {
 		
 		M('lionfish_comshop_notify_order')->add( $notify_od_data );
 		
+		$order_notify_switch = D('Home/Front')->get_config_by_name('order_notify_switch');
 		
+		if( isset($order_notify_switch) && $order_notify_switch == 1 )
+		{
+		    $notify_order_list = S('notify_order_list');
+		    
+		    if( empty($notify_order_list) || count($notify_order_list) < 100 )
+		    {
+		        if(empty($notify_order_list))
+		        {
+		            $notify_order_list = array();
+		        }
+		        
+		        $miao = 1;
+		        $result_data = array();
+		        	
+		        $result_data['code'] = 0;
+		        $result_data['username'] = $notify_od_data['username'];
+		        $result_data['avatar'] 	= $notify_od_data['avatar'];
+		        $result_data['order_id'] 	= $notify_od_data['order_id'];
+		        	
+		        $result_data['order_url'] 	= '';
+		        $result_data['miao'] 	= $miao;
+		        	
+		        $notify_order_list[] = $result_data;
+		        
+		        S('notify_order_list', $notify_order_list );
+		    }
+		    
+		}
 		
 		$order = $order_info;
 		
@@ -110,8 +139,9 @@ class WeixinnotifyModel {
 						$community_model->ins_head_commiss_order($order['order_id'],$order_goods['order_goods_id'], 0);	
 					}
 					
-					
 					$supply_model->ins_supply_commiss_order($order['order_id'],$order_goods['order_goods_id'], 0);
+					
+					D('Seller/Commonorder')->inc_daygoods_buy( $order_goods['goods_id'], $order_goods['quantity'] );
 				}
 				
 				$i++;
@@ -279,7 +309,7 @@ class WeixinnotifyModel {
 	
 					if( !empty($weixin_appid) && !empty($weixin_template_order_buy) )
 					{
-						$head_pathinfo = "lionfish_comshop/pages/groupCenter/groupDetail?groupOrderId=".$order['order_id'];
+						$head_pathinfo = "lionfish_comshop/moduleA/groupCenter/groupDetail?groupOrderId=".$order['order_id'];
 					
 						$weixin_template_order = array(
 											'appid' => $weixin_appid,
@@ -327,7 +357,7 @@ class WeixinnotifyModel {
 					$weixin_template_order_buy = D('Home/Front')->get_config_by_name('weixin_template_order_buy' );
 					if( !empty($weixin_appid) && !empty($weixin_template_order_buy) )
 					{
-						$head_pathinfo = "lionfish_comshop/pages/groupCenter/groupDetail?groupOrderId=".$order['order_id'];
+						$head_pathinfo = "lionfish_comshop/moduleA/groupCenter/groupDetail?groupOrderId=".$order['order_id'];
 						
 						$supply_send_info = array(
 												'appid' => $weixin_appid,
@@ -385,7 +415,7 @@ class WeixinnotifyModel {
 					if( !empty($weixin_appid) && !empty($weixin_template_order_buy) )
 					{
 						
-						$head_pathinfo = "lionfish_comshop/pages/groupCenter/groupDetail?groupOrderId=".$order['order_id'];
+						$head_pathinfo = "lionfish_comshop/moduleA/groupCenter/groupDetail?groupOrderId=".$order['order_id'];
 						
 						$platform_send_info = array(
 												'appid' => $weixin_appid,

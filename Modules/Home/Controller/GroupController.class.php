@@ -40,11 +40,11 @@ class GroupController extends CommonController {
 		{
 			$hide_pintuan_page_windows_info = 0;
 		}
-			
+		
 			
 		//拼团规则介绍  pintuan_publish
 		$pintuan_publish_info= D('Home/Front')->get_config_by_name('pintuan_publish');	
-		$category_list =  D('Home/GoodsCategory')->get_index_goods_category(0,'pintuan');
+		$category_list =  D('Home/GoodsCategory')->get_all_goods_category('pintuan');
 		
 		
 		$params = array();

@@ -97,10 +97,7 @@ private $data = array();
         $key = $car_prefix . $key;
 		
 		
-		$car_param = array();
-		$car_param[':uniacid'] = $_W['uniacid'];
-		$car_param[':token'] = $token;
-		$car_param[':carkey'] = $key;
+		
 		
 		//C('DB_PREFIX')
 		
@@ -258,7 +255,7 @@ private $data = array();
 	
 	 public function get_all_goodswecar($buy_type = 'dan', $token,$is_pay_need = 1, $community_id,$soli_id='') {
 		
-		
+	    
         if (!($this->data)) {
 			
 			if ($buy_type == 'dan') {
@@ -368,9 +365,25 @@ private $data = array();
                
                 
 				$goods_query_sql = "select * from ".C('DB_PREFIX')."lionfish_comshop_goods as p left join ".C('DB_PREFIX')."lionfish_comshop_good_commiss as pd 
-									on p.id = pd.goods_id where p.id ={$goods_id} and p.grounding = 1  ";
+									on p.id = pd.goods_id where p.id ={$goods_id}   ";
 				
 				$goods_query_arr = M()->query($goods_query_sql);
+				
+				if( empty($goods_query_arr) )
+				{
+				    	
+				    \Think\Log::record("出现空的商品");
+				    \Think\Log::record("sql:".$goods_query_sql);
+				
+				    $tp_a = M('lionfish_comshop_goods')->where( array('id' => $goods_id ) )->find();
+				    $tp_b = M('lionfish_comshop_good_commiss')->where( array('goods_id' => $goods_id ) )->find();
+				
+				
+				    \Think\Log::record("goods:" .json_encode($tp_a) );
+				    \Think\Log::record("commiss:".json_encode($tp_b) );
+				    \Think\Log::record("出现空的商品endendend");
+				
+				}
 				
 				$goods_query = $goods_query_arr[0];
 				
@@ -556,7 +569,9 @@ private $data = array();
 							$goods_query['is_mb_level_buy'] = 1;
 							$goods_query['levelprice'] = $price2;
 							
-							//$goods_query['price'] = $price ;
+							$goods_query['price'] = $price2 ;
+							
+							$price = $goods_query['price'];
 						}
 					}
 					

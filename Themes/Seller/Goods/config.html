@@ -161,7 +161,7 @@
 			</div>
 		</div>
 		<div class="layui-form-item">
-			<label class="layui-form-label">大家常买</label>
+			<label class="layui-form-label">大家常买<br/>(购物车)</label>
 			<div class="layui-input-block">
 				<label class='radio-inline'>
 					<input type='radio' name='parameter[is_show_guess_like]' value='0' <?php if(!empty($data) && $data['is_show_guess_like'] ==0){ ?>checked <?php } ?> title="不显示" /> 
@@ -173,7 +173,7 @@
 		</div>
 		
 		<div class="layui-form-item">
-			<label class="layui-form-label">猜你喜欢</label>
+			<label class="layui-form-label">猜你喜欢<br/>(商品详情页)</label>
 			<div class="layui-input-block">
 				<label class='radio-inline'>
 					<input type='radio' name='parameter[show_goods_guess_like]' value='0' <?php if( !empty($data) && $data['show_goods_guess_like'] ==0 ){ ?>checked <?php } ?> title="不显示" /> 
@@ -183,7 +183,7 @@
 				</label>
 			</div>
 		</div>
-		 <div class="layui-form-item">
+		<div class="layui-form-item">
 			<label class="layui-form-label">猜你喜欢展示数量</label>
 			<div class="layui-input-block fixmore-input-group">
 			<div class="input-group">
@@ -372,6 +372,24 @@
 				<span class='layui-form-mid'>商品详情页详情内容头部标题图片。坚持尺寸:336*60。<a href="/static/placeholder/goodsDetailTitle.png" target="_blank" class="text-primary">查看默认图片</a></span>
 			</div>
 		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">销量单位</label>
+			<div class="layui-input-block fixmore-input-group">
+				<div class="input-group">
+					<label class='radio-inline'>
+						<input lay-filter="isnull_unit" type='radio' name='parameter[isnull_goods_sale_unit]' value='1' <?php if(!empty($data) && $data['isnull_goods_sale_unit']==1){ ?>checked <?php } ?> title="空" />
+					</label>
+					<label class='radio-inline'>
+						<input lay-filter="isnull_unit" type='radio' name='parameter[isnull_goods_sale_unit]' value='0' <?php if(empty($data) || $data['isnull_goods_sale_unit']==0){ ?>checked <?php } ?> title="自定义" />
+					</label>
+					<div class="radio-inline" style="padding-left: 0;margin-left: 0">
+						<input id="goodsSaleUnit" type="text" name="parameter[goods_sale_unit]" class="form-control valid" value="{$data['goods_sale_unit']}" style="<?php if(empty($data) || $data['isnull_goods_sale_unit'] ==0){ ?>display:inline;<?php }else{ ?>display: none;<?php } ?>width:120px;" />
+					</div>
+				</div>
+				<div class="help-block">前端默认展示已售**件，仅剩**件。默认单位：件</div> 
+			</div>
+		</div>
 				
 		<blockquote class="layui-elem-quote">商品详情域名替换</blockquote>		
 			<div class="layui-form-item">
@@ -555,6 +573,16 @@ layui.use(['jquery', 'layer','form','colorpicker'], function(){
 	
     return false;
   });
+
+
+  	form.on('radio(isnull_unit)', function(data){
+	  	if (data.value==1) {
+			$("#goodsSaleUnit").hide();
+		} else {
+			$("#goodsSaleUnit").css('display','inline');
+		}
+		form.render('checkbox');
+	});
 })
 
 

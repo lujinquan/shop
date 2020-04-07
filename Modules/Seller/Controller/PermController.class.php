@@ -581,6 +581,7 @@ class PermController extends CommonController{
 
 		$ds = M()->query('SELECT id,rolename,perms2 FROM ' . C('DB_PREFIX') . 'lionfish_comshop_perm_role WHERE status=1 ' . $condition . ' order by id asc' );
 		
+		
 		$this->ds = $ds;
 		$this->display();
 	}

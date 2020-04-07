@@ -182,7 +182,7 @@ class IndexController extends CommonController {
 			调用分类
 		**/
 		$gid = isset($gpc['gid']) ? intval($gpc['gid']) : 0;	
-		$category_list = D('Home/GoodsCategory')->get_index_goods_category($gid);
+		$category_list = D('Home/GoodsCategory')->get_all_goods_category();
 		
 		
 		
@@ -2119,7 +2119,9 @@ class IndexController extends CommonController {
 			$common_header_backgroundimage = tomedia($common_header_backgroundimage);
 		}
 
-		echo json_encode( array('code' => 0,'new_head_id' => $new_head_id, 'default_head_info' => $default_head_info, 'skin'=>$skin, 'common_header_backgroundimage'=>$common_header_backgroundimage ) );
+		$goods_sale_unit = D('Home/goods')->get_sale_unit();
+
+		echo json_encode( array('code' => 0,'new_head_id' => $new_head_id, 'default_head_info' => $default_head_info, 'skin'=>$skin, 'common_header_backgroundimage'=>$common_header_backgroundimage, 'goods_sale_unit'=>$goods_sale_unit ) );
 		die();
 	}
 	
