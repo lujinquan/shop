@@ -66,15 +66,19 @@
                         <div class="layui-form-item">
         					<span class="layui-input-inline">
         						<select name='searchtime' class='form-control' style="width:100px;padding:0 5px;" id="searchtime">
-        							<option value=''>不按时间</option>
-        							<option value='pay' <?php if( $gpc['searchtime']=='pay'){ ?>selected<?php } ?>>付款时间</option>
-									<option value='create' <?php if( $gpc['searchtime']=='create' ){ ?>selected<?php } ?>>下单时间</option>
+        							<!-- <option value=''>不按时间</option>
+                                    <option value='pay' <?php if( $gpc['searchtime']=='pay'){ ?>selected<?php } ?>>付款时间</option>
+                                    <option value='create' <?php if( $gpc['searchtime']=='create' ){ ?>selected<?php } ?>>下单时间</option> -->
+                                    <option value='delivery' <?php if( $gpc['searchtime']=='delivery' ){ ?>selected<?php } ?>>配送日期</option>
         						</select>
         					</span>
-        					<span class="layui-input-inline" style="width:280px;">
-        						{:tpl_form_field_daterange('time', array('starttime'=>date('Y-m-d H:i', $starttime),'endtime'=>date('Y-m-d H:i', $endtime)),true);}
-        					</span>
-        					<span class="layui-input-inline">
+                            <!-- <span class="layui-input-inline" style="width:280px;" id="time">
+                                {:tpl_form_field_daterange('time', array('starttime'=>date('Y-m-d H:i', $starttime),'endtime'=>date('Y-m-d H:i', $endtime)),true);}
+                            </span> -->
+        					<span class="layui-input-inline" style="width: 285px;">
+                                {:tpl_form_field_date('delivery_date', date('Y-m-d',$delivery_time),false);}
+                            </span>
+        					<span class="layui-input-inline" id="line_id">
         						<select name="line_id" class='form-control select2' style="width:200px;" data-placeholder="配送线路">
         							<option value="-1" <?php if( empty($gpc['line_id'])){ ?>selected<?php } ?> >配送线路</option>
         							<?php foreach($line_list as $line){ ?>
@@ -98,7 +102,7 @@
                             <div class="page-table-header">
                                 <input type='checkbox' type='checkbox' name="checkall" lay-skin="primary" lay-filter="checkboxall" />
                                 <span class="pull-right">
-									<a  class='btn layui-btn  layui-btn-sm' href="{:U('delivery/auto_get_delivery_list')}" >
+									<a  class='btn layui-btn  layui-btn-sm' href="{:U('delivery/auto_get_delivery_list', array('delivery_date' => $delivery_date))}" >
 										<span data-toggle="tooltip" data-placement="top" title="" data-original-title="打印配送单">
 											一键生成所有清单
 										</span>
@@ -198,7 +202,8 @@ var can_sb = true;
 layui.use(['jquery', 'layer', 'form'], function(){ 
     $ = layui.$;
     var form = layui.form;
-
+    $('#time').hide();
+    $('#line_id').hide();
     $('.create_list').click(function(){
 		if(!can_sb)
 		{

@@ -251,6 +251,302 @@ class ExcelModel{
 		
 	}
 	
+
+		/**
+	 * 功能描述： 批量导出团长的配送清单
+	 * =====================================
+	 * @author  Lucas 
+	 * email:   598936602@qq.com 
+	 * Website  address:  www.mylucas.com.cn
+	 * =====================================
+	 * 创建时间: 2020-03-22 20:04:05
+	 * @example 
+	 * @link    文档参考地址：
+	 * @return  返回值  
+	 * @version 版本  1.0
+	 */
+	public function export_delivery_all_list($lists, $params = array())
+	{//dump($lists);exit;
+		if (PHP_SAPI == 'cli') {
+			exit('This example should only be run from a Web Browser');
+		}
+		
+		require_once ROOT_PATH . '/ThinkPHP/Library/Vendor/phpexcel/PHPExcel.php';
+		$excel = new \PHPExcel();
+		
+		$excel->getProperties()->setCreator('武房小店')->setLastModifiedBy('武房小店')->setTitle('Office 2007 XLSX Test Document')->setSubject('Office 2007 XLSX Test Document')->setDescription('Test document for Office 2007 XLSX, generated using PHP classes.')->setKeywords('office 2007 openxml php')->setCategory('report file');
+		
+		foreach ($lists as $l => $list ) {
+			// 创建sheet
+			$excel->createSheet();
+			$sheet = $excel->setActiveSheetIndex($l);
+			$rownum = 1;		
+			 
+			foreach ($params['columns'] as $key => $column ) {
+				//dump($this->column($key, $rownum)); // 获取单元格："A1"
+				//dump($this->column_str($key));exit; // 获取行："A"
+				$sheet->setCellValue($this->column($key, $rownum), $column['title']);
+
+				if (!(empty($column['width']))) {
+					$sheet->getColumnDimension($this->column_str($key))->setWidth($column['width']);
+				}
+				// 设置第一行行高
+				$sheet->getRowDimension($rownum)->setRowHeight(24);
+				// 设置边框线加粗
+				// $sheet->getstyle($this->column($key, $rownum))->getBorders()->getTop()->setBorderstyle(\PHPExcel_style_Border::BORDER_MEDIUM);
+				// $sheet->getstyle($this->column($key, $rownum))->getBorders()->getLeft()->setBorderstyle(\PHPExcel_style_Border::BORDER_MEDIUM);
+				// $sheet->getstyle($this->column($key, $rownum))->getBorders()->getBottom()->setBorderstyle(\PHPExcel_style_Border::BORDER_MEDIUM);
+				// $sheet->getstyle($this->column($key, $rownum))->getBorders()->getRight()->setBorderstyle(\PHPExcel_style_Border::BORDER_MEDIUM);
+				// 设置居中显示
+				$sheet->getstyle($this->column($key, $rownum))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+				$sheet->getstyle($this->column($key, $rownum))->getAlignment()->setVertical(\PHPExcel_style_Alignment::VERTICAL_CENTER);
+				// 设置字体加粗
+				$sheet->getstyle($this->column($key, $rownum))->getFont()->setBold(true);
+				// 设置标题行填充色
+				$sheet->getStyle($this->column($key, $rownum))->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID);
+				$sheet->getStyle($this->column($key, $rownum))->getFill()->getStartColor()->setARGB('80EEEEEE');
+			}
+
+			$sheet->freezePane('A2');
+			//p($list);		
+			++$rownum;
+			$len = count($params['columns']);
+			$spaceline = 0;
+			// 遍历每个工作组的列表数据
+			foreach ($list as $eee => $row ) {
+				$i = 0;
+				while ($i < $len) {
+					$value = ((isset($row[$params['columns'][$i]['field']]) ? $row[$params['columns'][$i]['field']] : ''));
+					$sheet->setCellValue($this->column($i, $rownum), $value);
+					//需要合并的行如 第二行和第三行，$i < 4代表合并E列前面的列,0为A,1为B,2为C,3为D
+					// $mergeColStartNum = '2';
+					// $mergeColEndNum = '3';
+					foreach ($params['sheetsMergeArr'][$l][0] as $p => $m) {
+						if($rownum == $m && $i < 4){
+							$i_name = $this->column_str($i);
+							$sheet->mergeCells($i_name.$m.':'.$i_name.$params['sheetsMergeArr'][$l][1][$p]);
+
+							//// 将合并的单元格设置样式垂直居中
+							// $sheet->getstyle($i_name.$m)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+							// $sheet->getstyle($i_name.$m)->getAlignment()->setVertical(\PHPExcel_style_Alignment::VERTICAL_CENTER);
+						}
+					}
+
+					// $sheet->getStyle($this->column($i, $rownum))->getAlignment()->setWrapText(TRUE);
+					// if($i == 4){
+					// 	$sheet->getstyle($this->column($i, $rownum))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+					// }else{
+					// 	$sheet->getstyle($this->column($i, $rownum))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+					// }
+					// $sheet->getstyle($this->column($i, $rownum))->getAlignment()->setVertical(\PHPExcel_style_Alignment::VERTICAL_CENTER);
+					// $sheet->getstyle($this->column($i, $rownum))->getBorders()->getTop()->setBorderstyle(\PHPExcel_style_Border::BORDER_THIN);
+					// $sheet->getstyle($this->column($i, $rownum))->getBorders()->getLeft()->setBorderstyle(\PHPExcel_style_Border::BORDER_THIN);
+					// $sheet->getstyle($this->column($i, $rownum))->getBorders()->getBottom()->setBorderstyle(\PHPExcel_style_Border::BORDER_THIN);
+					// $sheet->getstyle($this->column($i, $rownum))->getBorders()->getRight()->setBorderstyle(\PHPExcel_style_Border::BORDER_THIN);
+					
+					++$i;
+				}
+				$sheet->getRowDimension($rownum)->setRowHeight(20*$row['jishu']);
+				++$rownum;
+				unset($list[$eee]);
+			}
+			// $sheet->getstyle('A2:A100')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			// $sheet->getstyle('A2:A100')->getAlignment()->setVertical(\PHPExcel_style_Alignment::VERTICAL_CENTER);
+			// $sheet->getstyle('B2:B100')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			// $sheet->getstyle('B2:B100')->getAlignment()->setVertical(\PHPExcel_style_Alignment::VERTICAL_CENTER);
+			// $sheet->getstyle('C2:C100')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			// $sheet->getstyle('C2:C100')->getAlignment()->setVertical(\PHPExcel_style_Alignment::VERTICAL_CENTER);
+			// $sheet->getstyle('D2:D100')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			// $sheet->getstyle('D2:D100')->getAlignment()->setVertical(\PHPExcel_style_Alignment::VERTICAL_CENTER);
+			// $sheet->getstyle('E2:E100')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			// $sheet->getstyle('E2:E100')->getAlignment()->setVertical(\PHPExcel_style_Alignment::VERTICAL_CENTER);
+
+			// $sheet->getColumnDimension('H')->setWidth(12);
+			// $sheet->getColumnDimension('I')->setWidth(36);
+			//$sheet->setCellValue('H2', '配送信息');
+			
+			// $sheet->getstyle('H3:I7')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			// $sheet->getstyle('H3:I7')->getAlignment()->setVertical(\PHPExcel_style_Alignment::VERTICAL_CENTER);
+			// $sheet->setCellValue('H3', '配送日期：');
+			// $sheet->setCellValue('I3', $params['delivery_date']);
+			// $sheet->setCellValue('H4', '配送地址：');
+			// $sheet->setCellValue('I4', $params['sheetsAttrArr'][$l]['address']);
+			// $sheet->setCellValue('H5', '联系人：');
+			// $sheet->setCellValue('I5', $params['sheetsAttrArr'][$l]['head_name']);
+			// $sheet->setCellValue('H6', '联系方式：');
+			// $sheet->setCellValue('I6', $params['sheetsAttrArr'][$l]['head_mobile']);
+			// $sheet->setCellValue('H7', '总单量：');
+			// $sheet->setCellValue('I7', $params['sheetsAttrArr'][$l]['count_ji']);
+			// $sheet->setCellValue('H8', '备注：');
+			//$sheet->setCellValue('I8', '湖北省武汉市洪山区梨园街道东沙花园小区物业');
+			// $sheet->setCellValue('H9', '配送合计');
+			// $sheet->setCellValue('H10', '品种');
+			// $sheet->setCellValue('I10', '1387148498');
+			//$sheet->getColumnDimension('I')->setWidth(30);
+			
+			$excel->getActiveSheet()->setTitle($params['sheetsTitleArr'][$l]);
+			unset($lists[$l]);
+		}
+		//p(convert(memory_get_usage(true)));	
+		$filename = ($params['title'] . '-' . date('Y-m-d H:i', time()));
+
+		header('pragma:public');
+		header('Content-type:application/vnd.ms-excel;charset=utf-8;name="'.$params['title'].'.xls"');
+		header("Content-Disposition:attachment;filename=".$filename.".xls");//attachment新窗口打印inline本窗口打印
+		$objWriter = \PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+		$objWriter->save('php://output');
+		exit;
+		
+	}
+
+	/**
+	 * 功能描述： 批量导出团长的配送清单
+	 * =====================================
+	 * @author  Lucas 
+	 * email:   598936602@qq.com 
+	 * Website  address:  www.mylucas.com.cn
+	 * =====================================
+	 * 创建时间: 2020-03-22 20:04:05
+	 * @example 
+	 * @link    文档参考地址：
+	 * @return  返回值  
+	 * @version 版本  1.0
+	 */
+	public function export_delivery_all_list_dan($lists, $params = array())
+	{//dump($lists);exit;
+		if (PHP_SAPI == 'cli') {
+			exit('This example should only be run from a Web Browser');
+		}
+		
+		require_once ROOT_PATH . '/ThinkPHP/Library/Vendor/phpexcel/PHPExcel.php';
+		$excel = new \PHPExcel();
+		
+		$excel->getProperties()->setCreator('武房小店')->setLastModifiedBy('武房小店')->setTitle('Office 2007 XLSX Test Document')->setSubject('Office 2007 XLSX Test Document')->setDescription('Test document for Office 2007 XLSX, generated using PHP classes.')->setKeywords('office 2007 openxml php')->setCategory('report file');
+		$sheet = $excel->setActiveSheetIndex(0);
+		$excel->createSheet();
+		$rownum = 1;
+		foreach ($lists as $l => $list ) {
+			// 创建sheet
+			
+			
+					
+			 
+			foreach ($params['columns'] as $key => $column ) {
+				//dump($this->column($key, $rownum)); // 获取单元格："A1"
+				//dump($this->column_str($key));exit; // 获取行："A"
+				$sheet->setCellValue($this->column($key, 1), $column['title']);
+
+				if (!(empty($column['width']))) {
+					$sheet->getColumnDimension($this->column_str($key))->setWidth($column['width']);
+				}
+				// 设置第一行行高
+				$sheet->getRowDimension(1)->setRowHeight(24);
+				// 设置边框线加粗
+				// $sheet->getstyle($this->column($key, $rownum))->getBorders()->getTop()->setBorderstyle(\PHPExcel_style_Border::BORDER_MEDIUM);
+				// $sheet->getstyle($this->column($key, $rownum))->getBorders()->getLeft()->setBorderstyle(\PHPExcel_style_Border::BORDER_MEDIUM);
+				// $sheet->getstyle($this->column($key, $rownum))->getBorders()->getBottom()->setBorderstyle(\PHPExcel_style_Border::BORDER_MEDIUM);
+				// $sheet->getstyle($this->column($key, $rownum))->getBorders()->getRight()->setBorderstyle(\PHPExcel_style_Border::BORDER_MEDIUM);
+				// 设置居中显示
+				$sheet->getstyle($this->column($key, 1))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+				$sheet->getstyle($this->column($key, 1))->getAlignment()->setVertical(\PHPExcel_style_Alignment::VERTICAL_CENTER);
+				// 设置字体加粗
+				$sheet->getstyle($this->column($key, 1))->getFont()->setBold(true);
+				// 设置标题行填充色
+				$sheet->getStyle($this->column($key, 1))->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID);
+				$sheet->getStyle($this->column($key, 1))->getFill()->getStartColor()->setARGB('80EEEEEE');
+			}
+
+			$sheet->freezePane('A2');
+			//p($list);	
+			if($rownum == 1){
+				++$rownum;
+			}	
+			
+			$len = count($params['columns']);
+			$spaceline = 0;
+			// 遍历每个工作组的列表数据
+			foreach ($list as $eee => $row ) {
+				$i = 0;
+				while ($i < $len) {
+					$value = ((isset($row[$params['columns'][$i]['field']]) ? $row[$params['columns'][$i]['field']] : ''));
+					$sheet->setCellValue($this->column($i, $rownum), $value);
+					//需要合并的行如 第二行和第三行，$i < 4代表合并E列前面的列,0为A,1为B,2为C,3为D
+					// $mergeColStartNum = '2';
+					// $mergeColEndNum = '3';
+					foreach ($params['sheetsMergeArr'][$l][0] as $p => $m) {
+						if($rownum == $m && $i < 4){
+							$i_name = $this->column_str($i);
+							$sheet->mergeCells($i_name.$m.':'.$i_name.$params['sheetsMergeArr'][$l][1][$p]);
+
+							//// 将合并的单元格设置样式垂直居中
+							// $sheet->getstyle($i_name.$m)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+							// $sheet->getstyle($i_name.$m)->getAlignment()->setVertical(\PHPExcel_style_Alignment::VERTICAL_CENTER);
+						}
+					}
+
+					$sheet->getStyle($this->column($i, $rownum))->getAlignment()->setWrapText(TRUE);
+					// if($i == 4){
+					// 	$sheet->getstyle($this->column($i, $rownum))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+					// }else{
+					// 	$sheet->getstyle($this->column($i, $rownum))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+					// }
+					
+					// $sheet->getstyle($this->column($i, $rownum))->getAlignment()->setVertical(\PHPExcel_style_Alignment::VERTICAL_CENTER);
+
+					// $sheet->getstyle($this->column($i, $rownum))->getBorders()->getTop()->setBorderstyle(\PHPExcel_style_Border::BORDER_THIN);
+					// $sheet->getstyle($this->column($i, $rownum))->getBorders()->getLeft()->setBorderstyle(\PHPExcel_style_Border::BORDER_THIN);
+					// $sheet->getstyle($this->column($i, $rownum))->getBorders()->getBottom()->setBorderstyle(\PHPExcel_style_Border::BORDER_THIN);
+					// $sheet->getstyle($this->column($i, $rownum))->getBorders()->getRight()->setBorderstyle(\PHPExcel_style_Border::BORDER_THIN);
+					// if($rownum == $mergeColStartNum && $i < 3){
+					// 	$i_name = $this->column_str($i);
+					// 	$sheet->mergeCells($i_name.$mergeColStartNum.':'.$i_name.$mergeColEndNum);
+					// }
+					++$i;
+				}
+				$sheet->getRowDimension($rownum)->setRowHeight(20*$row['jishu']);
+				++$rownum;
+				unset($list[$eee]);
+			}
+			
+
+			// $sheet->getColumnDimension('H')->setWidth(12);
+			// $sheet->getColumnDimension('I')->setWidth(36);
+			//$sheet->setCellValue('H2', '配送信息');
+			
+			// $sheet->getstyle('H3:I7')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			// $sheet->getstyle('H3:I7')->getAlignment()->setVertical(\PHPExcel_style_Alignment::VERTICAL_CENTER);
+			// $sheet->setCellValue('H3', '配送日期：');
+			// $sheet->setCellValue('I3', $params['delivery_date']);
+			// $sheet->setCellValue('H4', '配送地址：');
+			// $sheet->setCellValue('I4', $params['sheetsAttrArr'][$l]['address']);
+			// $sheet->setCellValue('H5', '联系人：');
+			// $sheet->setCellValue('I5', $params['sheetsAttrArr'][$l]['head_name']);
+			// $sheet->setCellValue('H6', '联系方式：');
+			// $sheet->setCellValue('I6', $params['sheetsAttrArr'][$l]['head_mobile']);
+			// $sheet->setCellValue('H7', '总单量：');
+			// $sheet->setCellValue('I7', $params['sheetsAttrArr'][$l]['count_ji']);
+			// $sheet->setCellValue('H8', '备注：');
+			//$sheet->setCellValue('I8', '湖北省武汉市洪山区梨园街道东沙花园小区物业');
+			// $sheet->setCellValue('H9', '配送合计');
+			// $sheet->setCellValue('H10', '品种');
+			// $sheet->setCellValue('I10', '1387148498');
+			//$sheet->getColumnDimension('I')->setWidth(30);
+			
+			//$excel->getActiveSheet()->setTitle($params['sheetsTitleArr'][$l]);
+			unset($lists[$l]);
+		}
+		
+		$filename = ($params['title'] . '-' . date('Y-m-d H:i', time()));
+
+		header('pragma:public');
+		header('Content-type:application/vnd.ms-excel;charset=utf-8;name="'.$params['title'].'.xls"');
+		header("Content-Disposition:attachment;filename=".$filename.".xls");//attachment新窗口打印inline本窗口打印
+		$objWriter = \PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+		$objWriter->save('php://output');
+		exit;
+		
+	}
+
 	/**
 		批量导出团长配送清单
 	**/

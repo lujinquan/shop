@@ -254,7 +254,7 @@ layui.use(['jquery', 'layer','form'], function(){
 	})
 	function load_next_updata()
 	{
-		$.post('<?php echo U("delivery/do_quenu_deliverylist" ); ?>', function (ret) {
+		$.post('<?php echo U("delivery/do_quenu_deliverylist" , array('delivery_date' => $delivery_date)); ?>', function (ret) {
                 if(  ret.code == 0)
 				{
 					//msg update_content

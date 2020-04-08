@@ -17,7 +17,39 @@
                             <input type="text" name="groupname" class="form-control" value="{$group['groupname']}" data-rule-required="true" />
                         </div>
                     </div>
+                    <!-- -- by lucas Start -- -->
 
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label must">结单时间</label>
+                        <div class="col-sm-9 col-xs-12">
+                            {// 这是个时间段选择的模板 :tpl_form_field_daterange('time', array('starttime'=>date('Y-m-d H:i', $item['begin_time']),'endtime'=>date('Y-m-d H:i', $item['end_time'])),true);}
+                            {:tpl_form_field_date('close_order_time', date('Y-m-d H:i',$group['close_order_time']),true);}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label must">发货日期</label>
+                        <div class="col-sm-9 col-xs-12">
+                            {// 这是个时间段选择的模板 :tpl_form_field_daterange('time', array('starttime'=>date('Y-m-d H:i', $item['begin_time']),'endtime'=>date('Y-m-d H:i', $item['end_time'])),true);}
+                            {:tpl_form_field_date('send_order_time', date('Y-m-d',$group['send_order_time']),false);}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label must">配送周期</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <select id="cates1" name='delivery_cycle' class="form-control select1" style='width:605px;' multiple='multiple' >
+                                
+                                <option value="1" data-names="aaa" <?php if( $group['delivery_cycle']==1){ ?>selected<?php } ?> > 1天</option>
+                                <option value="2" data-names="aaa" <?php if( $group['delivery_cycle']==2){ ?>selected<?php } ?> >2天</option>
+                                <option value="3" data-names="aaa" <?php if( $group['delivery_cycle']==3){ ?>selected<?php } ?> >3天</option>
+                                <option value="4" data-names="aaa" <?php if( $group['delivery_cycle']==4){ ?>selected<?php } ?> >4天</option>
+                                <option value="5" data-names="aaa" <?php if( $group['delivery_cycle']==5){ ?>selected<?php } ?> >5天</option>
+                                <option value="6" data-names="aaa" <?php if( $group['delivery_cycle']==6){ ?>selected<?php } ?> >6天</option>
+                                <option value="7" data-names="aaa" <?php if( $group['delivery_cycle']==7){ ?>selected<?php } ?> >7天</option>
+                                
+                            </select>
+                        </div>
+                    </div>
+                     <!-- -- by lucas End -- -->
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary" type="submit">提交</button>

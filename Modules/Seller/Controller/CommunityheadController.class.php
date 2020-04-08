@@ -522,8 +522,46 @@ class CommunityheadController extends CommonController {
 		show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
 		
 	}
-	
+
+	//-------------- by lucas 【团长分组 2020-04-08 09:15:54】 Start ------------------------
 	public function addusergroup()
+	{
+		$_GPC = I('request.');
+		$id = intval($_GPC['id']);
+			
+		$group = M('lionfish_community_head_group')->where( array('id' => $id ) )->find();		
+
+		if (IS_POST) {
+			$data = array( 
+				'groupname' => trim($_GPC['groupname']) ,
+				'close_order_time' => trim(strtotime($_GPC['close_order_time'])) ,
+				'send_order_time' => trim(strtotime($_GPC['send_order_time'])) ,
+				'delivery_cycle' => trim($_GPC['delivery_cycle']) ,
+			);
+			
+			if (!(empty($id))) {
+				M('lionfish_community_head_group')->where( array('id' => $id) )->save( $data );
+			}
+			 else {
+
+				$id = M('lionfish_community_head_group')->add($data);
+			}
+
+			show_json(1, array('url' => U('communityhead/usergroup', array('op' => 'display'))));
+		}
+
+		// $item['begin_time'] = time();
+		// $item['end_time'] = time() + 86400;
+		// $this->item = $item;
+		//dump($group);exit;
+		$this->id = $id;
+		$this->group = $group;
+		
+		$this->display();
+	}
+	//-------------- by lucas 【团长分组 2020-04-08 09:15:58】 End --------------------------
+
+	/*public function addusergroup()
 	{
 		$_GPC = I('request.');
 		$id = intval($_GPC['id']);
@@ -548,7 +586,7 @@ class CommunityheadController extends CommonController {
 		$this->group = $group;
 		
 		$this->display();
-	}
+	}*/
 	
 	//------end-------
 	
