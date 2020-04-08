@@ -1102,10 +1102,17 @@ class IndexController extends CommonController {
 		if($is_seckill ==1)
 		{
 			$where = " g.grounding =1 and g.is_seckill =1 and  g.type ='normal'   ";
-		}else
-		{
-			$where = " g.grounding =1 and g.is_seckill =0 and  g.type ='normal'   ";
 		}
+		//----------------------- by lucas S ------------------------
+		else
+		{
+			 $where = " g.grounding =1 and  g.type ='normal'   ";
+		}
+		// else
+		// {
+		// 	 $where = " g.grounding =1 and g.is_seckill =0 and  g.type ='normal'   ";
+		// }
+		//----------------------- by lucas E ------------------------
 		
 		//head_id
 		if( !empty($keyword) )
@@ -1139,7 +1146,10 @@ class IndexController extends CommonController {
 		{
 				
 		}else{
-			$where .= " and gc.is_new_buy=0 and gc.is_spike_buy = 0 ";
+			//----------------------- by lucas S ------------------------
+			$where .= " and gc.is_new_buy=0 ";
+			//$where .= " and gc.is_new_buy=0 and gc.is_spike_buy = 0 ";
+			//----------------------- by lucas E ------------------------
 		}
 		
 		if( $is_video == 1 )
@@ -1513,7 +1523,340 @@ class IndexController extends CommonController {
 		die();
 	}
 	
+	//------------------- by lucas -------------
 	public function load_spikebuy_goodslist()
+	{
+		$_GPC = I('request.');
+		
+		$head_id = $_GPC['head_id'];
+		$pageNum = $_GPC['pageNum'];
+		
+		$per_page = 10000;
+		$offset = ($pageNum - 1) * $per_page;
+		$limit = "{$offset},{$per_page}";
+		
+		$token =  $_GPC['token'];
+		
+		$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
+		
+		
+		if(  empty($weprogram_token) ||  empty($weprogram_token['member_id']) )
+		{
+			//echo json_encode( array('code' => 2) );
+			//die();
+		}
+		$member_id = $weprogram_token['member_id'];
+	    
+	    $now_time = time();
+	    
+	    $where = " g.grounding =1    ";
+		//head_id
+		
+		if( !empty($head_id) && $head_id >0 )
+		{
+			$params = array();
+			$params['uniacid'] = $_W['uniacid'];
+			$params['head_id'] = $head_id;
+
+			$sql_goods_ids = "select pg.goods_id from ".C('DB_PREFIX')."lionfish_community_head_goods as pg,"
+	                        .C('DB_PREFIX')."lionfish_comshop_good_common as g where pg.goods_id = g.goods_id and g.is_spike_buy = 1 and pg.head_id = {$head_id} order by pg.id desc ";
+            $goods_ids_arr = M()->query($sql_goods_ids);
+			
+			$ids_arr = array();
+			foreach($goods_ids_arr as $val){
+				$ids_arr[] = $val['goods_id'];
+			}
+
+			
+			$goods_ids_nolimit_ids = "select pg.id from ".C('DB_PREFIX')."lionfish_comshop_goods as pg,"
+	                        .C('DB_PREFIX')."lionfish_comshop_good_common as g where pg.id = g.goods_id and g.is_spike_buy = 1 and pg.is_all_sale=1  order by pg.id desc ";
+            $goods_ids_nolimit_arr = M()->query($goods_ids_nolimit_ids);
+			
+			if( !empty($goods_ids_nolimit_arr) )
+			{
+				foreach($goods_ids_nolimit_arr as $val){
+					$ids_arr[] = $val['id'];
+				}
+			}
+			
+			$ids_str = implode(',',$ids_arr);
+			
+			if( !empty($ids_str) )
+			{
+				$where .= "  and g.id in ({$ids_str})";
+			} else{
+				$where .= " and 0 ";
+			}
+		}else{
+			//echo json_encode( array('code' => 1) );
+			//die();
+			$where .= " and gc.is_spike_buy = 1";
+		}
+		
+		$where .= " and gc.begin_time <={$now_time} and gc.end_time > {$now_time} ";
+		
+		$index_sort_method = D('Home/Front')->get_config_by_name('index_sort_method');
+		
+		if( empty($index_sort_method) )
+		{
+			$index_sort_method = 0;
+		}
+		
+		$order_sort = 'g.istop DESC, g.settoptime DESC,g.index_sort desc,g.id desc ';
+		
+		if( $index_sort_method == 1 )
+		{
+			$order_sort = 'g.index_sort desc,g.id desc ';
+		}
+		
+		$community_goods = D('Home/Pingoods')->get_community_index_goods('g.*,gc.begin_time,gc.end_time,gc.big_img,gc.is_take_fullreduction,gc.labelname ', $where,$offset,$per_page,$order_sort);
+		 
+		
+		if( !empty($community_goods) )
+		{
+			$is_open_fullreduction = D('Home/Front')->get_config_by_name('is_open_fullreduction');
+			$full_money = D('Home/Front')->get_config_by_name('full_money');
+			$full_reducemoney = D('Home/Front')->get_config_by_name('full_reducemoney');
+			
+			if(empty($full_reducemoney) || $full_reducemoney <= 0)
+			{
+				$is_open_fullreduction = 0;
+			}
+			
+			$cart= D('Home/Car');
+			
+			$list = array();
+			foreach($community_goods as $val)
+			{
+				$tmp_data = array();
+				$tmp_data['actId'] = $val['id'];
+				$tmp_data['spuName'] = $val['goodsname'];
+				$tmp_data['spuCanBuyNum'] = $val['total'];
+				$tmp_data['spuDescribe'] = $val['subtitle'];
+				$tmp_data['end_time'] = $val['end_time'];
+				$tmp_data['soldNum'] = $val['seller_count'] + $val['sales'];
+				
+				$productprice = $val['productprice'];
+				$tmp_data['marketPrice'] = explode('.', $productprice);
+
+				if( !empty($val['big_img']) )
+				{
+					$tmp_data['bigImg'] = tomedia($val['big_img']);
+				}
+				
+				$good_image = D('Home/Pingoods')->get_goods_images($val['id']);
+				if( !empty($good_image) )
+				{
+					$tmp_data['skuImage'] = tomedia($good_image['image']);
+				}
+				$price_arr = D('Home/Pingoods')->get_goods_price($val['id'], $member_id);
+				$price = $price_arr['price'];
+				
+				$tmp_data['actPrice'] = explode('.', $price);
+				
+				$tmp_data['skuList']= D('Home/Pingoods')->get_goods_options($val['id'], $member_id);
+				
+				if( !empty($tmp_data['skuList']) )
+				{
+					$tmp_data['car_count'] = 0;
+				}else{
+						
+					$car_count = $cart->get_wecart_goods($val['id'],"",$head_id ,$token);
+					
+					if( empty($car_count)  )
+					{
+						$tmp_data['car_count'] = 0;
+					}else{
+						$tmp_data['car_count'] = $car_count;
+					}
+				}
+				
+				$list[] = $tmp_data;
+			}
+
+			$spikebuy_goodslist = $list;
+			// echo json_encode(array('code' => 0, 'list' => $list ));
+			// die();
+		}else{
+			// echo json_encode( array('code' => 1) );
+			// die();
+		}
+
+		//----------------- by lucas -----------------------
+		$_GPC = I('request.');
+		//dump($_GPC);exit;
+		$head_id = $_GPC['head_id'];
+		$pageNum = $_GPC['pageNum'];
+		$per_page = 10;
+		$offset = ($pageNum - 1) * $per_page;
+		$limit = "{$offset},{$per_page}";
+		$gid = $_GPC['gid'];
+		
+		$token =  $_GPC['token'];
+		
+		$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
+		
+		
+		if(  empty($weprogram_token) ||  empty($weprogram_token['member_id']) )
+		{
+			//echo json_encode( array('code' => 2) );
+		//	die();
+		}
+		$member_id = $weprogram_token['member_id'];
+		
+		
+	    $now_time = time();
+	    
+	    $where = " g.grounding =1 ";
+		//head_id
+		
+		if( !empty($head_id) && $head_id >0 )
+		{
+			if($gid == 0){
+				$goods_ids_arr = M('lionfish_community_head_goods')->field('goods_id')->where( array('head_id' => $head_id) )->order('id desc')->select();	
+			} else {
+				$sql_goods_ids = "select pg.goods_id from ".C('DB_PREFIX')."lionfish_community_head_goods as pg, "
+                        .C('DB_PREFIX')."lionfish_comshop_goods_to_category as g where pg.goods_id = g.goods_id  and g.cate_id = {$gid} and pg.head_id = {$head_id}  order by pg.id desc ";
+		
+				$goods_ids_arr = M()->query($sql_goods_ids);
+			}
+		
+			$ids_arr = array();
+			foreach($goods_ids_arr as $val){
+				$ids_arr[] = $val['goods_id'];
+			}
+
+			//
+			if($gid == 0){
+				$goods_ids_nolimit_arr = M('lionfish_comshop_goods')->field('id')->where( array('is_all_sale' => 1) )->select();
+			} else {
+				$goods_ids_nolimit_sql = "select pg.id from ".C('DB_PREFIX')."lionfish_comshop_goods as pg, "
+                        .C('DB_PREFIX')."lionfish_comshop_goods_to_category as g where pg.id = g.goods_id and g.cate_id = {$gid} and pg.is_all_sale=1 ";
+				
+				$goods_ids_nolimit_arr = M()->query($goods_ids_nolimit_sql);
+			}
+			//
+			
+			
+			if( !empty($goods_ids_nolimit_arr) )
+			{
+				foreach($goods_ids_nolimit_arr as $val){
+					$ids_arr[] = $val['id'];
+				}
+			}
+			
+			$ids_str = implode(',',$ids_arr);
+			if( !empty($ids_str) )
+			{
+				$where .= "  and g.id in ({$ids_str})";
+			} else{
+				$where .= " and 0 ";
+			}
+		}else{
+			if(isset($spikebuy_goodslist)){
+				echo json_encode( array('code' => 0, 'spikebuy_goodslist' => $spikebuy_goodslist) );
+			}else{
+				echo json_encode( array('code' => 1) );
+			}
+			
+			die();
+		}
+		
+		
+		$where .= " and gc.begin_time > {$now_time} ";
+		
+		$index_sort_method = D('Home/Front')->get_config_by_name('index_sort_method');
+		
+		if( empty($index_sort_method) )
+		{
+			$index_sort_method = 0;
+		}
+		
+		$order_sort = 'g.istop DESC, g.settoptime DESC,g.index_sort desc,g.id desc ';
+		
+		if( $index_sort_method == 1 )
+		{
+			$order_sort = 'g.index_sort desc,g.id desc ';
+		}
+		
+		$community_goods = D('Home/Pingoods')->get_community_index_goods('g.*,gc.begin_time,gc.end_time,gc.big_img,gc.is_take_fullreduction ', $where,$offset,$per_page ,$order_sort );
+		
+		if( !empty($community_goods) )
+		{
+			$is_open_fullreduction = D('Home/Front')->get_config_by_name('is_open_fullreduction');
+			$full_money = D('Home/Front')->get_config_by_name('full_money');
+			$full_reducemoney = D('Home/Front')->get_config_by_name('full_reducemoney');
+			
+			if(empty($full_reducemoney) || $full_reducemoney <= 0)
+			{
+				$is_open_fullreduction = 0;
+			}
+			
+			$list = array();
+			foreach($community_goods as $val)
+			{
+				$tmp_data = array();
+				$tmp_data['actId'] = $val['id'];
+				$tmp_data['spuName'] = $val['goodsname'];
+				$tmp_data['spuCanBuyNum'] = $val['total'];
+				$tmp_data['spuDescribe'] = $val['subtitle'];
+				$tmp_data['end_time'] = $val['end_time'];
+				$tmp_data['soldNum'] = $val['seller_count'] + $val['sales'];
+				
+				$productprice = $val['productprice'];
+				$tmp_data['marketPrice'] = explode('.', $productprice);
+
+				if( !empty($val['big_img']) )
+				{
+					$tmp_data['bigImg'] = tomedia($val['big_img']);
+				}
+				
+				$good_image = D('Home/Pingoods')->get_goods_images($val['id']);
+				if( !empty($good_image) )
+				{
+					$tmp_data['skuImage'] = tomedia($good_image['image']);
+				}
+				$price_arr = D('Home/Pingoods')->get_goods_price($val['id'],$member_id);
+				$price = $price_arr['price'];
+				
+				$tmp_data['actPrice'] = explode('.', $price);
+				
+				$tmp_data['skuList']= D('Home/Pingoods')->get_goods_options($val['id'],$member_id);
+				
+				if($is_open_fullreduction == 0)
+				{
+					$tmp_data['is_take_fullreduction'] = 0;
+				}else if($is_open_fullreduction == 1){
+					$tmp_data['is_take_fullreduction'] = $val['is_take_fullreduction'];
+				}
+				
+				$list[] = $tmp_data;
+			}
+			if(isset($spikebuy_goodslist)){
+				
+				echo json_encode(array('code' => 0,'spikebuy_goodslist' => $spikebuy_goodslist, 'comming_goodslist' => $list , 'cur_time' => time() ,'full_reducemoney' => $full_reducemoney,'full_money' => $full_money,'is_open_fullreduction' => $is_open_fullreduction ));
+			}else{
+				if($list){
+					echo json_encode(array('code' => 0,'comming_goodslist' => $list , 'cur_time' => time() ,'full_reducemoney' => $full_reducemoney,'full_money' => $full_money,'is_open_fullreduction' => $is_open_fullreduction ));
+				}else{
+					echo json_encode( array('code' => 1) );
+				}
+			}
+			
+			die();
+		}else{
+			if(isset($spikebuy_goodslist)){
+				
+				echo json_encode(array('code' => 0,'spikebuy_goodslist' => $spikebuy_goodslist));
+			}else{
+				echo json_encode( array('code' => 1) );
+			}
+			die();
+		}
+		
+	}
+
+	/*public function load_spikebuy_goodslist()
 	{
 		$_GPC = I('request.');
 		
@@ -1670,7 +2013,7 @@ class IndexController extends CommonController {
 			die();
 		}
 		
-	}
+	}*/
 	
 	
 	public function load_new_buy_goodslist()

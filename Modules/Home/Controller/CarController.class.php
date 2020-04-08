@@ -2295,7 +2295,7 @@ class CarController extends CommonController {
 	{
 		$man_free_shipping = 0;
 	}
-	
+	$delivery_date = '';
 	//if( $buy_type == 'dan' )
 	if( $buy_type == 'dan'  || $buy_type == 'soitaire' || ($pintuan_model_buy == 1 && $buy_type != 'dan' && $buy_type != 'integral'  ) )			
 	{
@@ -4161,7 +4161,9 @@ public function sub_order()
 						$o['date_modified']=time();
 						$o['pay_time']=time();
 						$o['transaction_id'] = $is_integral ==1? '积分兑换':'余额支付';
-						
+						//-------------- bu lucas --------------------
+						$o['delivery_date']=$order_all['delivery_date'];
+						//-------------- bu lucas --------------------
 						M('lionfish_comshop_order')->where( array('order_id' => $order['order_id'] ) )->save($o);
 						
 						
@@ -4371,9 +4373,8 @@ public function sub_order()
 				$model = new CommunityheadModel(); 
 				$delivery_date = $model->get_delivery_date($comshop_head_info['groupid']);//dump($delivery_date);exit;
 				M('lionfish_comshop_order_all')->where( array('id' => $order_all_id ) )->save( array('extra' => 10,'delivery_date' => $delivery_date ) );
+				M('lionfish_comshop_order')->where( array('order_id' => array('in', $order_ids_arr)) )->save( array('perpay_id' => $prepay_id, 'delivery_date' => $delivery_date ) );
 				//------------------------- by lucas 入库提货日期 2020-03-21 E-----------------------
-				
-				M('lionfish_comshop_order')->where( array('order_id' => array('in', $order_ids_arr)) )->save( array('perpay_id' => $prepay_id) );
 				
 				
 				

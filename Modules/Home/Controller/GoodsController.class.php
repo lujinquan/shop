@@ -128,6 +128,13 @@ class GoodsController extends CommonController {
 		
 		$need_list = array();
 		
+		//----------------- by lucas S 添加优惠券中文名-------------------------
+        $goodscates_list = M('lionfish_comshop_goods_category')->field('id,name')->select();
+        foreach($goodscates_list as $gcl)
+		{
+			$goodscates_list[$gcl['id']] = $gcl;
+		}
+		//----------------- by lucas S 添加优惠券中文名-------------------------
 		
 		foreach($quan_list as  $key => $val )
 		{
@@ -146,6 +153,20 @@ class GoodsController extends CommonController {
 				 continue;
 			  }
 			}
+			
+			//----------------- by lucas S 添加优惠券中文名-------------------------
+			//指定商品
+			if($val['is_limit_goods_buy'] == 1){
+				//$v['limit_goods_list'] = ''
+				if($val['limit_goods_list']){
+					$row = M()->query('SELECT group_concat(goodsname) as goodsnames FROM ' . C('DB_PREFIX') . "lionfish_comshop_goods where id in (" .$val['limit_goods_list'] . ") ");
+					$val['limit_goods_list_name'] = $row[0]['goodsnames'];
+				}
+			//指定商品类别
+			}elseif($val['is_limit_goods_buy'] == 2){
+				$val['goodscates_name'] = $goodscates_list[$val['goodscates']]['name'];
+			}
+			//----------------- by lucas E 添加优惠券中文名-------------------------
 			
 			//判断是否新人券
 			if( $voucher_info['is_new_man'] == 1 )
@@ -200,6 +221,20 @@ class GoodsController extends CommonController {
 					 continue;
 				  }
 				}
+				
+				//----------------- by lucas S 添加优惠券中文名-------------------------
+				//指定商品
+				if($val['is_limit_goods_buy'] == 1){
+					//$v['limit_goods_list'] = ''
+					if($val['limit_goods_list']){
+						$row = M()->query('SELECT group_concat(goodsname) as goodsnames FROM ' . C('DB_PREFIX') . "lionfish_comshop_goods where id in (" .$val['limit_goods_list'] . ") ");
+						$val['limit_goods_list_name'] = $row[0]['goodsnames'];
+					}
+				//指定商品类别
+				}elseif($val['is_limit_goods_buy'] == 2){
+					$val['goodscates_name'] = $goodscates_list[$val['goodscates']]['name'];
+				}
+				//----------------- by lucas E 添加优惠券中文名-------------------------
 				
 				if( $member_id > 0 )
 				{	//判断是否新人券
