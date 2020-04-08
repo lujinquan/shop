@@ -60,15 +60,16 @@ class PingoodsModel {
 			}
 			
 		}
-		
+		//-------------- by lucas 【显示供应商】 Start ------------------------
 		$sql_pingoods = "select {$fields} from "
-                        .C('DB_PREFIX')."lionfish_comshop_goods as g,".C('DB_PREFIX')."lionfish_comshop_good_common as gc {$inner_join}    
+                        .C('DB_PREFIX')."lionfish_comshop_goods as g,".C('DB_PREFIX')."lionfish_comshop_good_common as gc {$inner_join} left join ".C('DB_PREFIX')."lionfish_comshop_supply as gs  on  gc.supply_id=gs.id   
         	           where  {$where}   and g.id=gc.goods_id  order by {$order} limit {$offset},{$perpage} ";
-		
+        //$sql_pingoods = "select {$fields} from ".C('DB_PREFIX')."lionfish_comshop_goods as g,".C('DB_PREFIX')."lionfish_comshop_good_common as gc {$inner_join}  where  {$where}   and g.id=gc.goods_id  order by {$order} limit {$offset},{$perpage} ";
+		//-------------- by lucas 【显示供应商】 End --------------------------
 		
 		
 		$list_pingoods = M()->query($sql_pingoods);
-		
+
 		return $list_pingoods;
 	}
 	
