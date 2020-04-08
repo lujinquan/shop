@@ -116,6 +116,10 @@ class OrderModel{
 		$head_id = I('request.headid', ''); 
 		//$is_fenxiao = I('request.is_fenxiao', 0); 
 		
+		//-------------- by lucas 【】 Start ------------------------
+		$group_id = I('request.groupid', ''); 
+		//-------------- by lucas 【】 End --------------------------
+		
 		$pindex = I('request.page', 1);
 		$psize = 20;
 		
@@ -211,7 +215,22 @@ class OrderModel{
 			
 			$count_where .= " and head_id ='{$head_id}'  ";
 		}
-		
+		//---------------------- by lucas S ---------------------
+		if( !empty($group_id) && $group_id >0 )
+		{
+			$head_ingroup = M('lionfish_community_head')->field('id')->where( array('groupid' => $group_id ) )->select();
+			$cols = [];
+			foreach ($head_ingroup as $h => $e) {
+				$cols[] = $e['id'];
+			}
+			$headidin = implode(',', $cols);
+
+			// dump($head_ingroup);exit;
+			$condition .= " and o.head_id in (".$headidin.")  ";
+			
+			$count_where .= " and head_id in (".$headidin.")  ";
+		}
+		//---------------------- by lucas E ---------------------
 		if($order_status_id > 0)
 		{
 			//$condition .= " and o.order_status_id={$order_status_id} ";

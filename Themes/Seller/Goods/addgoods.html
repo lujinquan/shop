@@ -451,7 +451,17 @@
 									</div>
 								</div>
 								<?php } ?>
-								
+								<!-- by lucas Start -->
+								<div class="layui-form-item" >
+									<label class="layui-form-label">提货排序</label>
+									<div class="layui-input-block">
+										<div class="input-group">
+											<input type="text" name="ti_sort" id="ti_sort" class="form-control" value="{$item['ti_sort']}" />
+											<span class="input-group-addon">备注：排序越小显示越靠前</span>
+										</div>
+									</div>
+								</div>
+								<!-- by lucas End -->
 								<?php if($index_sort_method == 1){ ?>
 								<div class="layui-form-item" >
 									<label class="layui-form-label">首页排序</label>

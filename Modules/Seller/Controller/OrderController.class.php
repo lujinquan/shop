@@ -27,6 +27,9 @@ class OrderController extends CommonController{
 		$starttime = isset($time['start']) ? strtotime($time['start']) : strtotime(date('Y-m-d'.' 00:00:00'));
 		$endtime = isset($time['end']) ? strtotime($time['end']) : strtotime(date('Y-m-d'.' 23:59:59'));
 		
+		//-------------- by lucas 【团长分类】 Start ------------------------
+		$this->groupid = I('request.groupid', '');
+		//-------------- by lucas 【团长分类】 End --------------------------
 		
 		$this->searchfield = I('request.searchfield','');
 		$this->keyword = I('request.keyword','');
@@ -160,6 +163,11 @@ class OrderController extends CommonController{
 	
 		}
 		
+		//-------------- by lucas 【团长分类】 Start ------------------------
+		$headgroups = M('lionfish_community_head_group')->where( array('goods_id' => $value['id'] ) )->select();
+		$this->headgroups = $headgroups;
+		//-------------- by lucas 【团长分类】 End --------------------------
+
 		$this->is_can_look_headinfo = $is_can_look_headinfo;
 		$this->is_can_nowrfund_order = $is_can_nowrfund_order;
 		$this->is_can_confirm_delivery = $is_can_confirm_delivery;

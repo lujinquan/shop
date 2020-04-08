@@ -275,7 +275,7 @@
 									<?php }else{ ?>
 									<th  style="width:10px;" ></th>
 									<?php } ?>
-									
+									<th  style="width:80px;text-align:center;" >提货排序</th>
 								<?php if( defined('ROLE') && ROLE == 'agenter'){ ?>
 								
 								<?php  }else{  ?>									
@@ -483,7 +483,11 @@
 									<?php } ?>
 								<?php } ?>
 							</td>
-							
+							<td style="text-align:center;">
+								<a href='javascript:;' data-toggle='ajaxEdit' data-href="{:U('goods/changetisort',array('type'=>'ti_sort','id'=>$item['id']))}" >
+									<span class="text-danger">{$item['ti_sort']}</span>
+								</a>
+							</td>
 						<?php if( defined('ROLE') && ROLE == 'agenter'){ ?>
 						
 						<?php  }else{  ?>						

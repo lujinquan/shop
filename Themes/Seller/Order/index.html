@@ -212,6 +212,16 @@
 							<option value='express' <?php if( $delivery=='express'){ ?>selected<?php } ?>>快递</option>
 						</select>	
 					</div>
+					<!-- by lucas Start -->
+					<div class="layui-input-inline" style="width:140px;">
+						<select name='groupid' lay-ignore class='layui-input layui-unselect' style="width:140px;padding:0 5px;"  id="type">
+							<option value="" <?php if( empty($groupid) ){ ?>selected<?php } ?> >团长分类</option>
+							<?php foreach($headgroups as $cp){ ?>
+							<option value="{$cp['id']}" <?php if( $groupid==$cp['id'] ){ ?>selected<?php } ?> >{$cp['groupname']}</option>
+							<?php } ?>
+						</select>	
+					</div>
+					<!-- by lucas End -->
 					<div class="layui-input-inline" style="width:110px;">
 						<select name='searchfield' lay-ignore class='layui-input layui-unselect'   style="width:110px;padding:0 5px;"  >
 							<option value='ordersn' <?php if( $searchfield=='ordersn'){ ?>selected<?php } ?>>订单号</option>
