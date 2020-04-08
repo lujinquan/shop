@@ -1159,8 +1159,21 @@ class GoodsController extends CommonController{
 				show_json(0, array('message' => '商品图片必须上传' ,'url' => $_SERVER['HTTP_REFERER']) );
 				die();
 			}
-			
+
 			D('Seller/Goods')->addgoods();
+
+			//--------- 会员等级折扣 Start ------ Author Lucas by 2019-12-19 17:48-------------
+			$member_level_arr = M('lionfish_comshop_member_level')->select();
+			foreach ($member_level_arr as $k0 => $v0) {
+				$discount_row = M('lionfish_comshop_goods_discount_member')->where( array('goods_id' => $id,'member_level' => $v0['level']) )->find();
+				$member_level_discount = ($_GPC['is_mb_level_buy'] == 2)?$_GPC['member_level_'.$v0['level']]:100;
+				if($discount_row){
+					 M('lionfish_comshop_goods_discount_member')->where( array('goods_id' => $id,'member_level' => $v0['level']) )->save(['discount'=>$member_level_discount]);
+				}else{
+					M('lionfish_comshop_goods_discount_member')->data(['goods_id'=>$id,'discount'=>$member_level_discount,'member_level'=>$v0['level']])->add();
+				}
+			}
+			//--------- 会员等级折扣 End ----------------------------------------------------------
 			
 			$http_refer = S('HTTP_REFERER');
 			
@@ -1176,7 +1189,26 @@ class GoodsController extends CommonController{
 		$spec_list = D('Seller/Spec')->get_all_spec();
 		$this->spec_list = $spec_list;
 		
-		
+		//--------- 会员等级折扣 Start ------ Author Lucas by 2019-12-19 17:48-------------
+		$goods_temp_discounts = M('lionfish_comshop_goods_discount_member')->where( array('goods_id' => $id) )->field('discount,member_level')->select();
+		$goods_discounts = [];
+		foreach ($goods_temp_discounts as $k1 => $v1) {
+			$member_level_row = M('lionfish_comshop_member_level')->where( array('level' => $v1['member_level']) )->find();
+			$v1['levelname'] = $member_level_row['levelname'];
+			$goods_discounts[$v1['member_level']] = $v1;
+		}
+		$member_level_arr = M('lionfish_comshop_member_level')->select();
+		foreach ($member_level_arr as $k2 => $v2) {
+			if(!isset($goods_discounts[$v2['level']])){
+				$goods_discounts[$v2['level']] = [
+					'discount' => 100,
+					'member_level' => $v2['level'],
+					'levelname' => $v2['levelname'],
+				];
+			}
+		}
+		$this->goods_discounts = $goods_discounts;
+		//--------- 会员等级折扣 End ----------------------------------------------------------
 		
 		
 		$dispatch_data = M('lionfish_comshop_shipping')->where( array('enabled' => 1,'isdefault' =>1) )->order('sort_order desc')->select();
@@ -3321,6 +3353,19 @@ class GoodsController extends CommonController{
 			
 			D('Seller/Goods')->modify_goods();
 			
+			//--------- 会员等级折扣 Start ------ Author Lucas by 2019-12-19 17:48-------------
+			$member_level_arr = M('lionfish_comshop_member_level')->select();
+			foreach ($member_level_arr as $k0 => $v0) {
+				$discount_row = M('lionfish_comshop_goods_discount_member')->where( array('goods_id' => $id,'member_level' => $v0['level']) )->find();
+				$member_level_discount = ($_GPC['is_mb_level_buy'] == 2)?$_GPC['member_level_'.$v0['level']]:100;
+				if($discount_row){
+					 M('lionfish_comshop_goods_discount_member')->where( array('goods_id' => $id,'member_level' => $v0['level']) )->save(['discount'=>$member_level_discount]);
+				}else{
+					M('lionfish_comshop_goods_discount_member')->data(['goods_id'=>$id,'discount'=>$member_level_discount,'member_level'=>$v0['level']])->add();
+				}
+			}
+			//--------- 会员等级折扣 End ----------------------------------------------------------
+
 			$http_refer = S('HTTP_REFERER');
 			
 			$http_refer = empty($http_refer) ? $_SERVER['HTTP_REFERER'] : $http_refer;
@@ -3334,6 +3379,26 @@ class GoodsController extends CommonController{
 		$this->id = $id;
 		$item = D('Seller/Goods')->get_edit_goods_info($id);
 		
+		//--------- 会员等级折扣 Start ------ Author Lucas by 2019-12-19 17:48-------------
+		$goods_temp_discounts = M('lionfish_comshop_goods_discount_member')->where( array('goods_id' => $id) )->field('discount,member_level')->select();
+		$goods_discounts = [];
+		foreach ($goods_temp_discounts as $k1 => $v1) {
+			$member_level_row = M('lionfish_comshop_member_level')->where( array('level' => $v1['member_level']) )->find();
+			$v1['levelname'] = $member_level_row['levelname'];
+			$goods_discounts[$v1['member_level']] = $v1;
+		}
+		$member_level_arr = M('lionfish_comshop_member_level')->select();
+		foreach ($member_level_arr as $k2 => $v2) {
+			if(!isset($goods_discounts[$v2['level']])){
+				$goods_discounts[$v2['level']] = [
+					'discount' => 100,
+					'member_level' => $v2['level'],
+					'levelname' => $v2['levelname'],
+				];
+			}
+		}
+		$this->goods_discounts = $goods_discounts;
+		//--------- 会员等级折扣 End ----------------------------------------------------------
 		
 		//-------------------------以上是获取资料
 		
