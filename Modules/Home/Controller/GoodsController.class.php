@@ -754,7 +754,9 @@ class GoodsController extends CommonController {
 		$goods['full_money'] = $full_money;
 		$goods['full_reducemoney'] = $full_reducemoney;
 		
-		
+		//--------- 获取小程序商品列表供应商 Start ------ Author Lucas by 2019-12-26 16:04-----------------
+		$goods['supplier'] = $goods['shopname']?$goods['shopname']:'平台自营';
+		//--------- 获取小程序商品列表供应商 End ---------------------------------------------------------
 		
 		$goods['is_video'] = 0;
 		$goods['video_size_width'] = 0;
