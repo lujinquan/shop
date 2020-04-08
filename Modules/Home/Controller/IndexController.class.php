@@ -1172,13 +1172,20 @@ class IndexController extends CommonController {
 		{
 			$order_sort = 'g.index_sort desc,g.id desc ';
 		}
-		
+		//--------- 获取小程序商品列表供应商 Start ------ Author Lucas by 2019-12-26 16:04-----------------
 		if($is_random == 1)
+		{
+			$community_goods = D('Home/Pingoods')->get_community_index_goods('g.*,gc.begin_time,gc.end_time,gc.big_img,gc.is_take_fullreduction,gc.labelname,gc.video ,gc.pick_up_type,gc.supply_id,gc.pick_up_modify,gs.shopname ', $where,$offset,$per_page,$order_sort,' rand() ');
+		}else{
+			$community_goods = D('Home/Pingoods')->get_community_index_goods('g.*,gc.begin_time,gc.supply_id,gc.end_time,gc.big_img,gc.is_take_fullreduction,gc.labelname,gc.video,gc.pick_up_type,gc.pick_up_modify,gs.shopname ', $where,$offset,$per_page,$order_sort);
+		}
+		//--------- 获取小程序商品列表供应商 End ---------------------------------------------------------
+		/*if($is_random == 1)
 		{
 			$community_goods = D('Home/Pingoods')->get_new_community_index_goods($head_id,$gid,'g.*,gc.begin_time,gc.end_time,gc.big_img,gc.is_take_fullreduction,gc.labelname,gc.video,gc.pick_up_type,gc.pick_up_modify ', $where,$offset,$per_page,$order_sort,' rand() ');
 		}else{
 			$community_goods = D('Home/Pingoods')->get_new_community_index_goods($head_id,$gid,'g.*,gc.begin_time,gc.end_time,gc.big_img,gc.is_take_fullreduction,gc.labelname,gc.video,gc.pick_up_type,gc.pick_up_modify ', $where,$offset,$per_page,$order_sort);
-		}
+		}*/
 		
 		if( !empty($community_goods) )
 		{
