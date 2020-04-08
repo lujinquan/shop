@@ -1207,6 +1207,9 @@ class IndexController extends CommonController {
 			{
 				$tmp_data = array();
 				$tmp_data['actId'] = $val['id'];
+				//--------- 获取小程序商品列表供应商 Start ------ Author Lucas by 2019-12-26 16:04-----------------
+				$tmp_data['supplier'] = $val['shopname']?$val['shopname']:'平台自营';
+				//--------- 获取小程序商品列表供应商 End ----------------------------------------------------------
 				$tmp_data['spuName'] = $val['goodsname'];
 				$tmp_data['spuCanBuyNum'] = $val['total'];
 				$tmp_data['spuDescribe'] = $val['subtitle'];

@@ -577,7 +577,14 @@ class UserController extends CommonController {
 
         $now_time = time();
 
-        			
+        //----------------- by lucas S 添加优惠券中文名-------------------------
+        $goodscates_list = M('lionfish_comshop_goods_category')->field('id,name')->select();
+        foreach($goodscates_list as $gcl)
+		{
+			$goodscates_list[$gcl['id']] = $gcl;
+		}
+		//----------------- by lucas S 添加优惠券中文名-------------------------
+					
 		$category_list = M('lionfish_comshop_coupon_category')->field('id,name')->where( array('merchid' => 0) )->order('id desc')->select();			
         
 		$category = array();
@@ -629,7 +636,19 @@ class UserController extends CommonController {
 			{
 				$val['is_use'] = 1;
 			}
-
+			//----------------- by lucas S 添加优惠券中文名-------------------------
+			//指定商品
+			if($val['is_limit_goods_buy'] == 1){
+				//$v['limit_goods_list'] = ''
+				if($val['limit_goods_list']){
+					$row = M()->query('SELECT group_concat(goodsname) as goodsnames FROM ' . C('DB_PREFIX') . "lionfish_comshop_goods where id in (" .$val['limit_goods_list'] . ") ");
+					$val['limit_goods_list_name'] = $row[0]['goodsnames'];
+				}
+			//指定商品类别
+			}elseif($val['is_limit_goods_buy'] == 2){
+				$val['goodscates_name'] = $goodscates_list[$val['goodscates']]['name'];
+			}
+			//----------------- by lucas E 添加优惠券中文名-------------------------
 			$val['begin_time'] = date('Y.m.d H:i:s', $val['begin_time']);
 			$val['end_time']   = date('Y.m.d H:i:s', $val['end_time']);
 
