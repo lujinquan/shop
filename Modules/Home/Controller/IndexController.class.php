@@ -1255,6 +1255,7 @@ class IndexController extends CommonController {
 					$tmp_data['skuImage'] = tomedia($good_image['image']);
 				}
 				$price_arr = D('Home/Pingoods')->get_goods_price($val['id'], $member_id);
+				
 				$price = $price_arr['price'];
 				
 				if( $pageNum == 1 )

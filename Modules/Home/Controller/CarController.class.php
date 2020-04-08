@@ -1025,7 +1025,7 @@ class CarController extends CommonController {
 	
 	//显示购物车中商品列表
 	function show_cart_goods(){
-		
+	
 		$gpc = I('request.');
 		
 		$token = $gpc['token'];
@@ -1149,9 +1149,16 @@ class CarController extends CommonController {
 						if($d_goods['is_take_vipcard'] == 1)
 						{	
 							$vipcard_save_money = $d_goods['total'] - $d_goods['card_total'];
-						}else if($d_goods['is_mb_level_buy']  == 1 ){
+						}
+						//-------------- by lucas 【】 Start ------------------------
+						else if($d_goods['is_mb_level_buy']  > 0 ){
 							$level_save_money = $d_goods['total'] - $d_goods['level_total'];
 						}
+						/*else if($d_goods['is_mb_level_buy']  == 1 ){
+							$level_save_money = $d_goods['total'] - $d_goods['level_total'];
+						}*/
+						//-------------- by lucas 【】 End --------------------------
+						
 					} else {
 						$tp_val['isselect'] = false;
 					}
@@ -2066,7 +2073,7 @@ class CarController extends CommonController {
 			if($d_goods['is_take_vipcard'] == 1)
 			{	
 				$vipcard_save_money += $d_goods['total'] - $d_goods['card_total'];
-			}else if( $d_goods['is_mb_level_buy'] == 1 && $is_member_level_buy == 1)
+			}else if( $d_goods['is_mb_level_buy'] > 0 && $is_member_level_buy == 1)
 			{
 				$level_save_money += $d_goods['total'] - $d_goods['level_total'];
 			}
@@ -2084,7 +2091,7 @@ class CarController extends CommonController {
 					
 				}
 			}
-			else if( $d_goods['is_mb_level_buy'] == 1 && $is_member_level_buy == 1 )
+			else if( $d_goods['is_mb_level_buy'] > 0 && $is_member_level_buy == 1 )
 			{
 				$seller_total_fee += $d_goods['level_total'];
 				if( $store_id == 0 )
@@ -2543,7 +2550,7 @@ class CarController extends CommonController {
 		{
 			$total_free += $good['card_total'];
 		}
-		else if( $good['is_mb_level_buy'] == 1  && $is_member_level_buy == 1 )
+		else if( $good['is_mb_level_buy'] > 0  && $is_member_level_buy == 1 )
 		{
 			$total_free += $good['level_total'];
 		}
@@ -3515,7 +3522,7 @@ public function sub_order()
 				{
 					$store_buy_total_money += $good['card_total'];
 				}
-				else if( $good['is_mb_level_buy'] == 1 && $is_member_level_buy == 1)
+				else if( $good['is_mb_level_buy'] > 0 && $is_member_level_buy == 1)
 				{
 					$store_buy_total_money += $good['level_total'];
 				}
@@ -3548,7 +3555,7 @@ public function sub_order()
 				$order_goods_total_money += $good['card_total'];
 				$order_total += $good['card_total'];
 			}
-			else if( $good['is_mb_level_buy'] == 1 && $is_member_level_buy == 1)
+			else if( $good['is_mb_level_buy'] > 0 && $is_member_level_buy == 1)
 			{
 				$order_goods_total_money += $good['level_total'];
 				$order_total += $good['level_total'];
@@ -3609,7 +3616,7 @@ public function sub_order()
 				{
 					$fenbi_li = round($good['card_total'] / $zanbi_total_money, 2);
 				}
-				else if( $good['is_mb_level_buy'] == 1 && $is_member_level_buy == 1)
+				else if( $good['is_mb_level_buy'] > 0 && $is_member_level_buy == 1)
 				{
 					$fenbi_li = round($good['level_total'] / $zanbi_total_money, 2);
 				}
@@ -3676,9 +3683,9 @@ public function sub_order()
 			
 			$pay_goods_name .= $good['name'];
 			
-			if( $good['is_mb_level_buy'] == 1 && $is_member_level_buy == 1 )
+			if( $good['is_mb_level_buy'] > 0 && $is_member_level_buy == 1 )
 			{
-				$good['is_mb_level_buy'] == 1;
+				//$good['is_mb_level_buy'] == 1;
 			}else{
 				$good['is_mb_level_buy'] == 0;
 			}

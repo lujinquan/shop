@@ -1403,9 +1403,9 @@ class GoodsController extends CommonController {
 				}
 			}
 			
-			if($is_vip_card_member != 1 && $member_info['level_id'] >0  && $goods['is_mb_level_buy'] == 1 )
+			if($is_vip_card_member != 1 && $member_info['level_id'] >0  && $goods['is_mb_level_buy'] > 0 )
 			{
-				$is_member_level_buy = 1;
+				//$is_member_level_buy = 1;
 			}
 		}
 		
