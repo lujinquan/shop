@@ -46,12 +46,12 @@ class CarController extends CommonController {
 		
 		if( !isset($data['buy_type']) || empty($data['buy_type']) )
 		{
-		  $data['buy_type'] = 'dan';
+			$data['buy_type'] = 'dan';
 		}
 		$token = $_GPC['token'];
 		
 		
-		  
+
 		$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
 		
 		$member_id = $weprogram_token['member_id'];
@@ -62,9 +62,9 @@ class CarController extends CommonController {
 		$goods_id = $data['goods_id'];
 		if( empty($member_id))
 		{			
-		    $result = array('code' =>4);
-		    echo json_encode($result);
-		    die();
+			$result = array('code' =>4);
+			echo json_encode($result);
+			die();
 		}
 		
 		if (isset($data['goods_id'])) {
@@ -84,7 +84,7 @@ class CarController extends CommonController {
 			echo json_encode($json);
 			die();
 		}
-	
+
 		$is_community = D('Seller/Communityhead')->is_community($data['community_id']);
 		if( !$is_community )
 		{
@@ -116,14 +116,14 @@ class CarController extends CommonController {
 			} else {
 				$quantity = 1;
 			}
-					
+
 			$option = array();
 			
 			if( !empty($data['sku_str'])){
-			    $option = explode('_', $data['sku_str']);
+				$option = explode('_', $data['sku_str']);
 			}
 			
-            $cart_goods_quantity = $cart->get_wecart_goods($goods_id,$data['sku_str'],$data['community_id'] ,$token,$data['soli_id'] );
+			$cart_goods_quantity = $cart->get_wecart_goods($goods_id,$data['sku_str'],$data['community_id'] ,$token,$data['soli_id'] );
 			
 			
 			$key = (int)$goods_id . ':'.$data['community_id'].':';
@@ -133,7 +133,7 @@ class CarController extends CommonController {
 			{
 				$key .= $data['soli_id'].':';
 			}
-       
+
 			if ($data['sku_str']) {
 				$key.= base64_encode($data['sku_str']) . ':';
 			} else {
@@ -150,7 +150,7 @@ class CarController extends CommonController {
 				$key = 'cart.' . $key;
 			}
 			
-		
+
 			
 			
 			$json=array('code' =>0);
@@ -171,17 +171,17 @@ class CarController extends CommonController {
 				$tmp_format_data['quantity'] = $tmp_format_data['quantity'] - 1;
 				
 				M('lionfish_comshop_car')->where( array('id' => $car_info['id'], 'community_id' => $data['community_id'] ) )->save( array('format_data' => serialize($tmp_format_data) ) );
-					
+
 			}
-				
+
 			$cart= D('Home/Car');
 			$total=$cart->count_goodscar($token, $data['community_id']);
-		
-		
+
+
 			$json ['code']  = 1;
 			if( $data['buy_type'] != 'dan' )
 			{
-			    $json ['code']  = 2;
+				$json ['code']  = 2;
 			}
 			
 			
@@ -215,80 +215,80 @@ class CarController extends CommonController {
 	
 	/**
 		pintuan_newman_notice
-	**/
-	public function add_newcar()
-	{
-		$_GPC = I('request.');
-		
-		$data = array();
-		$data['goods_id'] = $_GPC['goods_id'];
-		$data['buy_type'] = 'pintuan';
-		$data['community_id'] = $_GPC['community_id'];
-		
-		$community_id= $data['community_id'];
-		
-		$data['quantity'] = 1;
-		
-		$token = $_GPC['token'];
-		
-		$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
-		
-		$member_id = $weprogram_token['member_id'];
-		
-		
-		$goods_id = $data['goods_id'];
-		if( empty($member_id))
-		{			
-		    $result = array('code' =>4);
-		    echo json_encode($result);
-		    die();
-		}
-		
-		$goods_param = array();
-		
-		$product = M('lionfish_comshop_goods')->where( array('id' => $goods_id ) )->find();
-		
-		if( $product['grounding'] != 1)
+		**/
+		public function add_newcar()
 		{
-			$json['code'] =6;
-			$json['msg']='商品已下架!';
-			echo json_encode($json);
-			die();
-		}
-		
-		
-		$goods_description = D('Home/Front')->get_goods_common_field($goods_id , 'total_limit_count,one_limit_count,is_new_buy');
-		
-		$pin_model = D('Home/Pin');
-		
-		$iszero_opentuan = $pin_model->check_goods_iszero_opentuan( $goods_id );
-		
-		if($iszero_opentuan != 1)
-		{
-			$json['code'] =6;
-			$json['msg']='非邀请团商品!';
-			echo json_encode($json);
-			die();
-		}
-		
-		$cart= D('Home/Car');
-		
-		
-		
-		if($product){
-			if( !empty($data['buy_type']) && $data['buy_type'] == 'pintuan' )
-			{
-				$car_prefix = 'pintuancart.';
+			$_GPC = I('request.');
+
+			$data = array();
+			$data['goods_id'] = $_GPC['goods_id'];
+			$data['buy_type'] = 'pintuan';
+			$data['community_id'] = $_GPC['community_id'];
+
+			$community_id= $data['community_id'];
+
+			$data['quantity'] = 1;
+
+			$token = $_GPC['token'];
+
+			$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
+
+			$member_id = $weprogram_token['member_id'];
+
+
+			$goods_id = $data['goods_id'];
+			if( empty($member_id))
+			{			
+				$result = array('code' =>4);
+				echo json_encode($result);
+				die();
 			}
-			
-            $cart_goods_quantity = $cart->get_wecart_goods($goods_id,$data['sku_str'],$data['community_id'] ,$token,$car_prefix);
-			
-			
-			$json=array('code' =>0);
+
+			$goods_param = array();
+
+			$product = M('lionfish_comshop_goods')->where( array('id' => $goods_id ) )->find();
+
+			if( $product['grounding'] != 1)
+			{
+				$json['code'] =6;
+				$json['msg']='商品已下架!';
+				echo json_encode($json);
+				die();
+			}
+
+
+			$goods_description = D('Home/Front')->get_goods_common_field($goods_id , 'total_limit_count,one_limit_count,is_new_buy');
+
+			$pin_model = D('Home/Pin');
+
+			$iszero_opentuan = $pin_model->check_goods_iszero_opentuan( $goods_id );
+
+			if($iszero_opentuan != 1)
+			{
+				$json['code'] =6;
+				$json['msg']='非邀请团商品!';
+				echo json_encode($json);
+				die();
+			}
+
+			$cart= D('Home/Car');
+
+
+
+			if($product){
+				if( !empty($data['buy_type']) && $data['buy_type'] == 'pintuan' )
+				{
+					$car_prefix = 'pintuancart.';
+				}
+
+				$cart_goods_quantity = $cart->get_wecart_goods($goods_id,$data['sku_str'],$data['community_id'] ,$token,$car_prefix);
+
+
+				$json=array('code' =>0);
 			//$goods_model = D('Home/Goods');
-			$goods_quantity=$cart->get_goods_quantity($goods_id);
-			
-			
+				$goods_quantity=$cart->get_goods_quantity($goods_id);
+
+
 			//检测商品限购 6 one_limit_count
 			/**
 			$can_buy_count = D('Home/Front')->check_goods_user_canbuy_count($member_id, $goods_id);
@@ -369,8 +369,8 @@ class CarController extends CommonController {
 			$data['shipping_city_id']=0;
 			$data['shipping_stree_id']=0;
 			$data['shipping_country_id']=0;
-						
-						
+
+
 			$data['shipping_method'] = 0;
 			$data['delivery']='express';
 			
@@ -428,7 +428,7 @@ class CarController extends CommonController {
 			$data['score_for_money'] = 0;
 			$data['reduce_money'] = 0;
 			$data['man_total_free'] = 0;
-					
+
 
 			$oid = D('Home/Frontorder')->addOrder($data);// D('Order')->addOrder($data);
 			
@@ -485,7 +485,7 @@ class CarController extends CommonController {
 		
 		if( !isset($data['buy_type']) || empty($data['buy_type']) )
 		{
-		  $data['buy_type'] = 'dan';
+			$data['buy_type'] = 'dan';
 		}
 		else if( !empty($data['buy_type']) && $data['buy_type'] == 'soitaire' )
 		{
@@ -511,7 +511,7 @@ class CarController extends CommonController {
 		
 		
 		$puis_not_buy =  D('Home/Front')->get_config_by_name('puis_not_buy');
-				
+
 		if( !empty($puis_not_buy) && $puis_not_buy ==1 )
 		{
 			$member_info = M('lionfish_comshop_member')->field('level_id')->where( array('member_id' => $member_id) )->find();
@@ -524,16 +524,16 @@ class CarController extends CommonController {
 				die();
 			}
 		}
-				
+
 		
 		$is_just_addcar = empty($data['is_just_addcar']) ? 0: 1;
 		
 		$goods_id = $data['goods_id'];
 		if( empty($member_id))
 		{			
-		    $result = array('code' =>4);
-		    echo json_encode($result);
-		    die();
+			$result = array('code' =>4);
+			echo json_encode($result);
+			die();
 		}
 		
 		if (isset($data['goods_id'])) {
@@ -555,7 +555,7 @@ class CarController extends CommonController {
 		
 		
 		$goods_description = D('Home/Front')->get_goods_common_field($goods_id , 'total_limit_count,one_limit_count,is_new_buy,is_limit_levelunbuy,is_limit_vipmember_buy');
-			
+
 		//is_limit_levelunbuy
 		//$is_default_levellimit_buy = D('Home/Front')->get_config_by_name('is_default_levellimit_buy');
 		//isset($is_default_levellimit_buy) && $is_default_levellimit_buy == 1 &&
@@ -630,10 +630,10 @@ class CarController extends CommonController {
 				die();
 			}
 		}
-			
+
 		
 		
-	
+
 		//$data['community_id']
 		if( $data['buy_type'] == 'dan' || $data['buy_type'] =='soitaire'  || ($pintuan_model_buy ==1 && $data['buy_type'] != 'dan') )
 		{
@@ -687,11 +687,11 @@ class CarController extends CommonController {
 			} else {
 				$quantity = 1;
 			}
-					
+
 			$option = array();
 			
 			if( !empty($data['sku_str'])){
-			    $option = explode('_', $data['sku_str']);
+				$option = explode('_', $data['sku_str']);
 			}
 			
 			$car_prefix = "cart.";
@@ -712,7 +712,7 @@ class CarController extends CommonController {
 			}
 			
 			//$data['soli_id']
-            $cart_goods_quantity = $cart->get_wecart_goods($goods_id,$data['sku_str'],$data['community_id'] ,$token,$car_prefix,$data['soli_id']);
+			$cart_goods_quantity = $cart->get_wecart_goods($goods_id,$data['sku_str'],$data['community_id'] ,$token,$car_prefix,$data['soli_id']);
 			
 			
 			$cart_goods_all_quantity = $cart->get_wecartall_goods($goods_id,$data['sku_str'],$data['community_id'] ,$token,$car_prefix);
@@ -754,7 +754,7 @@ class CarController extends CommonController {
 				$json['msg']='您本次只能购买'.$goods_description['total_limit_count'].'个';
 				
 				$json['max_quantity'] = $goods_description['total_limit_count'];
-			
+
 				echo json_encode($json);
 				die();
 			}else if($can_buy_count >0 && $quantity >$can_buy_count)
@@ -766,17 +766,17 @@ class CarController extends CommonController {
 				echo json_encode($json);
 				die();
 			}
-		
+
 			//已加入购物车的总数
 			
 			if($goods_quantity<$quantity+$cart_goods_quantity){
-			    $json['code'] =3;
-			    if ($goods_quantity==0) {
-			    	$json['msg']='已抢光';
-			    }else{
+				$json['code'] =3;
+				if ($goods_quantity==0) {
+					$json['msg']='已抢光';
+				}else{
 					$json['msg']='商品数量不足';
 					$json['max_quantity'] = $goods_quantity;
-			    }
+				}
 
 				echo json_encode($json);
 				die();
@@ -791,19 +791,19 @@ class CarController extends CommonController {
 				//ims_ 
 				//$goods_option_mult_value = M('lionfish_comshop_goods_option_item_value')->where( array('goods_id' => $goods_id,'option_item_ids' => $data['sku_str']) )->find();
 				$open_redis_server = D('Home/Front')->get_config_by_name('open_redis_server');
-		
-                if(!empty($open_redis_server) && $open_redis_server == 1)
-                {
-                    $goods_option_mult_value_stock = D('Seller/Redisorder')->get_goods_sku_quantity($goods_id, $data['sku_str']);
-                }else{
-                	$goods_option_mult_value = M('lionfish_comshop_goods_option_item_value')->where( array('goods_id' => $goods_id,'option_item_ids' => $data['sku_str']) )->find();
-                }
+
+				if(!empty($open_redis_server) && $open_redis_server == 1)
+				{
+					$goods_option_mult_value_stock = D('Seller/Redisorder')->get_goods_sku_quantity($goods_id, $data['sku_str']);
+				}else{
+					$goods_option_mult_value = M('lionfish_comshop_goods_option_item_value')->where( array('goods_id' => $goods_id,'option_item_ids' => $data['sku_str']) )->find();
+				}
 				
-			
+
 				if( !empty($goods_option_mult_value_stock) )
 				{
 					if($goods_option_mult_value_stock<$quantity+$cart_goods_quantity){
-					    $json['code'] =3;
+						$json['code'] =3;
 						$json['msg']='商品数量不足，剩余'.$goods_option_mult_value_stock.'个！！';
 						
 						$json['max_quantity'] = $goods_option_mult_value['stock'];
@@ -816,19 +816,19 @@ class CarController extends CommonController {
 			//buy_type
 			
 		   // $this->clear_all_cart(); $data['community_id']
-		   
+
 			$format_data_array = array(
-									'quantity' => $quantity,
-									'community_id' => $data['community_id'],
-									'goods_id' => $goods_id,
-									'sku_str'=>$data['sku_str'],
-									'buy_type' =>$data['buy_type'],
-									'soli_id' => $data['soli_id']
-								);
+				'quantity' => $quantity,
+				'community_id' => $data['community_id'],
+				'goods_id' => $goods_id,
+				'sku_str'=>$data['sku_str'],
+				'buy_type' =>$data['buy_type'],
+				'soli_id' => $data['soli_id']
+			);
 			//区分活动商品还是普通商品。做两个购物车，活动商品是需要直接购买的，单独购买商品加入正常的购物车TODO....
 		    //is_just_addcar 0  1
 			if($data['buy_type'] == 'dan' && $is_just_addcar == 0)
-		    {
+			{
 				
 				//$cart->removedancar($token);
 				//清空一下购物车
@@ -836,9 +836,9 @@ class CarController extends CommonController {
 				$format_data_array['is_just_addcar'] = 0;
 				$format_data_array['singledel'] = 1;
 				
-		        $cart->addwecar($token,$goods_id,$format_data_array,$data['sku_str'],$data['community_id']);
+				$cart->addwecar($token,$goods_id,$format_data_array,$data['sku_str'],$data['community_id']);
 				$total=$cart->count_goodscar($token ,$data['community_id']);
-		    }
+			}
 			else if($data['buy_type'] == 'dan' && $is_just_addcar == 1)
 			{
 				//singledel
@@ -853,7 +853,7 @@ class CarController extends CommonController {
 				$format_data_array['is_just_addcar'] = 1;
 				$format_data_array['singledel'] = 1;
 				
-		        $cart->addwecar($token,$goods_id,$format_data_array,$data['sku_str'],$data['community_id'],$car_prefix,$data['soli_id']);
+				$cart->addwecar($token,$goods_id,$format_data_array,$data['sku_str'],$data['community_id'],$car_prefix,$data['soli_id']);
 				$total=0;
 			}
 			else if( !empty($data['buy_type']) && $data['buy_type'] == 'pindan' )
@@ -863,7 +863,7 @@ class CarController extends CommonController {
 				$format_data_array['is_just_addcar'] = 0;
 				$format_data_array['singledel'] = 1;
 				
-		        $cart->addwecar($token,$goods_id,$format_data_array,$data['sku_str'],$data['community_id'],$car_prefix);
+				$cart->addwecar($token,$goods_id,$format_data_array,$data['sku_str'],$data['community_id'],$car_prefix);
 				$total=0;
 			}
 			else if( !empty($data['buy_type']) && $data['buy_type'] == 'pintuan' )
@@ -900,7 +900,7 @@ class CarController extends CommonController {
 				$format_data_array['singledel'] = 1;
 				$format_data_array['pin_id'] = $pin_id;
 				
-		        $cart->addwecar($token,$goods_id,$format_data_array,$data['sku_str'],$data['community_id'],$car_prefix);
+				$cart->addwecar($token,$goods_id,$format_data_array,$data['sku_str'],$data['community_id'],$car_prefix);
 				$total=0;
 			}
 			else if( !empty($data['buy_type']) && $data['buy_type'] == 'integral' )
@@ -911,12 +911,12 @@ class CarController extends CommonController {
 				$format_data_array['is_just_addcar'] = 0;
 				$format_data_array['singledel'] = 1;
 				
-		        $cart->addwecar($token,$goods_id,$format_data_array,$data['sku_str'],$data['community_id'],$car_prefix);
+				$cart->addwecar($token,$goods_id,$format_data_array,$data['sku_str'],$data['community_id'],$car_prefix);
 				$total=0;
 			}
 			else {
 		        //buy_type:pin  活动购物车。
-		        $pin_id = isset($data['pin_id']) ? $data['pin_id'] : 0;
+				$pin_id = isset($data['pin_id']) ? $data['pin_id'] : 0;
 				
 				//lottery
 				if( $product['type'] == 'lottery' && $product['type'] == 'lottery' )
@@ -955,13 +955,13 @@ class CarController extends CommonController {
 					**/
 				}
 				
-		        $format_data_array['pin_id'] = $pin_id;
+				$format_data_array['pin_id'] = $pin_id;
 
-		        $cart->add_activitycar($token, $goods_id,$format_data_array,$data['sku_str']);
+				$cart->add_activitycar($token, $goods_id,$format_data_array,$data['sku_str']);
 				$total=$cart->count_activitycar($token);
-		    }
-		    
-		    
+			}
+
+
 			$carts = M('lionfish_comshop_car')->where( array('token' => $token,'community_id' => $data['community_id'],'carkey' => 'cart_total') )->find();
 			
 			if( !empty($data['buy_type']) && $data['buy_type'] == 'dan' )
@@ -973,7 +973,7 @@ class CarController extends CommonController {
 					$car_data['modifytime'] = 1;
 					
 					M('lionfish_comshop_car')->where( array('token' => $token,'community_id' => $data['community_id'],'carkey' => 'cart_total') )->save($car_data);
-				
+
 				} else{				
 					
 					$car_data = array();
@@ -986,12 +986,12 @@ class CarController extends CommonController {
 					M('lionfish_comshop_car')->add($car_data);
 				}
 			}
-						
+
 			//session('cart_total',$total);
 			$json ['code']  = 1;
 			if( $data['buy_type'] != 'dan' )
 			{
-			    $json ['code']  = 2;
+				$json ['code']  = 2;
 			}
 			$json['success']='成功加入购物车！！';
 			$json['total']=$total;
@@ -1025,7 +1025,7 @@ class CarController extends CommonController {
 	
 	//显示购物车中商品列表
 	function show_cart_goods(){
-	
+
 		$gpc = I('request.');
 		
 		$token = $gpc['token'];
@@ -1072,14 +1072,14 @@ class CarController extends CommonController {
 		if( empty($member_id) )
 		{
 			  //需要登录
-			  echo json_encode( array('code' =>5) );
-			  die();
+			echo json_encode( array('code' =>5) );
+			die();
 		}
-		  
+
 		$cart =  D('Home/Car');
 		
 		$goods = $cart->get_all_goodswecar($buy_type, $token, 0, $community_id,$soli_id);
-	
+
 
 		$seller_goodss = array();
 
@@ -1227,7 +1227,7 @@ class CarController extends CommonController {
 				{
 					$s_logo = tomedia($s_logo);
 				}
-						
+
 				$val['store_info'] = $store_info;
 				
 				$store_data = array();
@@ -1276,8 +1276,8 @@ class CarController extends CommonController {
 		}
 		
 		
-	
-	
+
+
 		foreach($seller_goodss as $store_id => $val)
 		{
 			//total
@@ -1355,7 +1355,7 @@ class CarController extends CommonController {
 			{
 				$s_logo = tomedia($s_logo);
 			}
-					
+
 			$val['store_info'] = $store_info;
 			
 			$store_data = array();
@@ -1446,7 +1446,7 @@ class CarController extends CommonController {
 		
 		$need_data['is_member_level_buy'] = $is_member_level_buy;//当前会员折扣 购买，1是，0否
 		$need_data['level_save_money'] = $level_save_money;//会员折扣省的钱
-				
+
 		$need_data['is_vip_card_member'] = $is_vip_card_member;//当前会员是否是 会员卡会员 0 不是，1是，2已过期
 		$need_data['vipcard_save_money'] = $vipcard_save_money;//vip能节约的金额
 		$need_data['is_open_vipcard_buy'] = $is_open_vipcard_buy;//vip能节约的金额
@@ -1485,7 +1485,7 @@ class CarController extends CommonController {
 
 		$car_key = explode(',', $data['car_key']);
 		$all_keys_arr = explode(',', $data['all_keys_arr']) ;
-		  
+
 		$save_keys = array();
 		if(!empty($all_keys_arr)){
 			foreach($all_keys_arr as $val)
@@ -1500,7 +1500,7 @@ class CarController extends CommonController {
 		if( $buy_type == 'dan')
 		{
 			$all_cart = M('lionfish_comshop_car')->where("community_id={$community_id} and token='{$token}' and carkey like 'cart.%'")->select();
-		
+
 		}else if( $buy_type == 'soitaire' ){
 			$all_cart = M('lionfish_comshop_car')->where("community_id={$community_id} and token='{$token}' and carkey like 'soitairecart.%'")->select();	
 		}
@@ -1566,7 +1566,7 @@ class CarController extends CommonController {
 						echo json_encode( array('code' => 6,'msg' => $check_json['msg']) );
 						die();
 					}
-				
+
 					M('lionfish_comshop_car')->where( array('id' => $car_info['id'], 'community_id' => $community_id) )->save( array('format_data' => serialize($tmp_format_data) ) );	
 				}		
 			}	
@@ -1606,7 +1606,7 @@ class CarController extends CommonController {
 		
 		$token = $gpc['token'];
 		$community_id = $gpc['community_id'];
-		  
+
 		$carkey = $gpc['carkey'];
 		
 		
@@ -1734,7 +1734,7 @@ class CarController extends CommonController {
 			
 			$up_data = array();
 			$up_data['code'] = $city_id;
-		
+
 			M('lionfish_comshop_area')->where( array('id' => $city_id ) )->save($up_data);
 			
 		}
@@ -1797,7 +1797,7 @@ class CarController extends CommonController {
 		
 		$address_param['lon_lat'] = '';
 		$address_param['lou_meng_hao'] = $lou_meng_hao;
-	
+
 		if(!empty($latitude))
 		{
 			$address_param['lon_lat'] = $longitude.','.$latitude; 
@@ -1856,47 +1856,47 @@ class CarController extends CommonController {
 		$gpc = I('request.');
 		
 		
-	  $buy_type = isset($gpc['buy_type']) ? $gpc['buy_type'] : 'dan';
-	  
-	  $pintuan_model_buy = D('Home/Front')->get_config_by_name('pintuan_model_buy');
+		$buy_type = isset($gpc['buy_type']) ? $gpc['buy_type'] : 'dan';
+
+		$pintuan_model_buy = D('Home/Front')->get_config_by_name('pintuan_model_buy');
 		
-	  if( empty($pintuan_model_buy) || $pintuan_model_buy ==0 )
-	  {
-		  $pintuan_model_buy = 0;
-	  }
-	  
-	   
-	  $mb_city_name = isset($gpc['mb_city_name']) ? $gpc['mb_city_name'] : '';
-	  
-	  if($buy_type == 'undefined')
-	  {
-		 $buy_type = 'dan'; 
-	  }
-	  
-	  $community_id = $gpc['community_id'];
-	  $token = $gpc['token'];
-	  
-	  $voucher_id = isset($gpc['voucher_id']) ? $gpc['voucher_id'] : 0;
-	  
-	  $soli_id = isset($gpc['soli_id']) ? intval($gpc['soli_id']) : '';
-	   
-	  $use_quan_str = isset($gpc['use_quan_str']) ? $gpc['use_quan_str'] : '';
-	  $use_quan_arr = array();
-	  
-	  if($use_quan_str != '')
-	  {
-		  $use_quan_arr_tmp = explode('@',$use_quan_str );
-		  foreach($use_quan_arr_tmp as $val)
-		  {
-			 $tmp_arr = explode('_', $val);
-			 $use_quan_arr[$tmp_arr[0]] = $tmp_arr[1];
-		  }
-	  }
-	  
-	  $weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
-	  $member_id = $weprogram_token['member_id'];
-	
-	
+		if( empty($pintuan_model_buy) || $pintuan_model_buy ==0 )
+		{
+			$pintuan_model_buy = 0;
+		}
+
+
+		$mb_city_name = isset($gpc['mb_city_name']) ? $gpc['mb_city_name'] : '';
+
+		if($buy_type == 'undefined')
+		{
+			$buy_type = 'dan'; 
+		}
+
+		$community_id = $gpc['community_id'];
+		$token = $gpc['token'];
+
+		$voucher_id = isset($gpc['voucher_id']) ? $gpc['voucher_id'] : 0;
+
+		$soli_id = isset($gpc['soli_id']) ? intval($gpc['soli_id']) : '';
+
+		$use_quan_str = isset($gpc['use_quan_str']) ? $gpc['use_quan_str'] : '';
+		$use_quan_arr = array();
+
+		if($use_quan_str != '')
+		{
+			$use_quan_arr_tmp = explode('@',$use_quan_str );
+			foreach($use_quan_arr_tmp as $val)
+			{
+				$tmp_arr = explode('_', $val);
+				$use_quan_arr[$tmp_arr[0]] = $tmp_arr[1];
+			}
+		}
+
+		$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
+		$member_id = $weprogram_token['member_id'];
+
+
 		$is_open_vipcard_buy = D('Home/Front')->get_config_by_name('is_open_vipcard_buy');
 		$is_open_vipcard_buy = !empty($is_open_vipcard_buy) && $is_open_vipcard_buy ==1 ? 1:0; 
 
@@ -1926,1089 +1926,1089 @@ class CarController extends CommonController {
 			}
 		}
 
-			
-	
-	  if( empty($member_id) )
-	  {
+
+
+		if( empty($member_id) )
+		{
 		  //需要登录
-		  echo json_encode( array('code' =>5) );
-		  die();
-	  }
-	
-	$cart = D('Home/Car');
-	
-	
-	
-	if ((!$cart->has_goodswecar($buy_type,$token,$community_id) ) ) {
+			echo json_encode( array('code' =>5) );
+			die();
+		}
+
+		$cart = D('Home/Car');
+
+
+
+		if ((!$cart->has_goodswecar($buy_type,$token,$community_id) ) ) {
 		//购物车中没有商品
-		echo json_encode( array('code' =>4) );
-		die();
-	}
-	
-	
-	$member_info = M('lionfish_comshop_member')->where( array('member_id' => $member_id) )->find();
-	
-	//soitaire
-	$goods=$cart->get_all_goodswecar($buy_type, $token,1,$community_id,$soli_id);
-	
-	
-	$address = M('lionfish_comshop_address')->where( array('member_id' => $member_id) )->order('is_default desc,address_id desc')->find();
-	
-	$add_old_order = M('lionfish_comshop_order')->field('address_id')->where(  array('delivery' => 'express','member_id' => $member_id) )->order('order_id desc')->find();
-	
-	if( !empty($add_old_order) && $add_old_order['address_id'] > 0)
-	{
-		$address = M('lionfish_comshop_address')->where( array('address_id' => $add_old_order['address_id'],'member_id' => $member_id) )->find();	
-	}
-	
-	$mb_city_id = 0;
-	if(!empty($mb_city_name))
-	{
-		$mb_city_info = M('lionfish_comshop_area')->where(" name='{$mb_city_name}' ")->find();
-		
-		if( !empty($mb_city_info) )
-		{
-			$mb_city_id = $mb_city_info['id'];
-		}			
-		
-	}
+			echo json_encode( array('code' =>4) );
+			die();
+		}
 
-	if($address){
-		
-		
-		//get_area_info($id)
-		$province_info =  D('Home/Front')->get_area_info($address['province_id']);// M('area')->field('area_name')->where( array('area_id' => $address['province_id']) )->find();
-		$city_info = D('Home/Front')->get_area_info($address['city_id']);//M('area')->field('area_name')->where( array('area_id' => $address['city_id']) )->find();
-		$country_info = D('Home/Front')->get_area_info($address['country_id']);//M('area')->field('area_name')->where( array('area_id' => $address['country_id']) )->find();
-		
-		$address['province_name'] = $province_info['name'];
-		$address['city_name'] = $city_info['name'];
-		$address['country_name'] = $country_info['name'];
-	}else{
-		$address = array();
-	}
-	
-	$seller_goodss = array();
-	$show_voucher = 0;
-	
-	//判断是否仅快递的配送方式  is_only_express
-	
-	$is_open_only_express = D('Home/Front')->get_config_by_name('is_open_only_express');
-					
-	$is_only_express = 0;
-	
-	if( !empty($is_open_only_express) && $is_open_only_express == 1)
-	{
-		$is_only_express = 1;
-	}
-	
-	
-	foreach($goods as $key => &$val)
-	{
-		//$goods_store_field =  M('goods')->field('store_id')->where( array('goods_id' => $val['goods_id']) )->find();
-		if( $is_only_express == 1 && $val['is_only_express'] != 1 )
+
+		$member_info = M('lionfish_comshop_member')->where( array('member_id' => $member_id) )->find();
+
+		//soitaire
+		$goods=$cart->get_all_goodswecar($buy_type, $token,1,$community_id,$soli_id);
+
+
+		$address = M('lionfish_comshop_address')->where( array('member_id' => $member_id) )->order('is_default desc,address_id desc')->find();
+
+		$add_old_order = M('lionfish_comshop_order')->field('address_id')->where(  array('delivery' => 'express','member_id' => $member_id) )->order('order_id desc')->find();
+
+		if( !empty($add_old_order) && $add_old_order['address_id'] > 0)
 		{
-			$is_only_express = 0;
+			$address = M('lionfish_comshop_address')->where( array('address_id' => $add_old_order['address_id'],'member_id' => $member_id) )->find();	
+		}
+
+		$mb_city_id = 0;
+		if(!empty($mb_city_name))
+		{
+			$mb_city_info = M('lionfish_comshop_area')->where(" name='{$mb_city_name}' ")->find();
+
+			if( !empty($mb_city_info) )
+			{
+				$mb_city_id = $mb_city_info['id'];
+			}			
+
+		}
+
+		if($address){
+
+
+			//get_area_info($id)
+			$province_info =  D('Home/Front')->get_area_info($address['province_id']);// M('area')->field('area_name')->where( array('area_id' => $address['province_id']) )->find();
+			$city_info = D('Home/Front')->get_area_info($address['city_id']);//M('area')->field('area_name')->where( array('area_id' => $address['city_id']) )->find();
+			$country_info = D('Home/Front')->get_area_info($address['country_id']);//M('area')->field('area_name')->where( array('area_id' => $address['country_id']) )->find();
+			
+			$address['province_name'] = $province_info['name'];
+			$address['city_name'] = $city_info['name'];
+			$address['country_name'] = $country_info['name'];
+		}else{
+			$address = array();
+		}
+	
+		$seller_goodss = array();
+		$show_voucher = 0;
+		
+		//判断是否仅快递的配送方式  is_only_express
+		
+		$is_open_only_express = D('Home/Front')->get_config_by_name('is_open_only_express');
+
+		$is_only_express = 0;
+		
+		if( !empty($is_open_only_express) && $is_open_only_express == 1)
+		{
+			$is_only_express = 1;
 		}
 		
 		
-		
-		if($is_only_express == 0 && $val['is_only_express'] == 3 )
+		foreach($goods as $key => $val)
 		{
-			$is_only_express = 3;
-		}
-		
-		
-		$supply_id = D('Home/Front')->get_goods_supply_id($val['goods_id']);
-		//-------------- by lucas 【显示供应商】 Start ------------------------
-		$val['shopname'] = '平台自营';
-		//-------------- by lucas 【显示供应商】 End --------------------------
-		if($supply_id > 0)
-		{
-			$supply_info = D('Home/Front')->get_supply_info($supply_id);
+			//$goods_store_field =  M('goods')->field('store_id')->where( array('goods_id' => $val['goods_id']) )->find();
+			if( $is_only_express == 1 && $val['is_only_express'] != 1 )
+			{
+				$is_only_express = 0;
+			}
+			
+			
+			
+			if($is_only_express == 0 && $val['is_only_express'] == 3 )
+			{
+				$is_only_express = 3;
+			}
+			
+			
+			$supply_id = D('Home/Front')->get_goods_supply_id($val['goods_id']);
 			//-------------- by lucas 【显示供应商】 Start ------------------------
-			$val['shopname'] = $supply_info['shopname'];
+			$val['shopname'] = '平台自营';
 			//-------------- by lucas 【显示供应商】 End --------------------------
-			if($supply_info['type'] ==0)
+			if($supply_id > 0)
 			{
-				$supply_id = 0;
-			}
-		}
-		$seller_goodss[ $supply_id ]['goods'][$key] = $val;
-	}
-	
-	$quan_model = D('Home/Voucher'); 
-	$pin_model = D('Home/Pin');
-	
-	
-	$voucher_price = 0;
-	$reduce_money = 0;
-	$cha_reduce_money = 0;
-	
-	$is_pin_over = 0;
-	$is_moban =  false;
-	
-	
-	
-	$is_open_fullreduction = D('Home/Front')->get_config_by_name('is_open_fullreduction');
-	$full_money = D('Home/Front')->get_config_by_name('full_money');
-	$full_reducemoney = D('Home/Front')->get_config_by_name('full_reducemoney');
-	
-	if(empty($full_reducemoney) || $full_reducemoney <= 0)
-	{
-		$is_open_fullreduction = 0;
-	}
-
-	
-	$show_voucher = 0;
-		
-	$voucher_can_use =1;//目前都是平台券，
-	$man_total_free = 0;
-	$store_buy_total_money = 0;
-	
-	$pin_id = 0;
-	
-	$is_zero_buy = 0;
-	$vipcard_save_money = 0;
-	$level_save_money = 0;
-	
-	
-	//计算优惠券
-	foreach($seller_goodss as $store_id => $val)
-	{
-		
-		$seller_voucher_list = array();
-		$seller_total_fee = 0;
-		$total_trans_free = 0;
-		$is_no_quan = false;
-		
-		
-		$total_weight = 0;
-		$total_quantity = 0;
-		$vch_goods_ids =  array();
-		
-		
-		foreach($val['goods'] as $kk =>$d_goods)
-		{
-			if($d_goods['is_take_vipcard'] == 1)
-			{	
-				$vipcard_save_money += $d_goods['total'] - $d_goods['card_total'];
-			}else if( $d_goods['is_mb_level_buy'] > 0 && $is_member_level_buy == 1)
-			{
-				$level_save_money += $d_goods['total'] - $d_goods['level_total'];
-			}
-			
-			if( $is_vip_card_member == 1 && $d_goods['is_take_vipcard'] == 1 )
-			{
-				$seller_total_fee += $d_goods['card_total'];
-				if( $store_id == 0 )
+				$supply_info = D('Home/Front')->get_supply_info($supply_id);
+				//-------------- by lucas 【显示供应商】 Start ------------------------
+				$val['shopname'] = $supply_info['shopname'];
+				//-------------- by lucas 【显示供应商】 End --------------------------
+				if($supply_info['type'] ==0)
 				{
-					$store_buy_total_money += $d_goods['card_total'];
-				}
-				if( $d_goods['can_man_jian'] == 1)
-				{
-					$man_total_free += $d_goods['card_total'];
-					
+					$supply_id = 0;
 				}
 			}
-			else if( $d_goods['is_mb_level_buy'] > 0 && $is_member_level_buy == 1 )
-			{
-				$seller_total_fee += $d_goods['level_total'];
-				if( $store_id == 0 )
-				{
-					$store_buy_total_money += $d_goods['level_total'];
-				}
-				if( $d_goods['can_man_jian'] == 1)
-				{
-					$man_total_free += $d_goods['level_total'];
-				}
-			}
-			else
-			{
-				$seller_total_fee += $d_goods['total'];
-				if( $store_id == 0 )
-				{
-					$store_buy_total_money += $d_goods['total'];
-				}
-				if( $d_goods['can_man_jian'] == 1)
-				{
-					$man_total_free += $d_goods['total'];
-					
-				}
-			}
-			
-			
-			if($buy_type == 'pintuan' && $d_goods['pin_id'] > 0)
-			{
-				$is_pin_over = $pin_model->getNowPinState($d_goods['pin_id']);
-				if( $is_pin_over == 2 )
-				{
-					$is_zero_buy = $pin_model->check_goods_iszero_opentuan( $d_goods['goods_id'] );
-				}
-			}else if($buy_type == 'pintuan' && $d_goods['pin_id'] == 0)
-			{
-				$is_zero_buy = $pin_model->check_goods_iszero_opentuan( $d_goods['goods_id'] );
-			}
-			
-			$tp_goods_info = M('lionfish_comshop_goods')->field('type')->where( array('id' => $d_goods['goods_id']) )->find();	
-			
-			$vch_goods_ids[$d_goods['goods_id']] = $d_goods['total'];
-			//$is_no_quan = true;
-			
-			if($tp_goods_info['type'] == 'integral')
-			{
-				$is_no_quan = true;
-			}
-			
-			if($d_goods['shipping']==0)
-			{
-				$is_moban = true;
-				$val['is_moban'] = true;
-				$total_weight += $d_goods['weight']*$d_goods['quantity'];
-				$total_quantity += $d_goods['quantity'];
-			}
-			
-			$d_goods[$kk]['trans_free'] = 0;
-			/**
-			if($d_goods['shipping']==1)
-			{
-				//统一运费
-				$d_goods[$kk]['trans_free'] = $d_goods['goods_freight'];
-			}else {
-				//运费模板
-				 if(!empty($address))
-				{
-					$trans_free = load_model_class('transport')->calc_transport($d_goods['transport_id'], $d_goods['quantity'],$d_goods['quantity']*$d_goods['weight'], $address['city_id'] );
-				}else{
-					$trans_free = 0;
-				}
-			   $d_goods[$kk]['trans_free'] = $trans_free;
-			}
-			**/
-			
-			$total_trans_free  += $d_goods[$kk]['trans_free'];
-			$val['goods'][$kk] = $d_goods;
-			
+			$seller_goodss[ $supply_id ]['goods'][$key] = $val;
 		}
 		
-		$chose_vouche = array();
+		$quan_model = D('Home/Voucher'); 
+		$pin_model = D('Home/Pin');
+		
+		
+		$voucher_price = 0;
+		$reduce_money = 0;
+		$cha_reduce_money = 0;
+		
+		$is_pin_over = 0;
+		$is_moban =  false;
 		
 		
 		
+		$is_open_fullreduction = D('Home/Front')->get_config_by_name('is_open_fullreduction');
+		$full_money = D('Home/Front')->get_config_by_name('full_money');
+		$full_reducemoney = D('Home/Front')->get_config_by_name('full_reducemoney');
 		
-		if(!$is_no_quan)
-		{
-			
-			$vouche_list = $quan_model->get_user_canpay_voucher($member_id,$store_id,$seller_total_fee,'',$vch_goods_ids);
-		
-			
-			if(!empty($vouche_list) && empty($use_quan_arr) ) {
-				if($voucher_can_use == 1)
-				{
-					$voucher_can_use++;
-					
-					$show_voucher = 1;
-					reset($vouche_list);
-					$chose_vouche = current($vouche_list);
-					$voucher_price += $chose_vouche['credit'];
-					
-					$seller_total_fee = round( $seller_total_fee - $chose_vouche['credit'], 2);
-				}
-				
-			}else if( !empty($vouche_list) &&  !empty($use_quan_arr) )
-			{
-				
-				foreach($vouche_list as $tmp_voucher)
-				{
-					if($tmp_voucher['id'] == $use_quan_arr[$store_id]) 
-					{
-						$show_voucher = 1;
-						$chose_vouche = $tmp_voucher;
-						$seller_total_fee = round( $seller_total_fee - $chose_vouche['credit'], 2);
-						$voucher_price += $chose_vouche['credit'];
-						break;
-					}
-				}
-			}
-			
-		}
-		
-		$val['chose_vouche'] = $chose_vouche;
-		$val['show_voucher'] = $show_voucher;
-		
-		$val['voucher_list'] = $vouche_list;
-		$val['total'] = $seller_total_fee;
-		
-		if($val['total'] < 0)
-		{
-			$val['total'] = 0;
-		}
-		
-		$val['trans_free'] = $total_trans_free;
-		
-		$val['reduce_money'] = 0;
-		
-		//pindan （拼团商品单独购买）   pintuan （拼团）
-		
-		if($buy_type == 'pindan' || $buy_type == 'pintuan' || $buy_type == 'integral')
+		if(empty($full_reducemoney) || $full_reducemoney <= 0)
 		{
 			$is_open_fullreduction = 0;
 		}
+
+		
+		$show_voucher = 0;
+
+		$voucher_can_use =1;//目前都是平台券，
+		$man_total_free = 0;
+		$store_buy_total_money = 0;
+		
+		$pin_id = 0;
+		
+		$is_zero_buy = 0;
+		$vipcard_save_money = 0;
+		$level_save_money = 0;
 		
 		
-		//man_total_free
-		if($is_open_fullreduction == 1 && $man_total_free >= $full_money )
+		//计算优惠券
+		foreach($seller_goodss as $store_id => $val)
 		{
-			$val['reduce_money'] = $full_reducemoney;
-			$reduce_money = $full_reducemoney;
-		}else if($is_open_fullreduction == 1 && $man_total_free < $full_money)
-		{
-			$cha_reduce_money = $full_money - $man_total_free;
-		}
-		
-		
-		
-		
-		
-		$val['total_weight'] = $total_weight;
-		$val['total_quantity'] = $total_quantity;
-		
-		$s_logo = D('Home/Front')->get_config_by_name('shoplogo');
-		$shoname = D('Home/Front')->get_config_by_name('shoname');
-		if( !empty($s_logo) )
-		{
-			$s_logo = tomedia( $s_logo );
-		}
-		
-		$store_info = array('s_id' => $store_id,'s_true_name' => $shoname,'s_logo' => $s_logo );
-		
-		if( !empty($store_id) && $store_id > 0 )
-		{
-			 $supply_info = D('Home/Front')->get_supply_info($store_id);
-			 //logo
-			 if( !empty($supply_info) )
-			 {
-				 $store_info['s_true_name'] = $supply_info['shopname'];
-				 $store_info['s_logo'] = tomedia( $supply_info['logo'] );
-			 }
-		}
-		
-		$val['store_info'] = $store_info;
-		
-		$seller_goodss[$store_id] = $val;
-	}
-	
-	$trans_free_toal = 0;//运费
-   
-	//delivery_type_ziti  delivery_type_express    delivery_type_tuanz  delivery_tuanz_money
-	
-	$delivery_type_ziti = D('Home/Front')->get_config_by_name('delivery_type_ziti');
-	$delivery_type_express = D('Home/Front')->get_config_by_name('delivery_type_express');
-	$delivery_type_tuanz = D('Home/Front')->get_config_by_name('delivery_type_tuanz');
-	$delivery_tuanz_money = D('Home/Front')->get_config_by_name('delivery_tuanz_money');
-	//---
-	$man_free_tuanzshipping = D('Home/Front')->get_config_by_name('man_free_tuanzshipping');
-	$man_free_shipping = D('Home/Front')->get_config_by_name('man_free_shipping');
-	
-	$delivery_express_name = D('Home/Front')->get_config_by_name('delivery_express_name');
-	
-	
-	if( empty($man_free_tuanzshipping) || $buy_type == 'integral')
-	{
-		$man_free_tuanzshipping = 0;
-	}
-	
-	if( empty($man_free_shipping) || $buy_type == 'integral' )
-	{
-		$man_free_shipping = 0;
-	}
-	$delivery_date = '';
-	//if( $buy_type == 'dan' )
-	if( $buy_type == 'dan'  || $buy_type == 'soitaire' || ($pintuan_model_buy == 1 && $buy_type != 'dan' && $buy_type != 'integral'  ) )			
-	{
-		//...判断团长是否开启自定义的情况 store_buy_total_money
-		$community_info_modify = M('lionfish_community_head')->field('groupid,is_modify_shipping_method,is_modify_shipping_fare,shipping_fare')->where( array('id' => $community_id) )->find();				
 			
-		//------------------- by lucas S 小程序调用提交订单页面时，显示提货的时间--------------
-		$community_head_group = M('lionfish_community_head_group')->where( array('id' => $community_info_modify['groupid']) )->find();
-		$model = new CommunityheadModel(); 
-		$delivery_date = $model->get_delivery_date($community_info_modify['groupid']);
-		//dump($delivery_date);exit;
-		//$delivery_time = '提货时间： 2020-03-20';				
-		//var_dump('$community_info_modify: ',$community_info_modify);exit; //by lucas
-		//------------------- by lucas E --------------							
-		
-		if( !empty($community_info_modify['is_modify_shipping_method']) && $community_info_modify['is_modify_shipping_method'] == 1 )
-		{
-			//开启配送
-			$delivery_type_tuanz = 1;
+			$seller_voucher_list = array();
+			$seller_total_fee = 0;
+			$total_trans_free = 0;
+			$is_no_quan = false;
 			
-			if( !empty($community_info_modify['is_modify_shipping_fare']) && $community_info_modify['is_modify_shipping_fare'] == 1 && $community_info_modify['shipping_fare'] > 0 )
+			
+			$total_weight = 0;
+			$total_quantity = 0;
+			$vch_goods_ids =  array();
+			
+			
+			foreach($val['goods'] as $kk =>$d_goods)
 			{
-				$delivery_tuanz_money = $community_info_modify['shipping_fare'];
+				if($d_goods['is_take_vipcard'] == 1)
+				{	
+					$vipcard_save_money += $d_goods['total'] - $d_goods['card_total'];
+				}else if( $d_goods['is_mb_level_buy'] > 0 && $is_member_level_buy == 1)
+				{
+					$level_save_money += $d_goods['total'] - $d_goods['level_total'];
+				}
+				
+				if( $is_vip_card_member == 1 && $d_goods['is_take_vipcard'] == 1 )
+				{
+					$seller_total_fee += $d_goods['card_total'];
+					if( $store_id == 0 )
+					{
+						$store_buy_total_money += $d_goods['card_total'];
+					}
+					if( $d_goods['can_man_jian'] == 1)
+					{
+						$man_total_free += $d_goods['card_total'];
+						
+					}
+				}
+				else if( $d_goods['is_mb_level_buy'] > 0 && $is_member_level_buy == 1 )
+				{
+					$seller_total_fee += $d_goods['level_total'];
+					if( $store_id == 0 )
+					{
+						$store_buy_total_money += $d_goods['level_total'];
+					}
+					if( $d_goods['can_man_jian'] == 1)
+					{
+						$man_total_free += $d_goods['level_total'];
+					}
+				}
+				else
+				{
+					$seller_total_fee += $d_goods['total'];
+					if( $store_id == 0 )
+					{
+						$store_buy_total_money += $d_goods['total'];
+					}
+					if( $d_goods['can_man_jian'] == 1)
+					{
+						$man_total_free += $d_goods['total'];
+						
+					}
+				}
+				
+				
+				if($buy_type == 'pintuan' && $d_goods['pin_id'] > 0)
+				{
+					$is_pin_over = $pin_model->getNowPinState($d_goods['pin_id']);
+					if( $is_pin_over == 2 )
+					{
+						$is_zero_buy = $pin_model->check_goods_iszero_opentuan( $d_goods['goods_id'] );
+					}
+				}else if($buy_type == 'pintuan' && $d_goods['pin_id'] == 0)
+				{
+					$is_zero_buy = $pin_model->check_goods_iszero_opentuan( $d_goods['goods_id'] );
+				}
+				
+				$tp_goods_info = M('lionfish_comshop_goods')->field('type')->where( array('id' => $d_goods['goods_id']) )->find();	
+				
+				$vch_goods_ids[$d_goods['goods_id']] = $d_goods['total'];
+				//$is_no_quan = true;
+				
+				if($tp_goods_info['type'] == 'integral')
+				{
+					$is_no_quan = true;
+				}
+				
+				if($d_goods['shipping']==0)
+				{
+					$is_moban = true;
+					$val['is_moban'] = true;
+					$total_weight += $d_goods['weight']*$d_goods['quantity'];
+					$total_quantity += $d_goods['quantity'];
+				}
+				
+				$d_goods[$kk]['trans_free'] = 0;
+				/**
+				if($d_goods['shipping']==1)
+				{
+					//统一运费
+					$d_goods[$kk]['trans_free'] = $d_goods['goods_freight'];
+				}else {
+					//运费模板
+					 if(!empty($address))
+					{
+						$trans_free = load_model_class('transport')->calc_transport($d_goods['transport_id'], $d_goods['quantity'],$d_goods['quantity']*$d_goods['weight'], $address['city_id'] );
+					}else{
+						$trans_free = 0;
+					}
+				   $d_goods[$kk]['trans_free'] = $trans_free;
+				}
+				**/
+				
+				$total_trans_free  += $d_goods[$kk]['trans_free'];
+				$val['goods'][$kk] = $d_goods;
+				
+			}
+			
+			$chose_vouche = array();
+			
+			
+			
+			
+			if(!$is_no_quan)
+			{
+				
+				$vouche_list = $quan_model->get_user_canpay_voucher($member_id,$store_id,$seller_total_fee,'',$vch_goods_ids);
+
+				
+				if(!empty($vouche_list) && empty($use_quan_arr) ) {
+					if($voucher_can_use == 1)
+					{
+						$voucher_can_use++;
+						
+						$show_voucher = 1;
+						reset($vouche_list);
+						$chose_vouche = current($vouche_list);
+						$voucher_price += $chose_vouche['credit'];
+						
+						$seller_total_fee = round( $seller_total_fee - $chose_vouche['credit'], 2);
+					}
+					
+				}else if( !empty($vouche_list) &&  !empty($use_quan_arr) )
+				{
+					
+					foreach($vouche_list as $tmp_voucher)
+					{
+						if($tmp_voucher['id'] == $use_quan_arr[$store_id]) 
+						{
+							$show_voucher = 1;
+							$chose_vouche = $tmp_voucher;
+							$seller_total_fee = round( $seller_total_fee - $chose_vouche['credit'], 2);
+							$voucher_price += $chose_vouche['credit'];
+							break;
+						}
+					}
+				}
+				
+			}
+			
+			$val['chose_vouche'] = $chose_vouche;
+			$val['show_voucher'] = $show_voucher;
+			
+			$val['voucher_list'] = $vouche_list;
+			$val['total'] = $seller_total_fee;
+			
+			if($val['total'] < 0)
+			{
+				$val['total'] = 0;
+			}
+			
+			$val['trans_free'] = $total_trans_free;
+			
+			$val['reduce_money'] = 0;
+			
+			//pindan （拼团商品单独购买）   pintuan （拼团）
+			
+			if($buy_type == 'pindan' || $buy_type == 'pintuan' || $buy_type == 'integral')
+			{
+				$is_open_fullreduction = 0;
 			}
 			
 			
-		}else if( !empty($community_info_modify['is_modify_shipping_method']) && $community_info_modify['is_modify_shipping_method'] == 2 )
-		{
-			//关闭配送
-			$delivery_type_tuanz = 0;
+			//man_total_free
+			if($is_open_fullreduction == 1 && $man_total_free >= $full_money )
+			{
+				$val['reduce_money'] = $full_reducemoney;
+				$reduce_money = $full_reducemoney;
+			}else if($is_open_fullreduction == 1 && $man_total_free < $full_money)
+			{
+				$cha_reduce_money = $full_money - $man_total_free;
+			}
+			
+			
+			
+			
+			
+			$val['total_weight'] = $total_weight;
+			$val['total_quantity'] = $total_quantity;
+			
+			$s_logo = D('Home/Front')->get_config_by_name('shoplogo');
+			$shoname = D('Home/Front')->get_config_by_name('shoname');
+			if( !empty($s_logo) )
+			{
+				$s_logo = tomedia( $s_logo );
+			}
+			
+			$store_info = array('s_id' => $store_id,'s_true_name' => $shoname,'s_logo' => $s_logo );
+			
+			if( !empty($store_id) && $store_id > 0 )
+			{
+				$supply_info = D('Home/Front')->get_supply_info($store_id);
+				 //logo
+				if( !empty($supply_info) )
+				{
+					$store_info['s_true_name'] = $supply_info['shopname'];
+					$store_info['s_logo'] = tomedia( $supply_info['logo'] );
+				}
+			}
+			
+			$val['store_info'] = $store_info;
+			
+			$seller_goodss[$store_id] = $val;
 		}
-	}else if( $buy_type == 'pindan' || $buy_type == 'pintuan' ){
-		if($pintuan_model_buy == 0)
+		
+		$trans_free_toal = 0;//运费
+
+		//delivery_type_ziti  delivery_type_express    delivery_type_tuanz  delivery_tuanz_money
+		
+		$delivery_type_ziti = D('Home/Front')->get_config_by_name('delivery_type_ziti');
+		$delivery_type_express = D('Home/Front')->get_config_by_name('delivery_type_express');
+		$delivery_type_tuanz = D('Home/Front')->get_config_by_name('delivery_type_tuanz');
+		$delivery_tuanz_money = D('Home/Front')->get_config_by_name('delivery_tuanz_money');
+		//---
+		$man_free_tuanzshipping = D('Home/Front')->get_config_by_name('man_free_tuanzshipping');
+		$man_free_shipping = D('Home/Front')->get_config_by_name('man_free_shipping');
+		
+		$delivery_express_name = D('Home/Front')->get_config_by_name('delivery_express_name');
+		
+		
+		if( empty($man_free_tuanzshipping) || $buy_type == 'integral')
+		{
+			$man_free_tuanzshipping = 0;
+		}
+		
+		if( empty($man_free_shipping) || $buy_type == 'integral' )
+		{
+			$man_free_shipping = 0;
+		}
+		$delivery_date = '';
+		//if( $buy_type == 'dan' )
+		if( $buy_type == 'dan'  || $buy_type == 'soitaire' || ($pintuan_model_buy == 1 && $buy_type != 'dan' && $buy_type != 'integral'  ) )			
+		{
+			//...判断团长是否开启自定义的情况 store_buy_total_money
+			$community_info_modify = M('lionfish_community_head')->field('groupid,is_modify_shipping_method,is_modify_shipping_fare,shipping_fare')->where( array('id' => $community_id) )->find();				
+
+			//------------------- by lucas S 小程序调用提交订单页面时，显示提货的时间--------------
+			$community_head_group = M('lionfish_community_head_group')->where( array('id' => $community_info_modify['groupid']) )->find();
+			$model = new CommunityheadModel(); 
+			$delivery_date = $model->get_delivery_date($community_info_modify['groupid']);
+			//dump($delivery_date);exit;
+			//$delivery_time = '提货时间： 2020-03-20';				
+			//var_dump('$community_info_modify: ',$community_info_modify);exit; //by lucas
+			//------------------- by lucas E --------------							
+			
+			if( !empty($community_info_modify['is_modify_shipping_method']) && $community_info_modify['is_modify_shipping_method'] == 1 )
+			{
+				//开启配送
+				$delivery_type_tuanz = 1;
+				
+				if( !empty($community_info_modify['is_modify_shipping_fare']) && $community_info_modify['is_modify_shipping_fare'] == 1 && $community_info_modify['shipping_fare'] > 0 )
+				{
+					$delivery_tuanz_money = $community_info_modify['shipping_fare'];
+				}
+				
+				
+			}else if( !empty($community_info_modify['is_modify_shipping_method']) && $community_info_modify['is_modify_shipping_method'] == 2 )
+			{
+				//关闭配送
+				$delivery_type_tuanz = 0;
+			}
+		}else if( $buy_type == 'pindan' || $buy_type == 'pintuan' ){
+			if($pintuan_model_buy == 0)
+			{
+				$delivery_type_tuanz = 0;
+				$delivery_type_express = 1;
+				$delivery_type_ziti = 2;
+			}
+		}else if( $buy_type == 'integral' )
 		{
 			$delivery_type_tuanz = 0;
 			$delivery_type_express = 1;
 			$delivery_type_ziti = 2;
 		}
-	}else if( $buy_type == 'integral' )
-	{
-		$delivery_type_tuanz = 0;
-		$delivery_type_express = 1;
-		$delivery_type_ziti = 2;
-	}
-	
-	
-	
-	$is_man_delivery_tuanz_fare = 0;//是否达到满xx减团长配送费
-	$fare_man_delivery_tuanz_fare_money = 0;//达到满xx减团长配送费， 减了多少钱
-	
-	if( ( $buy_type == 'dan' || $buy_type == 'soitaire' ) && !empty($man_free_tuanzshipping) && $man_free_tuanzshipping > 0 && $man_free_tuanzshipping <= $store_buy_total_money )
-	{
-		//$delivery_tuanz_money = 0;
-		$is_man_delivery_tuanz_fare = 1;
-		$fare_man_delivery_tuanz_fare_money = $delivery_tuanz_money;
-	}
-	
-	$is_man_shipping_fare = 0;//是否达到满xx减运费
-	$fare_man_shipping_fare_money = 0;//达到满xx减运费，司机减了多少运费
-	
-	//----开始计算运费 //dispatchtype
-	if($delivery_type_express == 1)
-	{
-		//ims_ 
-		 if($mb_city_id > 0){
-			
-			$shipping_default = M('lionfish_comshop_shipping')->where(array('enabled' => 1))->order('isdefault desc,id desc')->find();
-			
-			foreach($seller_goodss as $store_id => $val)
-			{
-				//$val['is_moban'] = true;
-				$store_shipping_fare = 0;
-				if(  isset($val['is_moban']) && $val['is_moban'] )
-				{
-					$store_shipping_fare = D('Home/Transport')->calc_transport($shipping_default['id'], $val['total_quantity'],$val['total_weight'], $mb_city_id );
-					
-				}
-				
-				
-				$val['store_shipping_fare'] = $store_shipping_fare;
-				
-				$trans_free_toal += $store_shipping_fare;
-				
-				foreach($val['goods'] as $kk =>$d_goods)
-				{
-					if($d_goods['shipping']==1)
-					{
-						//统一运费
-						$trans_free_toal += $d_goods['goods_freight'];
-					}
-				}
-			}
-			
-		}else if(!empty($address) && $mb_city_id == 0)
-		{
-			
-			$shipping_default = M('lionfish_comshop_shipping')->where( array('enabled' => 1) )->order('isdefault desc,id desc')->find();
-			
-			foreach($seller_goodss as $store_id => $val)
-			{
-				$store_shipping_fare = 0;
-				if(isset($val['is_moban']) && $val['is_moban'])
-				{
-					$store_shipping_fare = D('Home/Transport')->calc_transport($shipping_default['id'], $val['total_quantity'],$val['total_weight'], $address['city_id'] );
-				
-				}
-				$val['store_shipping_fare'] = $store_shipping_fare;
-				
-				$trans_free_toal += $store_shipping_fare;
-				
-				foreach($val['goods'] as $kk =>$d_goods)
-				{
-					if($d_goods['shipping']==1)
-					{
-						//统一运费
-						$trans_free_toal += $d_goods['goods_freight'];
-						$val['store_shipping_fare'] += $d_goods['goods_freight'];
-					}
-				}
-			}
 		
-		}else{
-			$trans_free_toal = 0;
+		
+		
+		$is_man_delivery_tuanz_fare = 0;//是否达到满xx减团长配送费
+		$fare_man_delivery_tuanz_fare_money = 0;//达到满xx减团长配送费， 减了多少钱
+		
+		if( ( $buy_type == 'dan' || $buy_type == 'soitaire' ) && !empty($man_free_tuanzshipping) && $man_free_tuanzshipping > 0 && $man_free_tuanzshipping <= $store_buy_total_money )
+		{
+			//$delivery_tuanz_money = 0;
+			$is_man_delivery_tuanz_fare = 1;
+			$fare_man_delivery_tuanz_fare_money = $delivery_tuanz_money;
 		}
 		
-		//
+		$is_man_shipping_fare = 0;//是否达到满xx减运费
+		$fare_man_shipping_fare_money = 0;//达到满xx减运费，司机减了多少运费
 		
-		if( !empty($man_free_shipping) && $man_free_shipping > 0 && $man_free_shipping <= $store_buy_total_money )
+		//----开始计算运费 //dispatchtype
+		if($delivery_type_express == 1)
 		{
-			
-			$fare_man_shipping_fare_money = $trans_free_toal;
-			$is_man_shipping_fare = 1;
-			//$trans_free_toal = 0;
-		}
-	}
-	//---结束结算运费
-	
-	if( empty($delivery_type_ziti) )
-	{
-		$delivery_type_ziti = 1;//开启
-	}
-	if( empty($delivery_type_express) )
-	{
-		$delivery_type_express = 2;
-	}
-	if( empty($delivery_type_tuanz) )
-	{
-		$delivery_type_tuanz = 2;
-	}
-	
-
-	
-	//is_only_express
-	if( $is_only_express == 1 )
-	{
-		$delivery_type_ziti = 2;
-		$delivery_type_express = 1;
-		$delivery_type_tuanz = 2;
-	}else if( $is_only_express == 3 )
-	{
-		//同城配送
-		$delivery_type_ziti = 0;
-		$delivery_type_express = 1;
-		$delivery_type_tuanz = 0;
-	}
-	
-	
-	
-	$total_free = 0;
-	$is_ziti = 2;
-	
-	$pick_up_time = "";
-	$pick_up_type = -1;
-	$pick_up_weekday = '';
-	$today_time = time();
-	
-	$arr = array('天','一','二','三','四','五','六');
-	
-	$pick_up_arr = array();
-	foreach($goods as $key => $good)
-	{
-		//暂时关闭
-		//var_dump($good);exit;
-		
-		//ims_lionfish_comshop_goods
-		//ims_ lionfish_comshop_good_common
-		
-		$goods_info = M('lionfish_comshop_good_common')->field('pick_up_type,pick_up_modify')->where( array('goods_id' => $good['goods_id']) )->find();				
+			//ims_ 
+			if($mb_city_id > 0){
+				
+				$shipping_default = M('lionfish_comshop_shipping')->where(array('enabled' => 1))->order('isdefault desc,id desc')->find();
+				
+				foreach($seller_goodss as $store_id => $val)
+				{
+					//$val['is_moban'] = true;
+					$store_shipping_fare = 0;
+					if(  isset($val['is_moban']) && $val['is_moban'] )
+					{
+						$store_shipping_fare = D('Home/Transport')->calc_transport($shipping_default['id'], $val['total_quantity'],$val['total_weight'], $mb_city_id );
 						
-		if($pick_up_type == -1 || $goods_info['pick_up_type'] > $pick_up_type)
-		{
-			$pick_up_type = $goods_info['pick_up_type'];
-			
-			if($pick_up_type == 0)
-			{
-				$pick_up_time = date('m-d', $today_time);
-				$pick_up_weekday = '周'.$arr[date('w',$today_time)];
-			}else if( $pick_up_type == 1 ){
-				$pick_up_time = date('m-d', $today_time+86400);
-				$pick_up_weekday = '周'.$arr[date('w',$today_time+86400)];
-			}else if( $pick_up_type == 2 )
-			{
-				$pick_up_time = date('m-d', $today_time+86400*2);
-				$pick_up_weekday = '周'.$arr[date('w',$today_time+86400*2)];
-			}else if($pick_up_type == 3)
-			{
-				$pick_up_time = $goods_info['pick_up_modify'];
-			}
-		}
-		
-		/**
-		if($goods_info['pick_just'] >= 1)
-		{
-			 $pick_up = $goods_info['pick_up'];
-			 $is_ziti = $goods_info['pick_just'];
-		}
-		**/
-	
-	
-		//$trans_free_toal += $good['goods_freight'];
-		$goods[$key]['trans_free'] = $good['goods_freight'];
-		
-		/**		
-		if($good['shipping']==1)
-		{
-			//统一运费
-			$trans_free_toal += $good['goods_freight'];
-			$goods[$key]['trans_free'] = $good['goods_freight'];
-		}else {
-			//运费模板
-			 if(!empty($address))
-			{
-				$trans_free =   load_model_class('transport')->calc_transport($good['transport_id'], $good['quantity'], $good['quantity']*$good['weight'], $address['city_id'] );
-			}else{
-				$trans_free = 0;
-			}
-			
-		   $goods[$key]['trans_free'] = $trans_free;
-			$trans_free_toal +=$trans_free;
-			
-		}
-		**/
-		
-		if( $is_vip_card_member == 1 && $good['is_take_vipcard'] == 1 )
-		{
-			$total_free += $good['card_total'];
-		}
-		else if( $good['is_mb_level_buy'] > 0  && $is_member_level_buy == 1 )
-		{
-			$total_free += $good['level_total'];
-		}
-		else
-		{
-			$total_free += $good['total'];
-		}
-		
-	} 
-	
-	//暂时关闭自提代码
-	/**
-	if(!empty($pick_up))
-	{
-		$pick_up = unserialize($pick_up);
-		$pick_up_ids = implode(',',$pick_up);
-		$pick_up_arr = M('pick_up')->where( array('id'=>array('in',$pick_up_ids)) )->select();
-	}
-	**/		
-	
-   
-	$pick_up_name = '';
-	$pick_up_mobile = '';
-	$tuan_send_address = '';
-	
-	$tuan_send_address_info = array();
-	
-	$shop_limit_buy_distance = D('Home/Front')->get_config_by_name('shop_limit_buy_distance');
-	
-	
-	
-	
-	if($is_ziti >= 1)
-	{
-		//寻找上一个订单的自提电话 自提姓名  
-		
-		$last_order_info = M('lionfish_comshop_order')->where( array('member_id' => $member_id,'delivery' => 'pickup') )->order('order_id desc')->find();
-		if(!empty($last_order_info))
-		{
-			$pick_up_name = $last_order_info['shipping_name'];
-			$pick_up_mobile = $last_order_info['telephone'];
-		}
-		
-		$last_tuanz_send_order_info = M('lionfish_comshop_order')->field('tuan_send_address,address_id')->where( array('member_id' =>$member_id,'delivery' => 'tuanz_send' ) )->order('order_id desc')->find();					
-		
-		if(!empty($last_tuanz_send_order_info))
-		{
-			$tuan_send_address = $last_tuanz_send_order_info['tuan_send_address'];
-			
-			if( !empty($last_tuanz_send_order_info['address_id']) )
-			{
-				
-				if($shop_limit_buy_distance == 1)
-				{
-					$tuan_send_address_info = M('lionfish_comshop_address')->where( "address_id=".$last_tuanz_send_order_info['address_id']." and lon_lat != '' " )->find();
+					}
 					
-				}else{
 					
-					$tuan_send_address_info = M('lionfish_comshop_address')->where( "address_id=".$last_tuanz_send_order_info['address_id'] )->find();
+					$val['store_shipping_fare'] = $store_shipping_fare;
 					
+					$trans_free_toal += $store_shipping_fare;
+					
+					foreach($val['goods'] as $kk =>$d_goods)
+					{
+						if($d_goods['shipping']==1)
+						{
+							//统一运费
+							$trans_free_toal += $d_goods['goods_freight'];
+						}
+					}
 				}
 				
-				if( !empty($tuan_send_address) && !empty($tuan_send_address_info['lon_lat']) )
+			}else if(!empty($address) && $mb_city_id == 0)
+			{
+				
+				$shipping_default = M('lionfish_comshop_shipping')->where( array('enabled' => 1) )->order('isdefault desc,id desc')->find();
+				
+				foreach($seller_goodss as $store_id => $val)
 				{
-					$province_info =  D('Home/Front')->get_area_info($tuan_send_address_info['province_id']);// M('area')->field('area_name')->where( array('area_id' => $address['province_id']) )->find();
-					$city_info = D('Home/Front')->get_area_info($tuan_send_address_info['city_id']);//M('area')->field('area_name')->where( array('area_id' => $address['city_id']) )->find();
-					$country_info = D('Home/Front')->get_area_info($tuan_send_address_info['country_id']);//M('area')->field('area_name')->where( array('area_id' => $address['country_id']) )->find();
+					$store_shipping_fare = 0;
+					if(isset($val['is_moban']) && $val['is_moban'])
+					{
+						$store_shipping_fare = D('Home/Transport')->calc_transport($shipping_default['id'], $val['total_quantity'],$val['total_weight'], $address['city_id'] );
+
+					}
+					$val['store_shipping_fare'] = $store_shipping_fare;
 					
-					$tuan_send_address_info['province_name'] = $province_info['name'];
-					$tuan_send_address_info['city_name'] = $city_info['name'];
-					$tuan_send_address_info['country_name'] = $country_info['name'];
+					$trans_free_toal += $store_shipping_fare;
 					
-					$tuan_send_address = $tuan_send_address_info['address'];
+					foreach($val['goods'] as $kk =>$d_goods)
+					{
+						if($d_goods['shipping']==1)
+						{
+							//统一运费
+							$trans_free_toal += $d_goods['goods_freight'];
+							$val['store_shipping_fare'] += $d_goods['goods_freight'];
+						}
+					}
+				}
+
+			}else{
+				$trans_free_toal = 0;
+			}
+			
+			//
+			
+			if( !empty($man_free_shipping) && $man_free_shipping > 0 && $man_free_shipping <= $store_buy_total_money )
+			{
+				
+				$fare_man_shipping_fare_money = $trans_free_toal;
+				$is_man_shipping_fare = 1;
+				//$trans_free_toal = 0;
+			}
+		}
+		//---结束结算运费
+		
+		if( empty($delivery_type_ziti) )
+		{
+			$delivery_type_ziti = 1;//开启
+		}
+		if( empty($delivery_type_express) )
+		{
+			$delivery_type_express = 2;
+		}
+		if( empty($delivery_type_tuanz) )
+		{
+			$delivery_type_tuanz = 2;
+		}
+		
+
+		
+		//is_only_express
+		if( $is_only_express == 1 )
+		{
+			$delivery_type_ziti = 2;
+			$delivery_type_express = 1;
+			$delivery_type_tuanz = 2;
+		}else if( $is_only_express == 3 )
+		{
+			//同城配送
+			$delivery_type_ziti = 0;
+			$delivery_type_express = 1;
+			$delivery_type_tuanz = 0;
+		}
+		
+		
+		
+		$total_free = 0;
+		$is_ziti = 2;
+		
+		$pick_up_time = "";
+		$pick_up_type = -1;
+		$pick_up_weekday = '';
+		$today_time = time();
+		
+		$arr = array('天','一','二','三','四','五','六');
+//p($goods);exit;	
+		$pick_up_arr = array();
+		foreach($goods as $key => $good)
+		{
+			//暂时关闭
+			//var_dump($good);exit;
+			
+			//ims_lionfish_comshop_goods
+			//ims_ lionfish_comshop_good_common
+			
+			$goods_info = M('lionfish_comshop_good_common')->field('pick_up_type,pick_up_modify')->where( array('goods_id' => $good['goods_id']) )->find();				
+
+			if($pick_up_type == -1 || $goods_info['pick_up_type'] > $pick_up_type)
+			{
+				$pick_up_type = $goods_info['pick_up_type'];
+				
+				if($pick_up_type == 0)
+				{
+					$pick_up_time = date('m-d', $today_time);
+					$pick_up_weekday = '周'.$arr[date('w',$today_time)];
+				}else if( $pick_up_type == 1 ){
+					$pick_up_time = date('m-d', $today_time+86400);
+					$pick_up_weekday = '周'.$arr[date('w',$today_time+86400)];
+				}else if( $pick_up_type == 2 )
+				{
+					$pick_up_time = date('m-d', $today_time+86400*2);
+					$pick_up_weekday = '周'.$arr[date('w',$today_time+86400*2)];
+				}else if($pick_up_type == 3)
+				{
+					$pick_up_time = $goods_info['pick_up_modify'];
+				}
+			}
+			
+			/**
+			if($goods_info['pick_just'] >= 1)
+			{
+				 $pick_up = $goods_info['pick_up'];
+				 $is_ziti = $goods_info['pick_just'];
+			}
+			**/
+
+
+			//$trans_free_toal += $good['goods_freight'];
+			$goods[$key]['trans_free'] = $good['goods_freight'];
+			
+			/**		
+			if($good['shipping']==1)
+			{
+				//统一运费
+				$trans_free_toal += $good['goods_freight'];
+				$goods[$key]['trans_free'] = $good['goods_freight'];
+			}else {
+				//运费模板
+				 if(!empty($address))
+				{
+					$trans_free =   load_model_class('transport')->calc_transport($good['transport_id'], $good['quantity'], $good['quantity']*$good['weight'], $address['city_id'] );
 				}else{
-					//todo...
+					$trans_free = 0;
+				}
+				
+			   $goods[$key]['trans_free'] = $trans_free;
+				$trans_free_toal +=$trans_free;
+				
+			}
+			**/
+			
+			if( $is_vip_card_member == 1 && $good['is_take_vipcard'] == 1 )
+			{
+				$total_free += $good['card_total'];
+			}
+			else if( $good['is_mb_level_buy'] > 0 && $is_member_level_buy == 1 )
+			{
+				$total_free += $good['level_total'];
+			}
+			else
+			{
+				$total_free += $good['total'];
+			}
+			
+		} 
+//dump($goods);exit;		
+		//暂时关闭自提代码
+		/**
+		if(!empty($pick_up))
+		{
+			$pick_up = unserialize($pick_up);
+			$pick_up_ids = implode(',',$pick_up);
+			$pick_up_arr = M('pick_up')->where( array('id'=>array('in',$pick_up_ids)) )->select();
+		}
+		**/		
+		
+
+		$pick_up_name = '';
+		$pick_up_mobile = '';
+		$tuan_send_address = '';
+		
+		$tuan_send_address_info = array();
+		
+		$shop_limit_buy_distance = D('Home/Front')->get_config_by_name('shop_limit_buy_distance');
+		
+		
+		
+		
+		if($is_ziti >= 1)
+		{
+			//寻找上一个订单的自提电话 自提姓名  
+			
+			$last_order_info = M('lionfish_comshop_order')->where( array('member_id' => $member_id,'delivery' => 'pickup') )->order('order_id desc')->find();
+			if(!empty($last_order_info))
+			{
+				$pick_up_name = $last_order_info['shipping_name'];
+				$pick_up_mobile = $last_order_info['telephone'];
+			}
+			
+			$last_tuanz_send_order_info = M('lionfish_comshop_order')->field('tuan_send_address,address_id')->where( array('member_id' =>$member_id,'delivery' => 'tuanz_send' ) )->order('order_id desc')->find();					
+			
+			if(!empty($last_tuanz_send_order_info))
+			{
+				$tuan_send_address = $last_tuanz_send_order_info['tuan_send_address'];
+				
+				if( !empty($last_tuanz_send_order_info['address_id']) )
+				{
+					
+					if($shop_limit_buy_distance == 1)
+					{
+						$tuan_send_address_info = M('lionfish_comshop_address')->where( "address_id=".$last_tuanz_send_order_info['address_id']." and lon_lat != '' " )->find();
+						
+					}else{
+						
+						$tuan_send_address_info = M('lionfish_comshop_address')->where( "address_id=".$last_tuanz_send_order_info['address_id'] )->find();
+						
+					}
+					
+					if( !empty($tuan_send_address) && !empty($tuan_send_address_info['lon_lat']) )
+					{
+						$province_info =  D('Home/Front')->get_area_info($tuan_send_address_info['province_id']);// M('area')->field('area_name')->where( array('area_id' => $address['province_id']) )->find();
+						$city_info = D('Home/Front')->get_area_info($tuan_send_address_info['city_id']);//M('area')->field('area_name')->where( array('area_id' => $address['city_id']) )->find();
+						$country_info = D('Home/Front')->get_area_info($tuan_send_address_info['country_id']);//M('area')->field('area_name')->where( array('area_id' => $address['country_id']) )->find();
+						
+						$tuan_send_address_info['province_name'] = $province_info['name'];
+						$tuan_send_address_info['city_name'] = $city_info['name'];
+						$tuan_send_address_info['country_name'] = $country_info['name'];
+						
+						$tuan_send_address = $tuan_send_address_info['address'];
+					}else{
+						//todo...
+						$tuan_send_address = '';
+					}
+					
+				}else{
 					$tuan_send_address = '';
 				}
 				
-			}else{
-				$tuan_send_address = '';
 			}
-			
 		}
-	}
-	/**
-	**/
-	/**
-	tuan_region
-	store_buy_total_money
-	
-	**/
-	
-	//open_score_buy_score $shop_limit_buy_distance = load_model_class('front')->get_config_by_name('shop_limit_buy_distance');
-	
-	$open_score_buy_score =  D('Home/Front')->get_config_by_name('open_score_buy_score');
-	
-	if( empty($open_score_buy_score) || $buy_type == 'integral' )
-	{
-		$open_score_buy_score = 0;
-	}
-	
-	$score_forbuy_money_maxbi = D('Home/Front')->get_config_by_name('score_forbuy_money_maxbi');
-	
-	if( empty($score_forbuy_money_maxbi) )
-	{
-		$score_forbuy_money_maxbi = 100;
-	}
-	
-	$score_for_money = 0;
-	$bue_use_score = 0;
-	
-	if( $open_score_buy_score == 1 )
-	{
-		if( $member_info['score'] > 0 )
+		/**
+		**/
+		/**
+		tuan_region
+		store_buy_total_money
+		
+		**/
+		
+		//open_score_buy_score $shop_limit_buy_distance = load_model_class('front')->get_config_by_name('shop_limit_buy_distance');
+		
+		$open_score_buy_score =  D('Home/Front')->get_config_by_name('open_score_buy_score');
+		
+		if( empty($open_score_buy_score) || $buy_type == 'integral' )
 		{
-			$score_can_max = $store_buy_total_money - $voucher_price - $reduce_money;
-			
-			//计算能兑换多少钱
-			$score_forbuy_money = D('Home/Front')->get_config_by_name('score_forbuy_money');
-			//只有兑换比例大于0才能允许兑换
-			if( !empty($score_forbuy_money) && $score_forbuy_money >0 )
+			$open_score_buy_score = 0;
+		}
+		
+		$score_forbuy_money_maxbi = D('Home/Front')->get_config_by_name('score_forbuy_money_maxbi');
+		
+		if( empty($score_forbuy_money_maxbi) )
+		{
+			$score_forbuy_money_maxbi = 100;
+		}
+		
+		$score_for_money = 0;
+		$bue_use_score = 0;
+		
+		if( $open_score_buy_score == 1 )
+		{
+			if( $member_info['score'] > 0 )
 			{
-				$score_for_money = round( $member_info['score'] / $score_forbuy_money ,2);
+				$score_can_max = $store_buy_total_money - $voucher_price - $reduce_money;
 				
-				if( $score_can_max < $score_for_money )
+				//计算能兑换多少钱
+				$score_forbuy_money = D('Home/Front')->get_config_by_name('score_forbuy_money');
+				//只有兑换比例大于0才能允许兑换
+				if( !empty($score_forbuy_money) && $score_forbuy_money >0 )
 				{
-					$score_for_money = $score_can_max;
-					$bue_use_score = $score_can_max * $score_forbuy_money;
-				}
-				
-				$max_store_buy_total_money = round( ($score_forbuy_money_maxbi * $score_can_max) /100,2);
-				
-				if($score_for_money > $max_store_buy_total_money)
-				{
-					$score_for_money = $max_store_buy_total_money;
+					$score_for_money = round( $member_info['score'] / $score_forbuy_money ,2);
 					
-					$bue_use_score = $max_store_buy_total_money * $score_forbuy_money;
-				}else if($score_for_money <= $max_store_buy_total_money){
+					if( $score_can_max < $score_for_money )
+					{
+						$score_for_money = $score_can_max;
+						$bue_use_score = $score_can_max * $score_forbuy_money;
+					}
 					
-					$bue_use_score = $score_for_money * $score_forbuy_money;
+					$max_store_buy_total_money = round( ($score_forbuy_money_maxbi * $score_can_max) /100,2);
+					
+					if($score_for_money > $max_store_buy_total_money)
+					{
+						$score_for_money = $max_store_buy_total_money;
+						
+						$bue_use_score = $max_store_buy_total_money * $score_forbuy_money;
+					}else if($score_for_money <= $max_store_buy_total_money){
+						
+						$bue_use_score = $score_for_money * $score_forbuy_money;
+					}
 				}
 			}
 		}
-	}
-	//score_forbuy_money score
-	
-	$delivery_ziti_name = D('Home/Front')->get_config_by_name('delivery_ziti_name');
-	$delivery_tuanzshipping_name = D('Home/Front')->get_config_by_name('delivery_tuanzshipping_name');
-	$delivery_diy_sort = D('Home/Front')->get_config_by_name('delivery_diy_sort');
-	
-	if(empty($delivery_diy_sort) || !isset($delivery_diy_sort)) $delivery_diy_sort = '0,1,2';
-	
-	
-	if( empty($tuan_send_address_info) )
-	{
-		$tuan_send_address_info = array();
-	}
-	
-	$need_data = array();
-	$need_data['code'] = 1;
+		//score_forbuy_money score
+		
+		$delivery_ziti_name = D('Home/Front')->get_config_by_name('delivery_ziti_name');
+		$delivery_tuanzshipping_name = D('Home/Front')->get_config_by_name('delivery_tuanzshipping_name');
+		$delivery_diy_sort = D('Home/Front')->get_config_by_name('delivery_diy_sort');
+		
+		if(empty($delivery_diy_sort) || !isset($delivery_diy_sort)) $delivery_diy_sort = '0,1,2';
+		
+		
+		if( empty($tuan_send_address_info) )
+		{
+			$tuan_send_address_info = array();
+		}
+		
+		$need_data = array();
+		$need_data['code'] = 1;
 
-	//--------------- by lucas start -------------
-	$need_data['delivery_date'] = $delivery_date;
-	//--------------- by lucas end --------------
-	
-	$need_data['open_score_buy_score'] = $open_score_buy_score;//1开启积分抵扣
-	$need_data['score'] = $member_info['score'];//会员持有的积分
-	$need_data['score_for_money'] = round($score_for_money,2);//会员能抵扣的金额
-	$need_data['bue_use_score'] = round($bue_use_score, 2);//会员能抵扣的积分数
-	
-	
-	$need_data['delivery_type_ziti'] = $delivery_type_ziti;
-	$need_data['delivery_type_express'] = $delivery_type_express;
-	$need_data['delivery_type_tuanz'] = $delivery_type_tuanz;
-	$need_data['delivery_express_name'] = $delivery_express_name;
-	$need_data['delivery_ziti_name'] = $delivery_ziti_name;
-	$need_data['delivery_tuanzshipping_name'] = $delivery_tuanzshipping_name;
-	$need_data['delivery_diy_sort'] = $delivery_diy_sort;
-	
-	
-	$need_data['delivery_tuanz_money'] = $delivery_tuanz_money;
-	$need_data['man_free_tuanzshipping'] = empty($man_free_tuanzshipping) ? 0 : $man_free_tuanzshipping;//团长配送，满多少免配送费，0或者为空表示不减免
-	$need_data['man_free_shipping'] = empty($man_free_shipping) ? 0 : $man_free_shipping;//快递配送，满多少免配送费，0或者为空表示不减免
-	
-	$need_data['address'] = $address;
-	
-	
-	$need_data['pick_up_time'] = $pick_up_time;
-	$need_data['pick_up_type'] = $pick_up_type;
-	$need_data['pick_up_weekday'] = $pick_up_weekday;
-	
-	$need_data['is_pin_over'] = $is_pin_over;
-	$need_data['is_integer'] = 0;//$is_no_quan ? 1: 0;
-	$need_data['pick_up_arr'] = $pick_up_arr;
-	$need_data['is_ziti'] = 2;
-	
-	$need_data['ziti_name'] = $pick_up_name;
-	$need_data['ziti_mobile'] = $pick_up_mobile;
-	$need_data['tuan_send_address'] = $tuan_send_address;
-	$need_data['tuan_send_address_info'] = $tuan_send_address_info;
-	$need_data['seller_goodss'] = $seller_goodss;
-	$need_data['show_voucher'] = $show_voucher;
-	
-	$need_data['buy_type'] = $buy_type;
-	$need_data['address'] = $address;
-	$need_data['trans_free_toal'] = $trans_free_toal;
-	
-	$need_data['is_limit_distance_buy'] = 0;
-	$need_data['limit_distance'] = 100;//km
-	
-	$need_data['is_member_level_buy'] = $is_member_level_buy;//km
-	$need_data['level_save_money'] = $level_save_money;//km
-	
-	$need_data['is_vip_card_member'] = $is_vip_card_member;//km
-	$need_data['vipcard_save_money'] = $vipcard_save_money;//km
-	$need_data['is_open_vipcard_buy'] = $is_open_vipcard_buy;//km
-	
-	
-	
-	if( !empty($shop_limit_buy_distance) && $shop_limit_buy_distance ==1 )
-	{
-		$latitude = 0;
-		$longitude = 0;
+		//--------------- by lucas start -------------
+		$need_data['delivery_date'] = $delivery_date;
+		//--------------- by lucas end --------------
 		
-		if( !empty($tuan_send_address_info) && !empty($tuan_send_address_info['lon_lat']) )
+		$need_data['open_score_buy_score'] = $open_score_buy_score;//1开启积分抵扣
+		$need_data['score'] = $member_info['score'];//会员持有的积分
+		$need_data['score_for_money'] = round($score_for_money,2);//会员能抵扣的金额
+		$need_data['bue_use_score'] = round($bue_use_score, 2);//会员能抵扣的积分数
+		
+		
+		$need_data['delivery_type_ziti'] = $delivery_type_ziti;
+		$need_data['delivery_type_express'] = $delivery_type_express;
+		$need_data['delivery_type_tuanz'] = $delivery_type_tuanz;
+		$need_data['delivery_express_name'] = $delivery_express_name;
+		$need_data['delivery_ziti_name'] = $delivery_ziti_name;
+		$need_data['delivery_tuanzshipping_name'] = $delivery_tuanzshipping_name;
+		$need_data['delivery_diy_sort'] = $delivery_diy_sort;
+		
+		
+		$need_data['delivery_tuanz_money'] = $delivery_tuanz_money;
+		$need_data['man_free_tuanzshipping'] = empty($man_free_tuanzshipping) ? 0 : $man_free_tuanzshipping;//团长配送，满多少免配送费，0或者为空表示不减免
+		$need_data['man_free_shipping'] = empty($man_free_shipping) ? 0 : $man_free_shipping;//快递配送，满多少免配送费，0或者为空表示不减免
+		
+		$need_data['address'] = $address;
+		
+		
+		$need_data['pick_up_time'] = $pick_up_time;
+		$need_data['pick_up_type'] = $pick_up_type;
+		$need_data['pick_up_weekday'] = $pick_up_weekday;
+		
+		$need_data['is_pin_over'] = $is_pin_over;
+		$need_data['is_integer'] = 0;//$is_no_quan ? 1: 0;
+		$need_data['pick_up_arr'] = $pick_up_arr;
+		$need_data['is_ziti'] = 2;
+		
+		$need_data['ziti_name'] = $pick_up_name;
+		$need_data['ziti_mobile'] = $pick_up_mobile;
+		$need_data['tuan_send_address'] = $tuan_send_address;
+		$need_data['tuan_send_address_info'] = $tuan_send_address_info;
+		$need_data['seller_goodss'] = $seller_goodss;
+		$need_data['show_voucher'] = $show_voucher;
+		
+		$need_data['buy_type'] = $buy_type;
+		$need_data['address'] = $address;
+		$need_data['trans_free_toal'] = $trans_free_toal;
+		
+		$need_data['is_limit_distance_buy'] = 0;
+		$need_data['limit_distance'] = 100;//km
+		
+		$need_data['is_member_level_buy'] = $is_member_level_buy;//km
+		$need_data['level_save_money'] = $level_save_money;//km
+		
+		$need_data['is_vip_card_member'] = $is_vip_card_member;//km
+		$need_data['vipcard_save_money'] = $vipcard_save_money;//km
+		$need_data['is_open_vipcard_buy'] = $is_open_vipcard_buy;//km
+		
+		
+		
+		if( !empty($shop_limit_buy_distance) && $shop_limit_buy_distance ==1 )
 		{
-			//lon_lat
-			$lon_lat_arr = explode(',', $tuan_send_address_info['lon_lat']);
-			$longitude = $lon_lat_arr[0];
-			$latitude = $lon_lat_arr[1];
-		}
-		
-		
-		if( isset($gpc['latitude']) && !empty($gpc['latitude']) )
-		{
-			$latitude = $gpc['latitude'];
-		}
-		if( isset($gpc['longitude']) && !empty($gpc['longitude']) )
-		{
-			$longitude = $gpc['longitude'];
-		}
-		
-		if( !empty($latitude) && !empty($longitude) )
-		{
-			$shop_buy_distance = D('Home/Front')->get_config_by_name('shop_buy_distance');
-		
-			$shop_buy_distance = $shop_buy_distance * 1000;
+			$latitude = 0;
+			$longitude = 0;
 			
-			
-			$community_info = M('lionfish_community_head')->field('lon,lat')->where( array('id' => $community_id ) )->find();
-			
-			
-			$distince = D('Seller/Communityhead')->GetDistance($longitude,$latitude,$community_info['lon'],$community_info['lat']);
-			
-			$need_data['current_distance'] = $distince;
-			$need_data['shop_buy_distance'] = $shop_buy_distance;
-			if($distince > $shop_buy_distance )
+			if( !empty($tuan_send_address_info) && !empty($tuan_send_address_info['lon_lat']) )
 			{
-				$need_data['is_limit_distance_buy'] = 1;
-				$need_data['limit_distance'] = $distince/1000;
+				//lon_lat
+				$lon_lat_arr = explode(',', $tuan_send_address_info['lon_lat']);
+				$longitude = $lon_lat_arr[0];
+				$latitude = $lon_lat_arr[1];
+			}
+			
+			
+			if( isset($gpc['latitude']) && !empty($gpc['latitude']) )
+			{
+				$latitude = $gpc['latitude'];
+			}
+			if( isset($gpc['longitude']) && !empty($gpc['longitude']) )
+			{
+				$longitude = $gpc['longitude'];
+			}
+			
+			if( !empty($latitude) && !empty($longitude) )
+			{
+				$shop_buy_distance = D('Home/Front')->get_config_by_name('shop_buy_distance');
+
+				$shop_buy_distance = $shop_buy_distance * 1000;
+				
+				
+				$community_info = M('lionfish_community_head')->field('lon,lat')->where( array('id' => $community_id ) )->find();
+				
+				
+				$distince = D('Seller/Communityhead')->GetDistance($longitude,$latitude,$community_info['lon'],$community_info['lat']);
+				
+				$need_data['current_distance'] = $distince;
+				$need_data['shop_buy_distance'] = $shop_buy_distance;
+				if($distince > $shop_buy_distance )
+				{
+					$need_data['is_limit_distance_buy'] = 1;
+					$need_data['limit_distance'] = $distince/1000;
+				}
 			}
 		}
-	}
-	
-	
-	
-	$need_data['reduce_money'] = $reduce_money;
-	$need_data['is_open_fullreduction'] = $is_open_fullreduction;
-	$need_data['cha_reduce_money'] = $cha_reduce_money;
-	
-	
-	$need_data['is_man_delivery_tuanz_fare'] = $is_man_delivery_tuanz_fare; //是否达到满xx减团长配送费
-	$need_data['fare_man_delivery_tuanz_fare_money'] = $fare_man_delivery_tuanz_fare_money;	//达到满xx减团长配送费， 减了多少钱
-	$need_data['is_man_shipping_fare'] = $is_man_shipping_fare; //是否达到满xx减运费
-	$need_data['fare_man_shipping_fare_money'] = $fare_man_shipping_fare_money;	//达到满xx减运费，司机减了多少运费
-	
-	
-	$dispatching = isset($gpc['dispatching']) ? $gpc['dispatching']:'pickup';
-	//is_ziti == 2
-	if($dispatching == 'express')
-	{
-		$need_data['total_free'] = $total_free + $trans_free_toal - $voucher_price -$reduce_money;
-	}else{
-		$need_data['total_free'] = $total_free  - $voucher_price -$reduce_money;
-	}
-	if($is_ziti == 2)
-	{
-		$need_data['total_free'] = $total_free  - $voucher_price -$reduce_money;
-	}
-	
-	//积分兑换 不算总金额，但是算总积分
-	if( $buy_type == 'integral' )
-	{
-		$need_data['total_free'] = $trans_free_toal;
-		$need_data['total_integral'] = $total_free;
-	}
-	
-	if($need_data['total_free'] < 0)
-	{
-		$need_data['total_free'] = 0;
-	}
-	
-	//判断是否可以余额支付
-	
-	//暂时关闭 会员余额功能
-	/**
-	$is_yue_open_info =	M('config')->where( array('name' => 'is_yue_open') )->find();
-	$is_yue_open =  $is_yue_open_info['value'];
-	**/
-	
-	$is_yue_open = 0;
-	
-	$is_yue_open = D('Home/Front')->get_config_by_name('is_open_yue_pay');
-	if( empty($is_yue_open) )
-	{
-		$is_yue_open = 0;
-	}
 		
-	
-	$need_data['is_yue_open'] = $is_yue_open;
-	
-	$need_data['can_yupay'] = 0;
-	
-	//暂时关闭 会员余额功能
-	
-	if($is_yue_open == 1 && $need_data['total_free'] >=0 && $member_info['account_money'] >= $need_data['total_free'])
-	{
-		$need_data['can_yupay'] = 1;
-	}
-	
-	//前端隐藏 团长信息
-	$index_hide_headdetail_address = D('Home/Front')->get_config_by_name('index_hide_headdetail_address');
-	
-	if( empty($index_hide_headdetail_address) )
-	{
-		$index_hide_headdetail_address = 0;
-	}
-	$need_data['index_hide_headdetail_address'] = $index_hide_headdetail_address;
-	
-	
-	//订单留言
-	$is_open_order_message = D('Home/Front')->get_config_by_name('is_open_order_message');
-	
-	$need_data['yu_money'] = $member_info['account_money'];
-	$need_data['goods'] = $goods;
-	$need_data['is_open_order_message'] = $is_open_order_message;
-	
-	$need_data['is_zero_opentuan'] = 0;
-	//拼团特殊情况0元开团
-	if( $buy_type == 'pintuan' && $is_zero_buy == 1 )
-	{
-		//$need_data['total_free'] = 0;
-		//$need_data['trans_free_toal'] = 0;
-		//$need_data['is_zero_opentuan'] = 1;
-	}
-	
-	
-	//订阅消息begin
-	
-	$is_need_subscript = 0;
-	$need_subscript_template = array();
-	
-	
-		//'pay_order','send_order','hexiao_success','apply_community','open_tuan','take_tuan','pin_tuansuccess','apply_tixian'
-		//$member_id
+		
+		
+		$need_data['reduce_money'] = $reduce_money;
+		$need_data['is_open_fullreduction'] = $is_open_fullreduction;
+		$need_data['cha_reduce_money'] = $cha_reduce_money;
+		
+		
+		$need_data['is_man_delivery_tuanz_fare'] = $is_man_delivery_tuanz_fare; //是否达到满xx减团长配送费
+		$need_data['fare_man_delivery_tuanz_fare_money'] = $fare_man_delivery_tuanz_fare_money;	//达到满xx减团长配送费， 减了多少钱
+		$need_data['is_man_shipping_fare'] = $is_man_shipping_fare; //是否达到满xx减运费
+		$need_data['fare_man_shipping_fare_money'] = $fare_man_shipping_fare_money;	//达到满xx减运费，司机减了多少运费
+		
+		
+		$dispatching = isset($gpc['dispatching']) ? $gpc['dispatching']:'pickup';
+		//is_ziti == 2
+		if($dispatching == 'express')
+		{
+			$need_data['total_free'] = $total_free + $trans_free_toal - $voucher_price -$reduce_money;
+		}else{
+			$need_data['total_free'] = $total_free  - $voucher_price -$reduce_money;
+		}
+		if($is_ziti == 2)
+		{
+			$need_data['total_free'] = $total_free  - $voucher_price -$reduce_money;
+		}
+		
+		//积分兑换 不算总金额，但是算总积分
+		if( $buy_type == 'integral' )
+		{
+			$need_data['total_free'] = $trans_free_toal;
+			$need_data['total_integral'] = $total_free;
+		}
+		
+		if($need_data['total_free'] < 0)
+		{
+			$need_data['total_free'] = 0;
+		}
+		
+		//判断是否可以余额支付
+		
+		//暂时关闭 会员余额功能
+		/**
+		$is_yue_open_info =	M('config')->where( array('name' => 'is_yue_open') )->find();
+		$is_yue_open =  $is_yue_open_info['value'];
+		**/
+		
+		$is_yue_open = 0;
+		
+		$is_yue_open = D('Home/Front')->get_config_by_name('is_open_yue_pay');
+		if( empty($is_yue_open) )
+		{
+			$is_yue_open = 0;
+		}
+
+		
+		$need_data['is_yue_open'] = $is_yue_open;
+		
+		$need_data['can_yupay'] = 0;
+		
+		//暂时关闭 会员余额功能
+		
+		if($is_yue_open == 1 && $need_data['total_free'] >=0 && $member_info['account_money'] >= $need_data['total_free'])
+		{
+			$need_data['can_yupay'] = 1;
+		}
+		
+		//前端隐藏 团长信息
+		$index_hide_headdetail_address = D('Home/Front')->get_config_by_name('index_hide_headdetail_address');
+		
+		if( empty($index_hide_headdetail_address) )
+		{
+			$index_hide_headdetail_address = 0;
+		}
+		$need_data['index_hide_headdetail_address'] = $index_hide_headdetail_address;
+		
+		
+		//订单留言
+		$is_open_order_message = D('Home/Front')->get_config_by_name('is_open_order_message');
+		
+		$need_data['yu_money'] = $member_info['account_money'];
+		$need_data['goods'] = $goods;
+		$need_data['is_open_order_message'] = $is_open_order_message;
+		
+		$need_data['is_zero_opentuan'] = 0;
+		//拼团特殊情况0元开团
+		if( $buy_type == 'pintuan' && $is_zero_buy == 1 )
+		{
+			//$need_data['total_free'] = 0;
+			//$need_data['trans_free_toal'] = 0;
+			//$need_data['is_zero_opentuan'] = 1;
+		}
+		
+		
+		//订阅消息begin
+		
+		$is_need_subscript = 0;
+		$need_subscript_template = array();
+		
+		
+			//'pay_order','send_order','hexiao_success','apply_community','open_tuan','take_tuan','pin_tuansuccess','apply_tixian'
+			//$member_id
 		if( $buy_type == 'pintuan' )
 		{
-			//pin_tuansuccess
-			//send_order  parameter[weprogram_subtemplate_pin_tuansuccess]
-			//hexiao_success
-			
+				//pin_tuansuccess
+				//send_order  parameter[weprogram_subtemplate_pin_tuansuccess]
+				//hexiao_success
+
 			$pin_tuansuccess_info = M('lionfish_comshop_subscribe')->where( array('member_id' => $member_id, 'type' => 'pin_tuansuccess' ) )->find();
-			
-			//if( empty($pin_tuansuccess_info) )
-			//{
-				$weprogram_subtemplate_pin_tuansuccess = D('Home/Front')->get_config_by_name('weprogram_subtemplate_pin_tuansuccess');
-				
-				if( !empty($weprogram_subtemplate_pin_tuansuccess) )
-				{
-					$need_subscript_template['pin_tuansuccess'] = $weprogram_subtemplate_pin_tuansuccess;
-				}
-			//}
-			
+
+				//if( empty($pin_tuansuccess_info) )
+				//{
+			$weprogram_subtemplate_pin_tuansuccess = D('Home/Front')->get_config_by_name('weprogram_subtemplate_pin_tuansuccess');
+
+			if( !empty($weprogram_subtemplate_pin_tuansuccess) )
+			{
+				$need_subscript_template['pin_tuansuccess'] = $weprogram_subtemplate_pin_tuansuccess;
+			}
+				//}
+
 		}else{
-			//pay_order
+				//pay_order
 			$pay_order_info = M('lionfish_comshop_subscribe')->where( array('member_id' => $member_id , 'type' => 'pay_order') )->find();
-			
-			//if( empty($pay_order_info) )
-			//{
-				$weprogram_subtemplate_pay_order = D('Home/Front')->get_config_by_name('weprogram_subtemplate_pay_order');
-				
-				if( !empty($weprogram_subtemplate_pay_order) )
-				{
-					$need_subscript_template['pay_order'] = $weprogram_subtemplate_pay_order;
-				}
-			//}
+
+				//if( empty($pay_order_info) )
+				//{
+			$weprogram_subtemplate_pay_order = D('Home/Front')->get_config_by_name('weprogram_subtemplate_pay_order');
+
+			if( !empty($weprogram_subtemplate_pay_order) )
+			{
+				$need_subscript_template['pay_order'] = $weprogram_subtemplate_pay_order;
+			}
+				//}
 		}
-		//send_order
-		
+			//send_order
+
 		$send_order_info = M('lionfish_comshop_subscribe')->where( array('member_id' => $member_id, 'type' => 'send_order' ) )->find();
-		
-		//if( empty($send_order_info) )
-		//{
-			$weprogram_subtemplate_send_order = D('Home/Front')->get_config_by_name('weprogram_subtemplate_send_order');
-			
-			if( !empty($weprogram_subtemplate_send_order) )
-			{
-				$need_subscript_template['send_order'] = $weprogram_subtemplate_send_order;
-			}
-		//}
-		//hexiao_success
+
+			//if( empty($send_order_info) )
+			//{
+		$weprogram_subtemplate_send_order = D('Home/Front')->get_config_by_name('weprogram_subtemplate_send_order');
+
+		if( !empty($weprogram_subtemplate_send_order) )
+		{
+			$need_subscript_template['send_order'] = $weprogram_subtemplate_send_order;
+		}
+			//}
+			//hexiao_success
 		$hexiao_success_info = M('lionfish_comshop_subscribe')->where( array('member_id' => $member_id, 'type' => 'hexiao_success' ) )->find();
-		
-		
-		//if( empty($hexiao_success_info) )
-		//{
-			$weprogram_subtemplate_hexiao_success = D('Home/Front')->get_config_by_name('weprogram_subtemplate_hexiao_success');
-			
-			if( !empty($weprogram_subtemplate_hexiao_success) )
-			{
-				$need_subscript_template['hexiao_success'] = $weprogram_subtemplate_hexiao_success;
-			}
-		//}
-		
+
+
+			//if( empty($hexiao_success_info) )
+			//{
+		$weprogram_subtemplate_hexiao_success = D('Home/Front')->get_config_by_name('weprogram_subtemplate_hexiao_success');
+
+		if( !empty($weprogram_subtemplate_hexiao_success) )
+		{
+			$need_subscript_template['hexiao_success'] = $weprogram_subtemplate_hexiao_success;
+		}
+			//}
+
 		if( !empty($need_subscript_template) )
 		{
 			$is_need_subscript = 1;
 		}	
-	
-	//订阅消息end
-	
-	$need_data['is_need_subscript'] = $is_need_subscript;
-	$need_data['need_subscript_template'] = $need_subscript_template;
-	
-	
-	echo json_encode($need_data);
-	die();
-}
+		
+		//订阅消息end
+		
+		$need_data['is_need_subscript'] = $is_need_subscript;
+		$need_data['need_subscript_template'] = $need_subscript_template;
+		
+		
+		echo json_encode($need_data);
+		die();
+	}
 
 public function sub_order()
 {
@@ -3020,7 +3020,7 @@ public function sub_order()
 	$member_id = $weprogram_token['member_id'];
 
 	$pintuan_model_buy = D('Home/Front')->get_config_by_name('pintuan_model_buy');
-		
+
 	if( empty($pintuan_model_buy) || $pintuan_model_buy ==0 )
 	{
 		$pintuan_model_buy = 0;
@@ -3061,7 +3061,7 @@ public function sub_order()
 	$use_score = isset($gpc['use_score']) ? intval($gpc['use_score']) : 0;
 	
 	$puis_not_buy =  D('Home/Front')->get_config_by_name('puis_not_buy');
-				
+
 	if( !empty($puis_not_buy) && $puis_not_buy ==1 )
 	{
 		$member_info = M('lionfish_comshop_member')->field('level_id')->where( array('member_id' => $member_id) )->find();
@@ -3072,7 +3072,7 @@ public function sub_order()
 			die();
 		}
 	}
-		
+
 	$data_s  = array();
 	$data_s['pay_method'] = $gpc['wxpay'];
 	$data_s['buy_type'] = isset($gpc['buy_type']) ? $gpc['buy_type'] : 'dan';
@@ -3090,7 +3090,7 @@ public function sub_order()
 			$data_s['pick_up_id'] = $last_community['head_id'];
 		}
 		
-	
+
 		//$data_s['pick_up_id']
 	}
 	
@@ -3377,7 +3377,7 @@ public function sub_order()
 	
 	
 	$address_info = M('lionfish_comshop_address')->where( array('address_id' => $data_s['address_id'] ) )->find();					
-						
+
 	
 	$is_open_fullreduction = D('Home/Front')->get_config_by_name('is_open_fullreduction');
 	$full_money = D('Home/Front')->get_config_by_name('full_money');
@@ -3401,7 +3401,7 @@ public function sub_order()
 	{
 		$is_open_fullreduction = 0;
 	}
-			
+
 	if( ($buy_type == 'pintuan' || $buy_type == 'pindan') && $pintuan_model_buy == 0  )
 	{
 		$man_free_tuanzshipping = 0;
@@ -3419,7 +3419,7 @@ public function sub_order()
 		$man_free_shipping = 0;
 		$is_open_fullreduction = 0;
 	}
-					
+
 	$is_moban = false;	
 	
 	
@@ -3432,7 +3432,7 @@ public function sub_order()
 	$store_buy_total_money = 0;
 	
 	$open_score_buy_score = D('Home/Front')->get_config_by_name('open_score_buy_score');
-		
+
 	$score_for_money = 0;//use_score
 	
 	if( $buy_type == 'integral' )
@@ -3452,7 +3452,7 @@ public function sub_order()
 		}
 	}
 	
-		
+
 	
 	foreach($seller_goodss as $kk => $vv)
 	{
@@ -3463,11 +3463,11 @@ public function sub_order()
 		$data['member_id']=$member_id;
 		$data['name']= $payment['username'];
 		$data['use_score']= $use_score;//是否使用积分抵扣
-	
+
 		$data['telephone']= $data_s['ziti_mobile'];
 		$data['shipping_name']= $data_s['ziti_name'];
 		$data['shipping_tel']= $data_s['ziti_mobile'];
-	
+
 		
 		if($dispatching == 'express' || $dispatching == 'tuanz_send')
 		{
@@ -3485,7 +3485,7 @@ public function sub_order()
 			$data['shipping_country_id']=$community_info['area_id'];
 		}
 		
-	
+
 		$data['shipping_method'] = 0;
 		$data['delivery']=$dispatching;
 		$data['pick_up_id']=$pick_up_id;
@@ -3493,20 +3493,20 @@ public function sub_order()
 		$data['ziti_name']=$community_info['head_name'];
 		$data['ziti_mobile']=$community_info['head_mobile'];
 		
-	
+
 		$data['payment_method']=$pay_method;
-	
+
 		$data['address_id']= $data_s['address_id'];
 		$data['voucher_id'] = isset($order_quan_arr[1]) ? $order_quan_arr[1]:0;//目前都是平台券
 		
-	
+
 		$data['user_agent']=$_SERVER['HTTP_USER_AGENT'];
 		$data['date_added']=time();
-	
+
 		$subject='';
 		$fare = 0;
 		$order_total = 0;
-	
+
 
 		$trans_free_toal = 0;//运费
 		
@@ -3666,7 +3666,7 @@ public function sub_order()
 			}
 			//如果是下单减库存,那么用占坑法来避免超库存---begin
 			$kucun_method = D('Home/Front')->get_config_by_name('kucun_method');
-						
+
 			if( empty($kucun_method) )
 			{
 				$kucun_method = 0;
@@ -3685,9 +3685,9 @@ public function sub_order()
 					//cancle_redis_user_list 
 					if( !empty($redis_has_add_list) )
 					{
-					    D('Seller/Redisorder')->bu_car_has_delquantity($redis_has_add_list);
+						D('Seller/Redisorder')->bu_car_has_delquantity($redis_has_add_list);
 					}
-				
+
 					echo json_encode( array('code' => 2, 'msg' => '已抢光' , 'is_forb' => 1) );
 					die();
 				}
@@ -3747,7 +3747,7 @@ public function sub_order()
 		{
 			//结算运费新模式
 			$trans_free_toal = 0;//运费
-		   
+
 			//----开始计算运费
 			
 			//ims_ 
@@ -3758,25 +3758,25 @@ public function sub_order()
 			
 			
 			
-				$store_shipping_fare = 0;
-				if($is_moban)
-				{
-					$store_shipping_fare = D('Home/Transport')->calc_transport($shipping_default['id'], $total_quantity,$total_weight, $address_info['city_id'] );
+			$store_shipping_fare = 0;
+			if($is_moban)
+			{
+				$store_shipping_fare = D('Home/Transport')->calc_transport($shipping_default['id'], $total_quantity,$total_weight, $address_info['city_id'] );
 				
 				
-				}
+			}
 			
-				$trans_free_toal += $store_shipping_fare;
-				
-				foreach($vv as $kkc =>$d_goods)
+			$trans_free_toal += $store_shipping_fare;
+
+			foreach($vv as $kkc =>$d_goods)
+			{
+				if($d_goods['shipping']==1)
 				{
-					if($d_goods['shipping']==1)
-					{
 						//统一运费
-						$trans_free_toal += $d_goods['goods_freight'];
-						
-					}
+					$trans_free_toal += $d_goods['goods_freight'];
+
 				}
+			}
 			
 			
 			if( $kk == 0 && !empty($man_free_shipping) && $man_free_shipping > 0 && $order_goods_total_money >= $man_free_shipping )
@@ -3796,7 +3796,7 @@ public function sub_order()
 			
 			
 			$community_info_modify = $community_info;
-	
+
 			if( !empty($community_info_modify['is_modify_shipping_method']) && $community_info_modify['is_modify_shipping_method'] == 1 )
 			{
 				if( !empty($community_info_modify['is_modify_shipping_fare']) && $community_info_modify['is_modify_shipping_fare'] == 1 && $community_info_modify['shipping_fare'] > 0 )
@@ -3849,14 +3849,14 @@ public function sub_order()
 			$data['type'] = 'spike';
 			$is_pin = 0;
 		}
-		 
+
 		$data['shipping_fare'] = floatval($trans_free_toal);
 		
 		if($is_free_shipping_fare == 1)
 		{
 			$trans_free_toal = 0;
 		}
-			
+
 		if($is_open_fullreduction == 1 && $man_total_free >= $full_money )
 		{
 			
@@ -3878,7 +3878,7 @@ public function sub_order()
 		
 		$data['goodss'] = $goods_data;
 		$data['order_num_alias']=build_order_no($member_id);
-			
+
 		$data['totals'][0]=array(
 			'code'=>'sub_total',
 			'title'=>'商品价格',
@@ -3891,14 +3891,14 @@ public function sub_order()
 			'text'=>'￥'.$trans_free_toal,
 			'value'=>$trans_free_toal
 		);
-			
+
 		$data['totals'][2]=array(
 			'code'=>'total',
 			'title'=>'总价',
 			'text'=>'￥'.($order_total+$trans_free_toal-$reduce_money),
 			'value'=>($order_total+$trans_free_toal-$reduce_money)
 		);
-	
+
 		$data['from_type'] = 'wepro';
 		
 		//目前都是平台券
@@ -3913,7 +3913,7 @@ public function sub_order()
 			
 			pdo_update('lionfish_comshop_coupon_list', array('ordersn' => $data['order_num_alias'],'consume' => 'Y','usetime' => time()), array('id' => $data['voucher_id'] ));
 			**/
-						
+
 			$voucher_info = M('lionfish_comshop_coupon_list')->where( array('id' => $data['voucher_id']) )->find();						
 			
 			$data['voucher_credit'] = $voucher_info['credit'];
@@ -3959,7 +3959,7 @@ public function sub_order()
 				//计算多少积分了。
 				
 				$score_forbuy_money_maxbi = D('Home/Front')->get_config_by_name('score_forbuy_money_maxbi');
-	
+
 				if( empty($score_forbuy_money_maxbi) )
 				{
 					$score_forbuy_money_maxbi = 100;
@@ -4007,10 +4007,10 @@ public function sub_order()
 		}
 		
 		
-	
+
 		$oid=  D('Home/Frontorder')->addOrder($data);// D('Order')->addOrder($data);
 		
-			
+
 		//暂时屏蔽自提模块
 		/**
 		if($data['delivery'] == 'pickup')
@@ -4080,23 +4080,23 @@ public function sub_order()
 	
 	$order_all_data = array();
 	$order_all_data['total_money'] = $pay_total;
-		
+
 	M('lionfish_comshop_order_all')->where(  array('id' => $order_all_id) )->save($order_all_data);	
 	
 	if($order_all_id){
-			
+
 		$order = M('lionfish_comshop_order')->where( array('order_id' => $oid) )->find();	
-					
+
 		$member_info = M('lionfish_comshop_member')->field('we_openid,account_money')->where( array('member_id' => $member_id ) )->find();				
 		
 		$is_yue_open = 0;
-	
+
 		$is_yue_open = D('Home/Front')->get_config_by_name('is_open_yue_pay');
 		if( empty($is_yue_open) )
 		{
 			$is_yue_open = 0;
 		}
-	
+
 	//检测是否需要扣除积分 
 		if($data['type'] == 'integral' && $del_integral> 0 && $is_integral == 1)
 		{
@@ -4143,7 +4143,7 @@ public function sub_order()
 				M('lionfish_comshop_member')->where( array('member_id' => $member_id) )->setInc('account_money',-$pay_total);
 				
 				$mb_info = M('lionfish_comshop_member')->field('account_money')->where( array('member_id' =>$member_id ) )->find();
-					
+
 				M('lionfish_comshop_member_charge_flow')->where( array('id' => $charge_flow_id ) )->save( array('operate_end_yuer' => $mb_info['account_money']) );
 				
 			}
@@ -4153,7 +4153,7 @@ public function sub_order()
 			
 			//开始处理订单状态
 			//$order_all = M('order_all')->where( array('id' => $order_all_id) )->find();
-					
+
 			$order_all = M('lionfish_comshop_order_all')->where( array('id' => $order_all_id) )->find();			
 			
 			
@@ -4195,7 +4195,7 @@ public function sub_order()
 						
 						
 						//暂时屏蔽
-												
+
 						$kucun_method = D('Home/Front')->get_config_by_name('kucun_method');
 						
 						if( empty($kucun_method) )
@@ -4224,7 +4224,7 @@ public function sub_order()
 						
 						M('lionfish_comshop_order_history')->add($oh);
 						
-							
+
 						//发送购买通知
 						//TODO 先屏蔽，等待调试这个消息
 						D('Home/Weixinnotify')->orderBuy($order['order_id'], true);
@@ -4367,18 +4367,18 @@ public function sub_order()
 			
 			
 			$post_xml = '<xml>
-				   <appid>'.$appid.'</appid>
-				   <body>'.$body.'</body>
-				   <mch_id>'.$mch_id.'</mch_id>
-				   <nonce_str>'.$nonce_str.'</nonce_str>
-				   <notify_url>'.$notify_url.'</notify_url>
-				   <openid>'.$openid.'</openid>
-				   <out_trade_no>'.$out_trade_no.'</out_trade_no>
-				   <spbill_create_ip>'.$spbill_create_ip.'</spbill_create_ip>
-				   <total_fee>'.$total_fee.'</total_fee>
-				   <trade_type>'.$trade_type.'</trade_type>
-				   <sign>'.$sign.'</sign>
-				</xml> ';
+			<appid>'.$appid.'</appid>
+			<body>'.$body.'</body>
+			<mch_id>'.$mch_id.'</mch_id>
+			<nonce_str>'.$nonce_str.'</nonce_str>
+			<notify_url>'.$notify_url.'</notify_url>
+			<openid>'.$openid.'</openid>
+			<out_trade_no>'.$out_trade_no.'</out_trade_no>
+			<spbill_create_ip>'.$spbill_create_ip.'</spbill_create_ip>
+			<total_fee>'.$total_fee.'</total_fee>
+			<trade_type>'.$trade_type.'</trade_type>
+			<sign>'.$sign.'</sign>
+			</xml> ';
 			$url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
 			$xml = http_request($url,$post_xml);
 			$array = xml($xml);
@@ -4431,40 +4431,40 @@ public function sub_order()
 				$data['text'] = "错误";
 				$data['RETURN_CODE'] = $array['RETURN_CODE'];
 				$data['RETURN_MSG'] = $array['RETURN_MSG'];
-				}
-				$data['has_yupay'] = 0;
 			}
-			
-			if($is_pin == 1)
-			{
-				$data['order_id'] = $oid;
-				$data['order_all_id'] = $order_all_id;
-			}else{
-				$data['order_id'] = $oid;
-				$data['order_all_id'] = $order_all_id;
-			}
-			$data['is_go_orderlist'] = $is_just_1;
-			
-			$data['is_spike'] = $is_spike;
-			echo json_encode($data);
-			die();	
-		}else{
-			echo json_encode( array('code' =>1,'order_all_id' =>$order_all_id) );
-			die();
+			$data['has_yupay'] = 0;
 		}
-			
+
+		if($is_pin == 1)
+		{
+			$data['order_id'] = $oid;
+			$data['order_all_id'] = $order_all_id;
+		}else{
+			$data['order_id'] = $oid;
+			$data['order_all_id'] = $order_all_id;
+		}
+		$data['is_go_orderlist'] = $is_just_1;
+
+		$data['is_spike'] = $is_spike;
+		echo json_encode($data);
+		die();	
+	}else{
+		echo json_encode( array('code' =>1,'order_all_id' =>$order_all_id) );
+		die();
 	}
-	
-	function requestAsHttpPOST($data, $service_url){
-        $HTTP_TIME_OUT= "20";
+
+}
+
+function requestAsHttpPOST($data, $service_url){
+	$HTTP_TIME_OUT= "20";
         ksort(array_filter($data)); //删除数组中的空值并排序
         $post_data = http_build_query($data);
-	
+
         $options = array(
-            'http' => array(
-                'method'  => 'POST',
-                'header'  => 'Content-type:application/x-www-form-urlencoded;charset=MD5',
-                'content' => $post_data,
+        	'http' => array(
+        		'method'  => 'POST',
+        		'header'  => 'Content-type:application/x-www-form-urlencoded;charset=MD5',
+        		'content' => $post_data,
                 'timeout' => $HTTP_TIME_OUT * 1000 //超时时间,*1000将毫秒变为秒（单位:s）
             )
         );
@@ -4472,353 +4472,353 @@ public function sub_order()
         $result = file_get_contents($service_url, false, $context);
         return $result;
     }
-	
-	
+
+
 	/**
 		微信充值
-	**/
-	public function wxcharge()
-	{
-		$_GPC = I('request.');
-		
-		$token = $_GPC['token'];
-	
-		
-		$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
-		
-		$member_id = $weprogram_token['member_id'];
-		
-		if( empty($member_id) )
+		**/
+		public function wxcharge()
 		{
-			echo json_encode( array('code' =>1,'msg' =>'未登录') );
-			die();
-		}
-		
-		$money = $_GPC['money'];
-		
-		$rech_id = isset($_GPC['rech_id']) && $_GPC['rech_id'] > 0 ? $_GPC['rech_id'] : 0;
-		
-		
-		
-		$member_info = M('lionfish_comshop_member')->field('we_openid')->where( array('member_id' => $member_id) )->find();
-		
-		$give_money = 0;
-		
-		if( $rech_id > 0 )
-		{
-			$rech_info = M('lionfish_comshop_chargetype')->where( array('id' => $rech_id ) )->find();
-			
-			if( !empty($rech_info) )
+			$_GPC = I('request.');
+
+			$token = $_GPC['token'];
+
+
+			$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
+
+			$member_id = $weprogram_token['member_id'];
+
+			if( empty($member_id) )
 			{
-				$give_money = $rech_info['send_money'];
+				echo json_encode( array('code' =>1,'msg' =>'未登录') );
+				die();
 			}
+
+			$money = $_GPC['money'];
+
+			$rech_id = isset($_GPC['rech_id']) && $_GPC['rech_id'] > 0 ? $_GPC['rech_id'] : 0;
+
+
+
+			$member_info = M('lionfish_comshop_member')->field('we_openid')->where( array('member_id' => $member_id) )->find();
+
+			$give_money = 0;
+
+			if( $rech_id > 0 )
+			{
+				$rech_info = M('lionfish_comshop_chargetype')->where( array('id' => $rech_id ) )->find();
+
+				if( !empty($rech_info) )
+				{
+					$give_money = $rech_info['send_money'];
+				}
+
+				$money = $rech_info['money'];
+			}
+
+
+
+			$member_charge_flow_data = array();
+			$member_charge_flow_data['member_id'] = $member_id;
+			$member_charge_flow_data['money'] = $money;
+			$member_charge_flow_data['state'] = 0;
+			$member_charge_flow_data['give_money'] = $give_money;
+			$member_charge_flow_data['charge_time'] = 0;
+			$member_charge_flow_data['remark'] = '会员前台微信充值';
+			$member_charge_flow_data['add_time'] = time();
+
+			$order_id = M('lionfish_comshop_member_charge_flow')->add( $member_charge_flow_data );
+
+
+			$shop_domain = D('Home/Front')->get_config_by_name('shop_domain');
+
+
+
 			
-			$money = $rech_info['money'];
-		}
-		
-		
-		
-		$member_charge_flow_data = array();
-		$member_charge_flow_data['member_id'] = $member_id;
-		$member_charge_flow_data['money'] = $money;
-		$member_charge_flow_data['state'] = 0;
-		$member_charge_flow_data['give_money'] = $give_money;
-		$member_charge_flow_data['charge_time'] = 0;
-		$member_charge_flow_data['remark'] = '会员前台微信充值';
-		$member_charge_flow_data['add_time'] = time();
-		
-		$order_id = M('lionfish_comshop_member_charge_flow')->add( $member_charge_flow_data );
-		
-		
-		$shop_domain = D('Home/Front')->get_config_by_name('shop_domain');
-		
-	
-		
-			
-		
-		$fee = $money;
-		$appid = D('Home/Front')->get_config_by_name('wepro_appid');
-		$body =         '会员充值';
-		$mch_id =      D('Home/Front')->get_config_by_name('wepro_partnerid');
-		$nonce_str =    nonce_str();
-		$notify_url =   $shop_domain.'/notify.php';
-		$openid =       $member_info['we_openid'];
-		$out_trade_no = $order_id.'-'.time().'-charge-'.$id;
-		$spbill_create_ip = $_SERVER['REMOTE_ADDR'];
-		$total_fee =    $fee*100;
-		$trade_type = 'JSAPI';
-		$pay_key = D('Home/Front')->get_config_by_name('wepro_key');
-		
-		$post = array();
-		
-		$post['appid'] = $appid;
-		$post['body'] = $body;
-		$post['mch_id'] = $mch_id;
-		$post['nonce_str'] = $nonce_str;
-		$post['notify_url'] = $notify_url;
-		$post['openid'] = $openid;
-		$post['out_trade_no'] = $out_trade_no;
-		$post['spbill_create_ip'] = $spbill_create_ip;
-		$post['total_fee'] = $total_fee;
-		$post['trade_type'] = $trade_type;
-		
-		$sign = sign($post,$pay_key);
-		
+
+			$fee = $money;
+			$appid = D('Home/Front')->get_config_by_name('wepro_appid');
+			$body =         '会员充值';
+			$mch_id =      D('Home/Front')->get_config_by_name('wepro_partnerid');
+			$nonce_str =    nonce_str();
+			$notify_url =   $shop_domain.'/notify.php';
+			$openid =       $member_info['we_openid'];
+			$out_trade_no = $order_id.'-'.time().'-charge-'.$id;
+			$spbill_create_ip = $_SERVER['REMOTE_ADDR'];
+			$total_fee =    $fee*100;
+			$trade_type = 'JSAPI';
+			$pay_key = D('Home/Front')->get_config_by_name('wepro_key');
+
+			$post = array();
+
+			$post['appid'] = $appid;
+			$post['body'] = $body;
+			$post['mch_id'] = $mch_id;
+			$post['nonce_str'] = $nonce_str;
+			$post['notify_url'] = $notify_url;
+			$post['openid'] = $openid;
+			$post['out_trade_no'] = $out_trade_no;
+			$post['spbill_create_ip'] = $spbill_create_ip;
+			$post['total_fee'] = $total_fee;
+			$post['trade_type'] = $trade_type;
+
+			$sign = sign($post,$pay_key);
+
 		//sign()
-		$post_xml = '<xml>
-			   <appid>'.$appid.'</appid>
-			   <body>'.$body.'</body>
-			   <mch_id>'.$mch_id.'</mch_id>
-			   <nonce_str>'.$nonce_str.'</nonce_str>
-			   <notify_url>'.$notify_url.'</notify_url>
-			   <openid>'.$openid.'</openid>
-			   <out_trade_no>'.$out_trade_no.'</out_trade_no>
-			   <spbill_create_ip>'.$spbill_create_ip.'</spbill_create_ip>
-			   <total_fee>'.$total_fee.'</total_fee>
-			   <trade_type>'.$trade_type.'</trade_type>
-			   <sign>'.$sign.'</sign>
+			$post_xml = '<xml>
+			<appid>'.$appid.'</appid>
+			<body>'.$body.'</body>
+			<mch_id>'.$mch_id.'</mch_id>
+			<nonce_str>'.$nonce_str.'</nonce_str>
+			<notify_url>'.$notify_url.'</notify_url>
+			<openid>'.$openid.'</openid>
+			<out_trade_no>'.$out_trade_no.'</out_trade_no>
+			<spbill_create_ip>'.$spbill_create_ip.'</spbill_create_ip>
+			<total_fee>'.$total_fee.'</total_fee>
+			<trade_type>'.$trade_type.'</trade_type>
+			<sign>'.$sign.'</sign>
 			</xml> ';
-		$url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
-		$xml = http_request($url,$post_xml);
-		$array = xml($xml);
-		if($array['RETURN_CODE'] == 'SUCCESS' && $array['RESULT_CODE'] == 'SUCCESS'){
-			$time = time();
-			$tmp= array();
-			$tmp['appId'] = $appid;
-			$tmp['nonceStr'] = $nonce_str;
-			$tmp['package'] = 'prepay_id='.$array['PREPAY_ID'];
-			$tmp['signType'] = 'MD5';
-			$tmp['timeStamp'] = "$time";
-			
-			M('lionfish_comshop_member_charge_flow')->where( array('id' => $order_id) )->save( array('formid' => $array['PREPAY_ID'] ) );
-			
-			$data['code'] = 0;
-			$data['timeStamp'] = "$time";
-			$data['nonceStr'] = $nonce_str;
-			$data['signType'] = 'MD5';
-			$data['package'] = 'prepay_id='.$array['PREPAY_ID'];
-			$data['paySign'] =   sign($tmp, $pay_key);
-			$data['out_trade_no'] = $out_trade_no;
-			
-			$data['redirect_url'] = '../dan/me';
-			
-		}else{
-			$data['code'] = 1;
-			$data['text'] = "错误";
-			$data['RETURN_CODE'] = $array['RETURN_CODE'];
-			$data['RETURN_MSG'] = $array['RETURN_MSG'];
-		}
-		
-		
-		
-		echo json_encode($data);
-		die();
-		
-	}
-	
-	
-	public function wxpay()
-	{
-		$gpc = I('request.');
-		
-		$token = $gpc['token'];
-		$order_id = $gpc['order_id'];
-		
-		
-		$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
-		
-		
-		$member_id = $weprogram_token['member_id'];
-		
-		
-		if( empty($member_id) )
-		{
-			echo json_encode( array('code' =>1,'msg' =>'未登录') );
+			$url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
+			$xml = http_request($url,$post_xml);
+			$array = xml($xml);
+			if($array['RETURN_CODE'] == 'SUCCESS' && $array['RESULT_CODE'] == 'SUCCESS'){
+				$time = time();
+				$tmp= array();
+				$tmp['appId'] = $appid;
+				$tmp['nonceStr'] = $nonce_str;
+				$tmp['package'] = 'prepay_id='.$array['PREPAY_ID'];
+				$tmp['signType'] = 'MD5';
+				$tmp['timeStamp'] = "$time";
+
+				M('lionfish_comshop_member_charge_flow')->where( array('id' => $order_id) )->save( array('formid' => $array['PREPAY_ID'] ) );
+
+				$data['code'] = 0;
+				$data['timeStamp'] = "$time";
+				$data['nonceStr'] = $nonce_str;
+				$data['signType'] = 'MD5';
+				$data['package'] = 'prepay_id='.$array['PREPAY_ID'];
+				$data['paySign'] =   sign($tmp, $pay_key);
+				$data['out_trade_no'] = $out_trade_no;
+
+				$data['redirect_url'] = '../dan/me';
+
+			}else{
+				$data['code'] = 1;
+				$data['text'] = "错误";
+				$data['RETURN_CODE'] = $array['RETURN_CODE'];
+				$data['RETURN_MSG'] = $array['RETURN_MSG'];
+			}
+
+
+
+			echo json_encode($data);
 			die();
+
 		}
-		
-		
-		$member_info = M('lionfish_comshop_member')->field('we_openid')->where( array('member_id' => $member_id) )->find();
-		
-		
-		$order = M('lionfish_comshop_order')->where( array('order_id' => $order_id ) )->find();
-		
-		
+
+
+		public function wxpay()
+		{
+			$gpc = I('request.');
+
+			$token = $gpc['token'];
+			$order_id = $gpc['order_id'];
+
+
+			$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
+
+
+			$member_id = $weprogram_token['member_id'];
+
+
+			if( empty($member_id) )
+			{
+				echo json_encode( array('code' =>1,'msg' =>'未登录') );
+				die();
+			}
+
+
+			$member_info = M('lionfish_comshop_member')->field('we_openid')->where( array('member_id' => $member_id) )->find();
+
+
+			$order = M('lionfish_comshop_order')->where( array('order_id' => $order_id ) )->find();
+
+
 		//order_status_id
-		
-		if( $order['order_status_id'] != 3)
-		{
-			$json = array();
-			
-			$json['msg']='商品已下架！';
-			$json['code'] = 2;
-			if($order['order_status_id'] == 1)
+
+			if( $order['order_status_id'] != 3)
 			{
-				$json['msg']='订单已付款，请勿重新付款!';
-			}
-			else if( $order['order_status_id'] == 5){
-				$json['msg']='订单已取消，请重新选择商品下单!';
-			}
-			echo json_encode($json);
-			die();
-		}
-		
-		
-		
-		//检测商品是否下架 begin
-		$sql = "select name,quantity,rela_goodsoption_valueid,goods_id from ".C('DB_PREFIX')."lionfish_comshop_order_goods  
-					where order_id={$order_id} ";
-			
-		$order_goods_list = M()->query($sql);
-		
-		foreach($order_goods_list as $tp_val)
-		{
-			$tp_gd_info = M('lionfish_comshop_goods')->field('grounding')->where( array('id' => $tp_val['goods_id'] ) )->find();
-			
-			if( empty($tp_gd_info) || $tp_gd_info['grounding'] != 1 )
-			{
-				$json['code'] = 2;
-					
+				$json = array();
+
 				$json['msg']='商品已下架！';
-			
+				$json['code'] = 2;
+				if($order['order_status_id'] == 1)
+				{
+					$json['msg']='订单已付款，请勿重新付款!';
+				}
+				else if( $order['order_status_id'] == 5){
+					$json['msg']='订单已取消，请重新选择商品下单!';
+				}
 				echo json_encode($json);
 				die();
 			}
-		}
-		
-		//检测商品是否下架end   
-		
-		
-		//检测是否已经支付过了begin
-		
-		$order_relate_info = M('lionfish_comshop_order_relate')->where( array('order_id' => $order_id ) )->order('id desc')->find();
-		
-		if( !empty($order_relate_info) && $order_relate_info['order_all_id'] > 0 )
-		{
-			$order_all_info = M('lionfish_comshop_order_all')->where( array('id' => $order_relate_info['order_all_id'] ) )->find();
+
+
+
+		//检测商品是否下架 begin
+			$sql = "select name,quantity,rela_goodsoption_valueid,goods_id from ".C('DB_PREFIX')."lionfish_comshop_order_goods  
+			where order_id={$order_id} ";
 			
-			if( !empty($order_all_info) && !empty($order_all_info['out_trade_no']) )
+			$order_goods_list = M()->query($sql);
+
+			foreach($order_goods_list as $tp_val)
 			{
-				
-				$out_trade_no = $order_all_info['out_trade_no'];
-		
-				$appid =  D('Home/Front')->get_config_by_name('wepro_appid');
-				$mch_id =      D('Home/Front')->get_config_by_name('wepro_partnerid');
-				$nonce_str =    nonce_str();
-				
-				$pay_key = D('Home/Front')->get_config_by_name('wepro_key');
-				
-				
-				$post = array();
-				$post['appid'] = $appid;
-				$post['mch_id'] = $mch_id;
-				$post['nonce_str'] = $nonce_str;
-				$post['out_trade_no'] = $out_trade_no;
-			
-				$sign = sign($post,$pay_key);
-				
-				$post_xml = '<xml>
-							   <appid>'.$appid.'</appid>
-							   <mch_id>'.$mch_id.'</mch_id>
-							   <nonce_str>'.$nonce_str.'</nonce_str>
-							   <out_trade_no>'.$out_trade_no.'</out_trade_no>
-							   <sign>'.$sign.'</sign>
-							</xml>';
-					
-				$url = "https://api.mch.weixin.qq.com/pay/orderquery";
-				
-				$result = http_request($url,$post_xml);
-				
-				$array = xml($result);
-				
-				if( $array['RETURN_CODE'] == 'SUCCESS' && $array['RETURN_MSG'] == 'OK' )
+				$tp_gd_info = M('lionfish_comshop_goods')->field('grounding')->where( array('id' => $tp_val['goods_id'] ) )->find();
+
+				if( empty($tp_gd_info) || $tp_gd_info['grounding'] != 1 )
 				{
-					if( $array['TRADE_STATE'] == 'SUCCESS' )
-					{
-						$json = array();
-			
-						$json['msg']='商品已下架！';
-						$json['code'] = 2;
-						$json['msg']='订单已付款，请勿重新付款，请刷新页面!';
-						echo json_encode($json);
-						die();
-					}
+					$json['code'] = 2;
+					
+					$json['msg']='商品已下架！';
+
+					echo json_encode($json);
+					die();
 				}
-				
 			}
-		}
-		
-		//检测是否已经支付过了end  
-		
-		//支付才减库存，才需要判断
-		$kucun_method = D('Home/Front')->get_config_by_name('kucun_method');
-						
-		if( empty($kucun_method) )
-		{
-			$kucun_method = 0;
-		}
-		
-		if($kucun_method == 1)
-		{
-			/*** 检测商品库存begin  **/
-		
-			
-			
-			
-			//goods_id
-			foreach($order_goods_list as $val)
+
+		//检测商品是否下架end   
+
+
+		//检测是否已经支付过了begin
+
+			$order_relate_info = M('lionfish_comshop_order_relate')->where( array('order_id' => $order_id ) )->order('id desc')->find();
+
+			if( !empty($order_relate_info) && $order_relate_info['order_all_id'] > 0 )
 			{
-				$quantity = $val['quantity'];
-				
-				$goods_id = $val['goods_id'];
-				
-				$can_buy_count = D('Home/Front')->check_goods_user_canbuy_count($member_id, $goods_id);
-				
-				$goods_description = D('Home/Front')->get_goods_common_field($goods_id , 'total_limit_count');
-				
-				if($can_buy_count == -1)
+				$order_all_info = M('lionfish_comshop_order_all')->where( array('id' => $order_relate_info['order_all_id'] ) )->find();
+
+				if( !empty($order_all_info) && !empty($order_all_info['out_trade_no']) )
 				{
-					$json['code'] = 2;
+
+					$out_trade_no = $order_all_info['out_trade_no'];
+
+					$appid =  D('Home/Front')->get_config_by_name('wepro_appid');
+					$mch_id =      D('Home/Front')->get_config_by_name('wepro_partnerid');
+					$nonce_str =    nonce_str();
+
+					$pay_key = D('Home/Front')->get_config_by_name('wepro_key');
+
+
+					$post = array();
+					$post['appid'] = $appid;
+					$post['mch_id'] = $mch_id;
+					$post['nonce_str'] = $nonce_str;
+					$post['out_trade_no'] = $out_trade_no;
+
+					$sign = sign($post,$pay_key);
+
+					$post_xml = '<xml>
+					<appid>'.$appid.'</appid>
+					<mch_id>'.$mch_id.'</mch_id>
+					<nonce_str>'.$nonce_str.'</nonce_str>
+					<out_trade_no>'.$out_trade_no.'</out_trade_no>
+					<sign>'.$sign.'</sign>
+					</xml>';
 					
-					$json['msg']='您还能购买'.$goods_description['total_limit_count'].'个';
-				
-					echo json_encode($json);
-					die();
-				}else if($can_buy_count >0 && $quantity >$can_buy_count)
-				{
-					$json['code'] = 2;
-					$json['msg']='您还能购买'.$can_buy_count.'份';
-					echo json_encode($json);
-					die();
-				}
-				//rela_goodsoption_valueid
-				if(!empty($val['rela_goodsoption_valueid']))
-				{
-					$mul_opt_arr = array();
-					
-					//ims_ 
-					
-					$goods_option_mult_value = M('lionfish_comshop_goods_option_item_value')->where( array('goods_id' => $goods_id,'option_item_ids' => $val['rela_goodsoption_valueid']) )->find();				
-									
-					
-					if( !empty($goods_option_mult_value) )
+					$url = "https://api.mch.weixin.qq.com/pay/orderquery";
+
+					$result = http_request($url,$post_xml);
+
+					$array = xml($result);
+
+					if( $array['RETURN_CODE'] == 'SUCCESS' && $array['RETURN_MSG'] == 'OK' )
 					{
-						if($goods_option_mult_value['stock']<$quantity){
-							$json['code'] =2;
-							$json['msg']='商品数量不足，剩余'.$goods_option_mult_value['stock'].'个！！';
+						if( $array['TRADE_STATE'] == 'SUCCESS' )
+						{
+							$json = array();
+
+							$json['msg']='商品已下架！';
+							$json['code'] = 2;
+							$json['msg']='订单已付款，请勿重新付款，请刷新页面!';
 							echo json_encode($json);
 							die();
 						}
 					}
+
 				}
-				
 			}
-			/*** 检测商品库存end **/
-		}
-	
-		$pin_order = array();
-		if( !empty($pin_order) )
-		{
+
+		//检测是否已经支付过了end  
+
+		//支付才减库存，才需要判断
+			$kucun_method = D('Home/Front')->get_config_by_name('kucun_method');
+
+			if( empty($kucun_method) )
+			{
+				$kucun_method = 0;
+			}
+
+			if($kucun_method == 1)
+			{
+				/*** 检测商品库存begin  **/
+
+
+
+
+			//goods_id
+				foreach($order_goods_list as $val)
+				{
+					$quantity = $val['quantity'];
+
+					$goods_id = $val['goods_id'];
+
+					$can_buy_count = D('Home/Front')->check_goods_user_canbuy_count($member_id, $goods_id);
+
+					$goods_description = D('Home/Front')->get_goods_common_field($goods_id , 'total_limit_count');
+
+					if($can_buy_count == -1)
+					{
+						$json['code'] = 2;
+
+						$json['msg']='您还能购买'.$goods_description['total_limit_count'].'个';
+
+						echo json_encode($json);
+						die();
+					}else if($can_buy_count >0 && $quantity >$can_buy_count)
+					{
+						$json['code'] = 2;
+						$json['msg']='您还能购买'.$can_buy_count.'份';
+						echo json_encode($json);
+						die();
+					}
+				//rela_goodsoption_valueid
+					if(!empty($val['rela_goodsoption_valueid']))
+					{
+						$mul_opt_arr = array();
+
+					//ims_ 
+
+						$goods_option_mult_value = M('lionfish_comshop_goods_option_item_value')->where( array('goods_id' => $goods_id,'option_item_ids' => $val['rela_goodsoption_valueid']) )->find();				
+
+
+						if( !empty($goods_option_mult_value) )
+						{
+							if($goods_option_mult_value['stock']<$quantity){
+								$json['code'] =2;
+								$json['msg']='商品数量不足，剩余'.$goods_option_mult_value['stock'].'个！！';
+								echo json_encode($json);
+								die();
+							}
+						}
+					}
+
+				}
+				/*** 检测商品库存end **/
+			}
+
+			$pin_order = array();
+			if( !empty($pin_order) )
+			{
 			/**
 			$pin_model =  load_model_class('pin');
 			$is_pin_over = $pin_model->getNowPinState($pin_order['pin_id']);
@@ -4858,7 +4858,7 @@ public function sub_order()
 		$order_all_data['extra'] = 1;
 		//--------------------- by lucas E ------------
 		$order_all_id = M('lionfish_comshop_order_all')->add($order_all_data);
-			
+
 		$order_relate_data = array();
 		$order_relate_data['order_all_id'] = $order_all_id;
 		$order_relate_data['order_id'] = $order_id;
@@ -4874,7 +4874,7 @@ public function sub_order()
 			$fee = $order['total']+ $order['shipping_fare']-$order['voucher_credit']-$order['fullreduction_money'] - $order['score_for_money'];
 		}
 		$fee = round($fee , 2);
-			
+
 		
 		$appid = D('Home/Front')->get_config_by_name('wepro_appid');
 		
@@ -4885,9 +4885,9 @@ public function sub_order()
 		
 		if( empty($body) )
 		{
-		    $body =         '商品购买';
+			$body =         '商品购买';
 		}
-			
+
 		
 		$mch_id =       D('Home/Front')->get_config_by_name('wepro_partnerid');
 		$nonce_str =    nonce_str();
@@ -4919,18 +4919,18 @@ public function sub_order()
 		
 		
 		$post_xml = '<xml>
-			   <appid>'.$appid.'</appid>
-			   <body>'.$body.'</body>
-			   <mch_id>'.$mch_id.'</mch_id>
-			   <nonce_str>'.$nonce_str.'</nonce_str>
-			   <notify_url>'.$notify_url.'</notify_url>
-			   <openid>'.$openid.'</openid>
-			   <out_trade_no>'.$out_trade_no.'</out_trade_no>
-			   <spbill_create_ip>'.$spbill_create_ip.'</spbill_create_ip>
-			   <total_fee>'.$total_fee.'</total_fee>
-			   <trade_type>'.$trade_type.'</trade_type>
-			   <sign>'.$sign.'</sign>
-			</xml> ';
+		<appid>'.$appid.'</appid>
+		<body>'.$body.'</body>
+		<mch_id>'.$mch_id.'</mch_id>
+		<nonce_str>'.$nonce_str.'</nonce_str>
+		<notify_url>'.$notify_url.'</notify_url>
+		<openid>'.$openid.'</openid>
+		<out_trade_no>'.$out_trade_no.'</out_trade_no>
+		<spbill_create_ip>'.$spbill_create_ip.'</spbill_create_ip>
+		<total_fee>'.$total_fee.'</total_fee>
+		<trade_type>'.$trade_type.'</trade_type>
+		<sign>'.$sign.'</sign>
+		</xml> ';
 		$url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
 		$xml = http_request($url,$post_xml);
 		$array = xml($xml);
@@ -4946,7 +4946,7 @@ public function sub_order()
 			$prepay_id = (string)$array['PREPAY_ID'];
 			
 			M('lionfish_comshop_order')->where( array('order_id' => $order_id) )->save( array('perpay_id' => $prepay_id) );
-				
+
 			
 			$data['code'] = 0;
 			$data['timeStamp'] = "$time";
@@ -4996,5 +4996,5 @@ public function sub_order()
 		die();
 
 	}
-    
+
 }

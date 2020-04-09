@@ -583,7 +583,7 @@ private $data = array();
 							
 							$price2 = round(( $price * $member_level_info['discount'] )/100,2);
 							
-							$goods_query['is_mb_level_buy'] = 2;
+							$goods_query['is_mb_level_buy'] = 1;
 							$goods_query['levelprice'] = $price2;
 							
 							//$goods_query['price'] = $price2 ;
