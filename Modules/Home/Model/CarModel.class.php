@@ -569,7 +569,7 @@ private $data = array();
 							$goods_query['is_mb_level_buy'] = 1;
 							$goods_query['levelprice'] = $price2;
 							
-							$goods_query['price'] = $price2 ;
+							//$goods_query['price'] = $price2 ;
 							
 							$price = $goods_query['price'];
 						}

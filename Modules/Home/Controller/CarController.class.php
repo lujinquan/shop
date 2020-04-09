@@ -1094,17 +1094,24 @@ class CarController extends CommonController {
 			//$seller_goodss[ $goods_store_field['store_id'] ]['goods'][$key] = $val;
 			
 			$supply_id = D('Home/Front')->get_goods_supply_id($val['goods_id']);
+			//-------------- by lucas 【显示供应商】 Start ------------------------
+			$val['shopname'] = '平台自营';
+			//-------------- by lucas 【显示供应商】 End --------------------------
+			
 			if($supply_id > 0)
 			{
 				$supply_info = D('Home/Front')->get_supply_info($supply_id);
-				
+				//-------------- by lucas 【显示供应商】 Start ------------------------
+				$val['shopname'] = $supply_info['shopname'];
+				//-------------- by lucas 【显示供应商】 End --------------------------
 				if($supply_info['type'] ==0)
 				{
 					$supply_id = 0;
 				}
 			}
-			
-			
+			//-------------- by lucas 【显示供应商】 Start ------------------------
+			$seller_goodss_mult[$val['is_only_express']][ $supply_id ]['shopname'] = $val['shopname'];
+			//-------------- by lucas 【显示供应商】 End --------------------------
 			$seller_goodss[ $supply_id ]['goods'][$key] = $val;
 			
 			$tp_ar[] = $val['is_only_express'];
@@ -1122,6 +1129,7 @@ class CarController extends CommonController {
 			
 			foreach($seller_goodss_tp as $store_id => $val)
 			{
+//dump($val);exit;
 				//total
 				$seller_voucher_list = array();
 				$seller_total_fee = 0;
@@ -1181,7 +1189,9 @@ class CarController extends CommonController {
 						$option_str = implode(';', $option_arr);
 					}
 					
-					
+					//-------------- by lucas 【显示供应商】 Start ------------------------
+					$tp_val['shopname'] = $val['shopname'];
+					//-------------- by lucas 【显示供应商】 End --------------------------
 					$tp_val['can_buy'] = D('Home/Pingoods')->get_goods_time_can_buy($d_goods['goods_id']);
 					
 					$tp_val['option_can_buy'] = D('Home/Pingoods')->get_goods_option_can_buy( $d_goods['goods_id'], $d_goods['sku_str']);
@@ -1210,7 +1220,7 @@ class CarController extends CommonController {
 				//$store_info = M('seller')->field('s_id,s_true_name,s_logo')->where( array('s_id' => $store_id) )->find();
 				//$store_info['s_logo'] = C('SITE_URL').'Uploads/image/'.$store_info['s_logo'];
 				
-				$store_info = array('s_true_name' => '','s_id' => 1);
+				$store_info = array('s_true_name' => '楚天新媒','s_id' => 1);
 				$s_logo = D('Home/Front')->get_config_by_name('shoplogo');
 				
 				if( !empty($s_logo) )
@@ -1228,8 +1238,12 @@ class CarController extends CommonController {
 				} else {
 					$store_data['isselect'] = false;
 				}
+
+				//-------------- by lucas 【显示供应商】 Start ------------------------
+				$store_data['shopname'] = $val['shopname'];
+				//$store_data['shopname'] = $store_info['s_true_name'];
+				//-------------- by lucas 【显示供应商】 End --------------------------
 				
-				$store_data['shopname'] = $store_info['s_true_name'];
 				$store_data['caredit'] = 'inline';
 				$store_data['finish'] = 'none';
 				$store_data['count'] = '0.00';
@@ -1353,7 +1367,8 @@ class CarController extends CommonController {
 				$store_data['isselect'] = false;
 			}
 			
-			$store_data['shopname'] = $store_info['s_true_name'];
+			//$store_data['shopname'] = $store_info['s_true_name'];
+			$store_data['shopname'] = $val['shopname'];
 			$store_data['caredit'] = 'inline';
 			$store_data['finish'] = 'none';
 			$store_data['count'] = '0.00';
@@ -1988,7 +2003,7 @@ class CarController extends CommonController {
 	}
 	
 	
-	foreach($goods as $key => $val)
+	foreach($goods as $key => &$val)
 	{
 		//$goods_store_field =  M('goods')->field('store_id')->where( array('goods_id' => $val['goods_id']) )->find();
 		if( $is_only_express == 1 && $val['is_only_express'] != 1 )
@@ -2005,10 +2020,15 @@ class CarController extends CommonController {
 		
 		
 		$supply_id = D('Home/Front')->get_goods_supply_id($val['goods_id']);
+		//-------------- by lucas 【显示供应商】 Start ------------------------
+		$val['shopname'] = '平台自营';
+		//-------------- by lucas 【显示供应商】 End --------------------------
 		if($supply_id > 0)
 		{
 			$supply_info = D('Home/Front')->get_supply_info($supply_id);
-			
+			//-------------- by lucas 【显示供应商】 Start ------------------------
+			$val['shopname'] = $supply_info['shopname'];
+			//-------------- by lucas 【显示供应商】 End --------------------------
 			if($supply_info['type'] ==0)
 			{
 				$supply_id = 0;
@@ -2485,7 +2505,7 @@ class CarController extends CommonController {
 	foreach($goods as $key => $good)
 	{
 		//暂时关闭
-		
+		//var_dump($good);exit;
 		
 		//ims_lionfish_comshop_goods
 		//ims_ lionfish_comshop_good_common
