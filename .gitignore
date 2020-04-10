@@ -2,4 +2,5 @@
 /Uploads/*
 /Modules/Seller/Conf/db.php
 /Modules/Common/Conf/db.php
+/Data
 *.log
