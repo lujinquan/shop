@@ -100,7 +100,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="page-table-header">
-                                <input type='checkbox' type='checkbox' name="checkall" lay-skin="primary" lay-filter="checkboxall" />
+                                <!-- <input type='checkbox' type='checkbox' name="checkall" lay-skin="primary" lay-filter="checkboxall" /> -->
                                 <span class="pull-right">
 									<a  class='btn layui-btn  layui-btn-sm' href="{:U('delivery/auto_get_delivery_list', array('delivery_date' => $delivery_date))}" >
 										<span data-toggle="tooltip" data-placement="top" title="" data-original-title="打印配送单">
@@ -108,11 +108,11 @@
 										</span>
                 					</a>
             					</span>
-								<div class="btn-group">
+								<!-- <div class="btn-group">
                                     <button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch-remove' data-confirm="确认要批量生成吗，请确认商品数量是否正确?" data-href="{:U('delivery/sub_delivery_list',   array('endtime' => $endtime,'starttime' => $starttime,'searchtime' => $gpc['searchtime'] ) )}">
                                         <i class='icow icow-shanchu1'></i> 批量生成清单
             						</button>
-                                </div>
+                                </div> -->
                             </div>
                             <table class="table table-responsive">
                                 <thead>
@@ -144,11 +144,11 @@
                     						{$item['goods_count']}
                     					</td>
                     					<td style="overflow:visible;position:relative">
-                    						<a class='layui-btn layui-btn-primary layui-btn-xs create_list' href="javascript:;" data-href="{:U('delivery/sub_delivery_list', array('head_id' => $item['head_id'],'endtime' => $endtime,'starttime' => $starttime,'searchtime' => $_GPC['searchtime'] ))}" >
+                    						<!-- <a class='layui-btn layui-btn-primary layui-btn-xs create_list' href="javascript:;" data-href="{:U('delivery/sub_delivery_list', array('head_id' => $item['head_id'],'endtime' => $endtime,'starttime' => $starttime,'searchtime' => $_GPC['searchtime'] ))}" >
                     							<span data-toggle="tooltip" data-placement="top" title="" data-original-title="生成清单">
                     								生成清单
                     							</span>
-                    						</a>
+                    						</a> -->
                     						<a class='layui-btn layui-btn-primary layui-btn-xs head_ordergoods_detail' href="javascript:;" data-href="{:U('delivery/head_ordergoods_detail', array('head_id' => $item['head_id'],'endtime' => $endtime,'starttime' => $starttime,'searchtime' => $_GPC['searchtime'],'ok'=>1 ))}" >
                     							<span data-toggle="tooltip" data-placement="top" title="" data-original-title="商品详情">
                     								<i class="icow icow-bianji2"></i>商品详情
@@ -162,12 +162,12 @@
                                     <tr>
                                         <td colspan="3" style="padding-left: 0;">
                 							<div class="page-table-header">
-                								<input type="checkbox" type='checkbox' name="checkall" lay-skin="primary" lay-filter="checkboxall">
+                								<!-- <input type="checkbox" type='checkbox' name="checkall" lay-skin="primary" lay-filter="checkboxall">
                 								<div class="btn-group">
                 									<button class="btn btn-default btn-sm btn-operation" type="button" data-toggle='batch-remove' data-confirm="确认要批量生成吗，请确认商品数量是否正确?" data-href="{php echo shopUrl('delivery/sub_delivery_list', array('endtime' => $endtime,'starttime' => $starttime,'searchtime' => $_GPC['searchtime']) )}">
                 										<i class='icow icow-shanchu1'></i> 批量生成清单
                 									</button>
-                								</div>
+                								</div> -->
                 							</div>
                                         </td>
                                         <td colspan="3" style="text-align: right">
