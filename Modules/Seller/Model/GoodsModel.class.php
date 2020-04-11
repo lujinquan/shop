@@ -88,7 +88,9 @@ class GoodsModel extends Model{
 		$post_data_goods['hasoption'] = I('post.hasoption','','intval');
 		$post_data_goods['index_sort'] = I('post.index_sort','','intval');
 		$post_data_goods['credit'] = I('post.credit','','trim');
-		
+		//-------------- by lucas 【提货顺序】 Start ------------------------
+		$post_data_goods['ti_sort'] =  I('post.ti_sort',1000,'intval');
+		//-------------- by lucas 【提货顺序】 End --------------------------
 		$post_data_goods['buyagain'] = I('post.buyagain','','trim');
 		$post_data_goods['buyagain_condition'] = I('post.buyagain_condition','','intval');
 		$post_data_goods['buyagain_sale'] = I('post.buyagain_sale','','intval');

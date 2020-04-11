@@ -3301,6 +3301,47 @@ class GoodsController extends CommonController{
 		
 		show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
 	}
+
+	/**
+	 * 提货排序
+	 * =====================================
+	 * @author  Lucas 
+	 * email:   598936602@qq.com 
+	 * Website  address:  www.mylucas.com.cn
+	 * =====================================
+	 * 创建时间: 2020-04-11 18:12:19
+	 * @return  返回值  
+	 * @version 版本  1.0
+	 */
+	
+	public function changetisort()
+	{
+		$id = I('request.id',0);
+		//ids
+		if (empty($id)) {
+			$ids = I('request.ids');
+			
+			$id = ((is_array($ids) ? implode(',', $ids) : 0));
+		}
+		if (empty($id)) {
+			show_json(0, array('message' => '参数错误'));
+		}
+		$type = I('request.type');
+		$value = I('request.value');
+		$items = M('lionfish_comshop_goods')->field('id')->where( array('id' => array('in', $id)) )->select();	
+			
+		foreach ($items as $item ) {
+			M('lionfish_comshop_goods')->where( array('id' => $item['id']) )->save( array($type => $value) );
+			
+			
+			if($type == 'total')
+			{
+				D('Seller/Redisorder')->sysnc_goods_total($item['id']);
+			}
+		}
+		
+		show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
+	}
 	
 	public function delete()
 	{
