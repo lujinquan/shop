@@ -52,7 +52,15 @@ class UserController extends CommonController{
 			$condition .= ' and groupid = '.$groupid;
 		}
 		
-	
+		//-------------- by lucas 【会员通过手机号搜索】 Start ------------------------
+		$telephone = I('request.telephone');
+		$this->telephone = $telephone;
+		if( isset($telephone) && !empty($telephone))
+		{
+			$condition .= ' and telephone  like '.'"%' . $telephone . '%"';
+		}
+		//-------------- by lucas 【会员通过手机号搜索】 End --------------------------
+		
 		
 		if ($gpc['export'] == '1') {
 			$list = M()->query('SELECT * FROM ' .C('DB_PREFIX') . "lionfish_comshop_member \r\n                
