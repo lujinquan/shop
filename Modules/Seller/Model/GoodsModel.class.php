@@ -562,6 +562,11 @@ class GoodsModel extends Model{
 			M('lionfish_comshop_good_commiss')->add( $post_data_commiss );
 			
 			D('Seller/Redisorder')->sysnc_goods_total($goods_id);
+			
+			//-------------- by lucas 【会员自定义折扣】 Start ------------------------
+			return $goods_id;
+			//-------------- by lucas 【会员自定义折扣】 End --------------------------
+			
 	}
 	
 	

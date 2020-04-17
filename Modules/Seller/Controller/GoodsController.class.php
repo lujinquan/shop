@@ -1160,9 +1160,10 @@ class GoodsController extends CommonController{
 				die();
 			}
 
-			D('Seller/Goods')->addgoods();
-
 			//--------- 会员等级折扣 Start ------ Author Lucas by 2019-12-19 17:48-------------
+			
+			$id = D('Seller/Goods')->addgoods();
+
 			$member_level_arr = M('lionfish_comshop_member_level')->select();
 			foreach ($member_level_arr as $k0 => $v0) {
 				$discount_row = M('lionfish_comshop_goods_discount_member')->where( array('goods_id' => $id,'member_level' => $v0['level']) )->find();
@@ -3439,6 +3440,7 @@ class GoodsController extends CommonController{
 			}
 		}
 		$this->goods_discounts = $goods_discounts;
+		//dump($id);p($goods_discounts);
 		//--------- 会员等级折扣 End ----------------------------------------------------------
 		
 		//-------------------------以上是获取资料
