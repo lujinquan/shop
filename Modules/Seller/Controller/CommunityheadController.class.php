@@ -532,13 +532,19 @@ class CommunityheadController extends CommonController {
 		$group = M('lionfish_community_head_group')->where( array('id' => $id ) )->find();		
 
 		if (IS_POST) {
+			$close_order_date = trim($_GPC['close_order_time']);
+			// if(substr($close_order_date,14,2) != '00' || substr($close_order_date,17,2) != '00'){
+			// 	show_json(0, array('msg' => '结单时间格式错误！') );
+			// }
+			$close_order_date = substr($close_order_date,0,13).':00:00';
+
 			$data = array( 
 				'groupname' => trim($_GPC['groupname']) ,
-				'close_order_time' => trim(strtotime($_GPC['close_order_time'])) ,
+				'close_order_time' => strtotime($close_order_date) ,
 				'send_order_time' => trim(strtotime($_GPC['send_order_time'])) ,
 				'delivery_cycle' => trim($_GPC['delivery_cycle']) ,
 			);
-			
+			//dump($close_order_date);exit;
 			if (!(empty($id))) {
 				M('lionfish_community_head_group')->where( array('id' => $id) )->save( $data );
 			}

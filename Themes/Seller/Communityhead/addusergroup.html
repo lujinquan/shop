@@ -21,10 +21,12 @@
 
                     <div class="form-group">
                         <label class="col-sm-2 control-label must">结单时间</label>
-                        <div class="col-sm-9 col-xs-12">
+                        <div class="col-sm-5 col-xs-5">
                             {// 这是个时间段选择的模板 :tpl_form_field_daterange('time', array('starttime'=>date('Y-m-d H:i', $item['begin_time']),'endtime'=>date('Y-m-d H:i', $item['end_time'])),true);}
                             {:tpl_form_field_date('close_order_time', date('Y-m-d H:i',$group['close_order_time']),true);}
                         </div>
+                        <!-- <div class="layui-form-mid layui-word-aux">“商品预达简介”为商品名称下方的“预计送达时间”。例如："现在下单 预计（12点前下单，预计当天送达）可自提" 默认开启，关闭后不进行显示。</div> -->
+                        <div class="col-sm-5 col-xs-5"><div class="layui-form-mid layui-word-aux">日期只能精确到小时,去除分秒</div></div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-2 control-label must">发货日期</label>
