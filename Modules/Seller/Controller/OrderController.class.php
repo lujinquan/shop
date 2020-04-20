@@ -66,7 +66,12 @@ class OrderController extends CommonController{
 		$this->is_soli = $is_soli;
 		
 		$need_data = D('Seller/Order')->load_order_list();
+//dump($need_data['order_ids']);exit;
+		//-------------- by lucas 【】 Start ------------------------
+		$this->order_ids = json_encode($need_data['order_ids']);
+		//-------------- by lucas 【】 End --------------------------
 		
+
 		$cur_controller = 'order/index';
 		$total = $need_data['total'];
 		$total_money = $need_data['total_money'];
@@ -192,11 +197,13 @@ class OrderController extends CommonController{
 		$this->id = $item['order_id'];
 		include $this->display();
 	}
-	private function check_order_data()
+
+	//-------------- by lucas 【】 Start ------------------------
+	private function check_order_data($id = '')
 	{
 		
 	
-		$id = I('request.id',0);
+		$id = $id?$id:I('request.id',0);
 		
 		$item = M('lionfish_comshop_order')->where( array('order_id' => $id) )->find();
 		
@@ -208,6 +215,7 @@ class OrderController extends CommonController{
 
 		return array('id' => $id, 'item' => $item);
 	}
+	//-------------- by lucas 【】 End --------------------------
 	
 	public function opsendcancel()
 	{
@@ -357,7 +365,20 @@ class OrderController extends CommonController{
 		
 		show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
 	}
-	
+
+	//-------------- by lucas 【确认送达团长】 Start ------------------------
+	public function opsend_tuanz_over_all()
+	{
+		$ids =  I('request.ids');
+		foreach ($ids as $id) {
+			$opdata = $this->check_order_data($id);
+			extract($opdata);
+			D('Seller/Order')->do_tuanz_over($item['order_id']);
+			D('Home/Frontorder')->send_order_operate($item['order_id']);	
+		}
+		show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
+	}
+	//-------------- by lucas 【确认送达团长】 End --------------------------
 	
 	public function all_opprint()
 	{
@@ -895,6 +916,19 @@ class OrderController extends CommonController{
 		show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
 	}
 	
+	//-------------- by lucas 【批量配送团长】 Start ------------------------
+	public function opsend_tuanz_all()
+	{
+		$ids =  I('request.ids');
+		foreach ($ids as $id) {
+			$opdata = $this->check_order_data($id);
+			extract($opdata);
+			D('Seller/Order')->do_send_tuanz($item['order_id']);
+		}
+		show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
+	}
+	//-------------- by lucas 【批量配送团长】 End --------------------------
+
 	public function opsend()
 	{
 		$_GPC = I('request.');
@@ -1046,7 +1080,10 @@ class OrderController extends CommonController{
 		$post_data['keyword'] = $_GPC['keyword'];
 		
 		$post_data['export'] = 1;
-		
+
+		//-------------- by lucas 【根据团长类型导出】 Start ------------------------
+		//$post_data['groupid'] = $_GPC['groupid'];
+		//-------------- by lucas 【根据团长类型导出】 End --------------------------
 		
 		$columns = array(
 				array('title' => '订单流水号', 'field' => 'day_paixu', 'width' => 24, 'sort' => 0, 'is_check' => 1),
@@ -1160,6 +1197,26 @@ class OrderController extends CommonController{
 		}
 	}
 	
+	//-------------- by lucas 【订单列表批量处理页面】 Start ------------------------
+	public function oppay_all()
+	{
+		if (defined('ROLE') && ROLE == 'agenter' )
+		{
+			show_json(0, array('msg' => '您无此权限') );
+		}
+		$ids =  I('request.ids');
+		foreach ($ids as $id) {
+			$res_arr = D('Seller/Order')->admin_pay_order($id);
+		}
+		if( $res_arr['code'] == 0)
+		{
+			show_json(0, array('msg' => $res_arr['msg']) );
+		}else{
+			show_json(1,  array('url' => $_SERVER['HTTP_REFERER']));	
+		}
+	}
+	//-------------- by lucas 【订单列表批量处理页面】 End --------------------------
+
 	public function detail()
 	{
 		$id = I('get.id');
@@ -1514,7 +1571,23 @@ class OrderController extends CommonController{
 		show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
 	}
 	
-	 public function orderaftersales()
+	//-------------- by lucas 【】 Start ------------------------
+	public function opreceive_all()
+	{
+		$ids =  I('request.ids');
+//dump($ids);exit;
+		foreach ($ids as $id) {
+			$opdata = $this->check_order_data($id);
+			extract($opdata);
+			D('Seller/Order')->receive_order($item['order_id']);	
+			M('lionfish_comshop_order_history')->where( array('order_id' => $item['order_id'],'order_status_id' => 6) )->save( array( 'comment' => '后台操作，确认收货') );
+		}
+		show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
+
+	}
+	//-------------- by lucas 【】 End --------------------------
+
+	public function orderaftersales()
 	{
 		//$_GPC['order_status_id'] = 12;
 		

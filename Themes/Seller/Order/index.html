@@ -256,7 +256,15 @@
 					<div class="layui-input-inline" style="width:215px;">
 						<button class="layui-btn layui-btn-sm unbtn_export" data-export="0" type="submit"> 搜索</button>
 						<button type="submit" name=""  data-export="1" value="1" class="layui-btn layui-btn-sm  btn_export">导出</button>
-						
+						<?php if($order_status_id=='3'){ ?>
+						<button type="button" data-confirm="确认批量确认付款吗？" data-href="{:U('order/oppay_all',array('order_status'=>3))}" name="batchprocess" value="1" class="layui-btn layui-btn-sm batchprocess">批量确认付款</button>
+						<?php }elseif($order_status_id=='1'){ ?>
+						<button type="button" data-confirm="确认批量配送吗？" data-href="{:U('order/opsend_tuanz_all',array('order_status'=>1))}" name="batchprocess" value="14" class="layui-btn layui-btn-sm batchprocess">批量配送</button>
+						<?php }elseif($order_status_id=='14'){ ?>
+						<button type="button" data-confirm="确认批量送达团长吗？" data-href="{:U('order/opsend_tuanz_over_all',array('order_status'=>14))}" name="batchprocess" value="6" class="layui-btn layui-btn-sm batchprocess">批量送达团长</button>
+						<?php }elseif($order_status_id=='4'){ ?>
+						<button type="button" data-confirm="批量确认收货吗？" data-href="{:U('order/opreceive_all',array('order_status'=>4))}" name="batchprocess" value="11" class="layui-btn layui-btn-sm batchprocess">批量收货</button>
+						<?php } ?>	
 						<?php if(!empty($open_feier_print) && $open_feier_print >=1){ ?>
 						<a href="javascript:;" class="layui-btn layui-btn-sm btn_all_print">批量打印小票</a>
 						<?php } ?>
@@ -741,7 +749,66 @@ var $;
 layui.use(['jquery', 'layer','form'], function(){ 
   $ = layui.$;
   var form = layui.form;
-  
+
+  	$(".batchprocess").click(function () {
+    	var that = $(this);
+    	var ids_arr = [];
+    	$("input[name=item_checkbox]").each(function() {
+			
+			if( $(this).prop('checked') )
+			{
+				ids_arr.push( $(this).val() );
+			}
+		})
+		
+		
+		var _confirm_content = that.attr('data-confirm');
+		if(ids_arr.length < 1)
+		{
+			console.log({$order_ids});
+			var ids_arr = {$order_ids};
+			if(!ids_arr){
+				layer.msg('请选择要操作的内容');
+				return false;
+			}
+			_confirm_content = '是否处理筛选条件下所有订单';
+			//console.log('一个都不选就传这个值：',ids_arr);
+		}
+
+        var s_url = that.attr('data-href');
+		layer.confirm(_confirm_content, function(index){
+			 $.ajax({
+				url:s_url,
+				type:'post',
+				dataType:'json',
+				data:{ids:ids_arr},
+				success:function(info){
+					$('#ajaxModal').removeClass('in');
+					$('.modal-backdrop').removeClass('in');
+					if(info.status == 0)
+					{
+						layer.msg(info.result.message,{icon: 1,time: 2000});
+					}else if(info.status == 1){
+						var go_url = location.href;
+						if( info.result.hasOwnProperty("url") )
+						{
+							go_url = info.result.url;
+						}
+						
+						layer.msg('操作成功',{time: 1000,
+							end:function(){
+								location.href = info.result.url;
+							}
+						}); 
+					}
+				}
+			})
+		},function(){
+			console.log(232323);
+			$('#ajaxModal').removeClass('in');
+			$('.modal-backdrop').removeClass('in');
+		});
+    });
   
 	$('.deldom').click(function(){
 		var s_url = $(this).attr('data-href');

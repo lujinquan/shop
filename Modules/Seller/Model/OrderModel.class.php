@@ -903,7 +903,14 @@ class OrderModel{
 		if (!(empty($total))) {
 			
 			$sql = 'SELECT o.* FROM ' .C('DB_PREFIX'). 'lionfish_comshop_order as o  '.$sqlcondition.' where '  . $condition . ' ORDER BY  o.`order_id` DESC LIMIT ' . (($pindex - 1) * $psize) . ',' . $psize;
-			
+			//-------------- by lucas 【】 Start ------------------------
+			$sql1 = 'SELECT o.order_id FROM ' .C('DB_PREFIX'). 'lionfish_comshop_order as o  '.$sqlcondition.' where '  . $condition . ' ORDER BY  o.`order_id` DESC';
+			$order_ids_all = M()->query($sql1);
+			$order_ids = [];
+			foreach($order_ids_all as $order_id){
+				$order_ids[] = $order_id['order_id'];
+			}
+			//-------------- by lucas 【】 End --------------------------
 			
 			$list = M()->query($sql);
 			$need_list = array();
@@ -1060,7 +1067,7 @@ class OrderModel{
 		
 		
 		return array('total' => $total, 'total_money' => $total_money,'pager' => $pager, 'all_count' => $all_count,
-				'list' =>$list,
+				'list' =>$list,'order_ids' =>$order_ids,
 				'count_status_1' => $count_status_1,'count_status_3' => $count_status_3,'count_status_4' => $count_status_4,
 				'count_status_5' => $count_status_5, 'count_status_7' => $count_status_7, 'count_status_11' => $count_status_11,
 				'count_status_14' => $count_status_14
