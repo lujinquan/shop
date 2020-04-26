@@ -1735,17 +1735,29 @@ class PingoodsModel {
 			{
 				
 				$member_info = M('lionfish_comshop_member')->field('level_id')->where( array('member_id' => $member_id ) )->find();
-				
+				$price_arr['is_mb_level_buy'] = 2;
 				if( $member_info['level_id'] > 0)
 				{
+					$level_info = M('lionfish_comshop_member_level')->where( array('id' => $member_info['level_id'] ) )->find();
 					// 这里做了处理，读的是自定义商品会员折扣表
-					$member_level_info = M('lionfish_comshop_goods_discount_member')->where( array('member_level' => $member_info['level_id'],'goods_id' => $goods_id ) )->find();
+					$member_level_info = M('lionfish_comshop_goods_discount_member')->where( array('member_level' => $level_info['level'],'goods_id' => $goods_id ) )->find();
+					if($member_level_info){ //如果能找到自定义折扣
+						$vipprice = round( ($price_arr['price'] *  $member_level_info['discount']) /100 ,2);
+						$vaipdanprice = round( ($price_arr['danprice'] *  $member_level_info['discount']) /100 ,2);
+						
+						$price_arr['levelprice'] = sprintf('%.2f', $vipprice );
+						$price_arr['leveldanprice'] = sprintf('%.2f', $vaipdanprice );
+					}else{
+						$member_level_info = M('lionfish_comshop_member_level')->where( array('id' => $member_info['level_id'] ) )->find();
 					
-					$vipprice = round( ($price_arr['price'] *  $member_level_info['discount']) /100 ,2);
-					$vaipdanprice = round( ($price_arr['danprice'] *  $member_level_info['discount']) /100 ,2);
+						$vipprice = round( ($price_arr['price'] *  $member_level_info['discount']) /100 ,2);
+						$vaipdanprice = round( ($price_arr['danprice'] *  $member_level_info['discount']) /100 ,2);
+						
+						$price_arr['levelprice'] = sprintf('%.2f', $vipprice );
+						$price_arr['leveldanprice'] = sprintf('%.2f', $vaipdanprice );
+						$price_arr['is_mb_level_buy'] = 1;
+					}
 					
-					$price_arr['levelprice'] = sprintf('%.2f', $vipprice );
-					$price_arr['leveldanprice'] = sprintf('%.2f', $vaipdanprice );
 				}else{
 					$price_arr['levelprice'] = sprintf('%.2f', $price_arr['price'] );
 					$price_arr['leveldanprice'] = sprintf('%.2f', $price_arr['danprice'] );

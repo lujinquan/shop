@@ -110,22 +110,22 @@
 						<div class="page-table-header">
 						
 							<div class="btn-group">	 
-								<a class='btn btn-default btn-sm btn-op ' data-sec="1" data-confirm='确认批量配送操作吗?' data-toggle="ajaxModal" href="javascript:;" data-href="{:U('delivery/onekey_tosend', array('sec' => 1) )}" >
+								<a class='btn btn-default btn-sm btn-op ' data-sec="1" data-confirm='确认批量配送操作吗?' data-toggle="ajaxModal" href="javascript:;" data-href="{:U('delivery/onekey_tosend', array('sec' => 1,'delivery_date' => $delivery_date) )}" >
 									<i class="icow icow-yibiaoji" style="color: #999;display: inline-block;vertical-align: middle" title="批量配送操作" ></i>
 									批量配送操作
 								</a>
 								
-								<a class='btn btn-default btn-sm btn-op ' data-sec="0" data-confirm='确认要将所有待配送，全部变更为已配送?' data-toggle="ajaxModal" href="javascript:;" data-href="{:U('delivery/onekey_tosend', array('sec' => 0) )}" >
+								<a class='btn btn-default btn-sm btn-op ' data-sec="0" data-confirm='确认要将所有待配送，全部变更为已配送?' data-toggle="ajaxModal" href="javascript:;" data-href="{:U('delivery/onekey_tosend', array('sec' => 0,'delivery_date' => $delivery_date) )}" >
 									<i class="icow icow-yibiaoji" style="color: #999;display: inline-block;vertical-align: middle" title="确认要将所有待配送，全部变更为已配送?" ></i>
 									一键配送操作
 								</a>
 								
-								<a class='btn btn-default btn-sm btn-op ' data-sec="1" data-confirm='确认批量送达操作吗?' data-toggle="ajaxModal" href="javascript:;" data-href="{:U('delivery/onekey_tosendover', array('sec' => 1) )}" >
+								<a class='btn btn-default btn-sm btn-op ' data-sec="1" data-confirm='确认批量送达操作吗?' data-toggle="ajaxModal" href="javascript:;" data-href="{:U('delivery/onekey_tosendover', array('sec' => 1,'delivery_date' => $delivery_date) )}" >
 									<i class="icow icow-yibiaoji" style="color: #999;display: inline-block;vertical-align: middle" title="批量送达操作" ></i>
 									批量送达操作
 								</a>
 								
-								<a class='btn btn-default btn-sm btn-op ' data-sec="0" data-confirm='确认要将所有配送中，全部变更为送达?' data-toggle="ajaxModal" href="javascript:;" data-href="{:U('delivery/onekey_tosendover', array('sec' => 0) )}" >
+								<a class='btn btn-default btn-sm btn-op ' data-sec="0" data-confirm='确认要将所有配送中，全部变更为送达?' data-toggle="ajaxModal" href="javascript:;" data-href="{:U('delivery/onekey_tosendover', array('sec' => 0,'delivery_date' => $delivery_date) )}" >
 									<i class="icow icow-yibiaoji" style="color: #999;display: inline-block;vertical-align: middle" title="确认要将所有配送中，全部变更为已送达?" ></i>
 									一键送达操作
 								</a>

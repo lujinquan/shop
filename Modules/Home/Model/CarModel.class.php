@@ -576,19 +576,39 @@ private $data = array();
 						//-------------- by lucas 【自定义折扣价】 Start ------------------------
 						if($member_info['level_id'] > 0 && $goods_common['is_mb_level_buy'] == 2)
 						{
-							$member_level_info = M('lionfish_comshop_goods_discount_member')->where( array('member_level' => $member_info['level_id'],'goods_id' => $goods_id ) )->find();
-							
-							$level_info['member_discount'] = $member_level_info['discount'] ;
-							$level_info['level_name'] = $member_level_info['levelname'];
-							
-							$price2 = round(( $price * $member_level_info['discount'] )/100,2);
-							
-							$goods_query['is_mb_level_buy'] = 1;
-							$goods_query['levelprice'] = $price2;
-							
-							//$goods_query['price'] = $price2 ;
+							$level_info = M('lionfish_comshop_member_level')->where( array('id' => $member_info['level_id'] ) )->find();
+							// 这里做了处理，读的是自定义商品会员折扣表
+							$member_level_info = M('lionfish_comshop_goods_discount_member')->where( array('member_level' => $level_info['level'],'goods_id' => $goods_id ) )->find();
 
-							$price = $goods_query['price'] ;
+							//$member_level_info = M('lionfish_comshop_goods_discount_member')->where( array('member_level' => $member_info['level_id'],'goods_id' => $goods_id ) )->find();
+							if($member_level_info){
+								$level_info['member_discount'] = $member_level_info['discount'] ;
+								$level_info['level_name'] = $member_level_info['levelname'];
+								
+								$price2 = round(( $price * $member_level_info['discount'] )/100,2);
+								
+								$goods_query['is_mb_level_buy'] = 1;
+								$goods_query['levelprice'] = $price2;
+								
+								//$goods_query['price'] = $price2 ;
+
+								$price = $goods_query['price'] ;
+							}else{
+								$member_level_info = M('lionfish_comshop_member_level')->where( array('id' => $member_info['level_id'] ) )->find();
+							
+								$level_info['member_discount'] = $member_level_info['discount'] ;
+								$level_info['level_name'] = $member_level_info['levelname'];
+								
+								$price2 = round(( $price * $member_level_info['discount'] )/100,2);
+								
+								$goods_query['is_mb_level_buy'] = 1;
+								$goods_query['levelprice'] = $price2;
+								
+								//$goods_query['price'] = $price2 ;
+								
+								$price = $goods_query['price'];
+							}
+							
 						}
 						//-------------- by lucas 【自定义折扣价】 End --------------------------
 					}

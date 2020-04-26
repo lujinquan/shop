@@ -107,9 +107,13 @@ class ConfigController extends CommonController{
 			$data['common_header_backgroundimage'] = save_media($data['common_header_backgroundimage']);
 			$data['index_header_backgroundimage'] = save_media($data['index_header_backgroundimage']);
 			$data['user_header_backgroundimage'] = save_media($data['user_header_backgroundimage']);
-			
-			
-			
+
+			//-------------- by lucas 【自定义设置图片同步到服务器供小程序初始化调用】 Start ------------------------
+			copy(ROOT_PATH.'Uploads/image/'.$data['user_header_backgroundimage'], ROOT_PATH.'static/images/top_background.png');
+			copy(ROOT_PATH.'Uploads/image/'.$data['goods_details_price_bg'], ROOT_PATH.'static/images/shareBottomBg.png');
+			// copy(ROOT_PATH.'Uploads/image/'.$data['goods_details_price_bg'], ROOT_PATH.'static/images/shareBottomBg.png');
+			//-------------- by lucas 【自定义设置图片同步到服务器供小程序初始化调用】 End --------------------------
+				
 			$datas = D('Seller/Config')->get_all_config();
 			
 			$data['index_share_qrcode_bg'] = save_media($data['index_share_qrcode_bg']);

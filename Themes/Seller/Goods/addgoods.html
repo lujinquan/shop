@@ -189,7 +189,15 @@
 										<div class="layui-form-mid layui-word-aux">小票打印机使用，请控制字数，未填写默认截取商品标题(无须打印的可以不填写)</div>
 									</div>
 								</div>
-								
+								<!-- by lucas Start 添加推荐搭配-->
+								<div class="layui-form-item">
+									<label class="layui-form-label">推荐搭配</label>
+									<div class="layui-input-block">
+										<input type="text" name="recommend_match" id="recommend_match" class="form-control" value="{$item['recommend_match']}" />
+										<div class="layui-form-mid layui-word-aux">推荐和那些菜品搭配购买、食用（推荐20~100字符以内）</div>
+									</div>
+								</div>
+								<!-- by lucas End 添加推荐搭配 -->
 								<div class="layui-form-item">
 									<label class="layui-form-label must">商品视频</label>
 									<div class="layui-input-block gimgs">
