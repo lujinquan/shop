@@ -1234,11 +1234,15 @@ class GoodsController extends CommonController {
 		$comment_list = array();
 		
 		if($order_comment_count > 0)
-		{
-			
+		{		
+			//-------------- by lucas 【评论条数改成5条】 Start ------------------------
+			/*$sql = "select o.*,m.username as name2,m.avatar as avatar2 from ".C('DB_PREFIX')."lionfish_comshop_order_comment as o left join ".C('DB_PREFIX')."lionfish_comshop_member as m 
+			on o.member_id=m.member_id 
+			where  o.state = 1 and o.goods_id = {$id}  order by o.add_time desc limit 1";*/
 			$sql = "select o.*,m.username as name2,m.avatar as avatar2 from ".C('DB_PREFIX')."lionfish_comshop_order_comment as o left join ".C('DB_PREFIX')."lionfish_comshop_member as m 
 			on o.member_id=m.member_id 
-			where  o.state = 1 and o.goods_id = {$id}  order by o.add_time desc limit 1";
+			where  o.state = 1 and o.goods_id = {$id}  order by o.add_time desc limit 5";
+			//-------------- by lucas 【评论条数改成5条】 End --------------------------
 			
 			$comment_list=  M()->query($sql);
 			
@@ -1256,7 +1260,9 @@ class GoodsController extends CommonController {
 					$val['name'] = $val['user_name'];
 					$val['avatar'] = tomedia($val['avatar']);
 				}
-				
+				//-------------- by lucas 【评论的名字处理下，中间用*号代替】 Start ------------------------
+				$val['user_name'] = mb_substr($val['user_name'], 0, 1,"utf-8").'**';
+				//-------------- by lucas 【评论的名字处理下，中间用*号代替】 End --------------------------
 				if($val['type'] == 0)
 				{
 					

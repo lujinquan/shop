@@ -1098,6 +1098,9 @@ class GoodsModel extends Model{
 		$post_data_goods['buyagain'] = I('post.buyagain');
 		$post_data_goods['buyagain_condition'] = I('post.buyagain_condition');
 		$post_data_goods['buyagain_sale'] = I('post.buyagain_sale');
+		//-------------- by lucas 【添加推荐搭配】 Start ------------------------
+		$post_data_goods['recommend_match'] =  I('post.recommend_match','','trim');
+		//-------------- by lucas 【添加推荐搭配】 End --------------------------
 		//-------------- by lucas 【提货顺序入库】 Start ------------------------
 		$post_data_goods['ti_sort'] =  I('post.ti_sort',1000,'intval');
 		//-------------- by lucas 【提货顺序入库】 End --------------------------
