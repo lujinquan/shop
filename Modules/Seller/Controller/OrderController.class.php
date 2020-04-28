@@ -466,16 +466,17 @@ class OrderController extends CommonController{
 					$free = false;
 					if($free){
 						 $phone = array('+8618674012767'); //手机号
-						 $data = array(
-							'SendStatusSet' => array(
-								array(
-									'Code' => 'Ok',
-									'SerialNo' => 'ceshide-xxx',
-									'phone' => '+8618674012767',
-								),
-							),
-							'RequestId' => 'ceshide-request-id',
-						);
+						 $data = D('Seller/Sms')->sendSms($tempid , $tempdata , $phone);
+						//  $data = array(
+						// 	'SendStatusSet' => array(
+						// 		array(
+						// 			'Code' => 'Ok',
+						// 			'SerialNo' => 'ceshide-xxx',
+						// 			'phone' => '+8618674012767',
+						// 		),
+						// 	),
+						// 	'RequestId' => 'ceshide-request-id',
+						// );
 					}else{
 						$phone = ['+86'.$row['shipping_tel']]; //手机号
 						$data = D('Seller/Sms')->sendSms($tempid , $tempdata , $phone);

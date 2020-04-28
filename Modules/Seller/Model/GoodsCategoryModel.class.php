@@ -34,6 +34,9 @@ class GoodsCategoryModel extends Model{
 		$ins_data['name'] = $data['name'];
 		$ins_data['logo'] = save_media($data['logo']);
 		$ins_data['banner'] = save_media($data['banner']);
+		//-------------- by lucas 【添加小程序图标，小程序展示分类需要图标】 Start ------------------------
+		$ins_data['app_icon'] = save_media($data['app_icon']);
+		//-------------- by lucas 【添加小程序图标，小程序展示分类需要图标】 End --------------------------
 		$ins_data['sort_order'] = $data['sort_order'];
 		$ins_data['cate_type'] = $cate_type;
 		

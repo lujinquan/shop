@@ -137,8 +137,15 @@
 						<span class='help-block'>分类logo，建议尺寸400*400</span>
                     </div>
                 </div>
-				
-				
+                <!-- -------------- by lucas 【添加小程序图标，小程序展示分类需要图标】 Start ------------------------ -->
+				<div class="layui-form-item">
+                    <label class="layui-form-label">小程序图标</label>
+                    <div class="layui-input-block"> 
+                        {:tpl_form_field_image2('data[app_icon]', $data['app_icon'])}
+                        <span class='help-block'>分类logo，建议尺寸90*90</span>
+                    </div>
+                </div>
+				<!-- -------------- by lucas 【添加小程序图标，小程序展示分类需要图标】 End ------------------------ -->
 				
 				<div class="layui-form-item">
 					<label class="layui-form-label"> </label>

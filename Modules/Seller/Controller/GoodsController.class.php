@@ -205,8 +205,16 @@ class GoodsController extends CommonController{
 		$this->cate = $cate;
 		if( !empty($cate) )
 		{
-			$cate_list = M('lionfish_comshop_goods_to_category')->field('goods_id')->where(array('cate_id' => $cate))->select();
 			
+			$cate_list = M('lionfish_comshop_goods_to_category')->field('goods_id')->where(array('cate_id' => $cate))->select();
+			//-------------- by lucas 【搜索父级分类时，显示子集分类，注意只支持2级，不支持更多级别的搜索】 Start ------------------------
+			$cate_select = M('lionfish_comshop_goods_category')->where(array('pid' => $cate))->getField('id');
+			if($cate_select){
+				$cate_list1 = M('lionfish_comshop_goods_to_category')->field('goods_id')->where('cate_id in ('.$cate_select.')')->select();
+				$cate_list = $cate_list1 + $cate_list;
+			}
+			//-------------- by lucas 【搜索父级分类时，显示子集分类，注意只支持2级，不支持更多级别的搜索】 End --------------------------
+				
 			$catids_arr = array();
 			
 			foreach($cate_list as $val)
