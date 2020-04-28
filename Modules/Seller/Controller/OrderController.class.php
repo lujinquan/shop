@@ -384,15 +384,21 @@ class OrderController extends CommonController{
 	public function update_delivery_date()
 	{
 		$ids =  I('request.ids');
-		if(!is_array($ids)){
-			$ids = explode(',', $ids);
+		if(is_array($ids)){
+			$ids = implode(',', $ids);
 		}
 		$delivery =  I('request.delivery');
 		if (preg_match ("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $delivery, $parts))
 	    {
 	        //检测是否为日期
 	        if(checkdate($parts[2],$parts[3],$parts[1])){
-	            //$order_info = M('lionfish_comshop_order')->where( 'order_id in ('..')' )->field('shipping_name,shipping_tel')->find();
+	        	//dump($ids);exit;
+	            $res = M('lionfish_comshop_order')->where( 'order_id in ('.$ids.')' )->save(array('delivery_date'=>$delivery));
+	            if($res){
+	            	show_json(1,  array('message' => '修改成功' ) );
+	            }else{
+	            	show_json(0,  array('message' => '修改失败' ) );
+	            }
 	        }
 	    }
 	    //show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
