@@ -253,7 +253,7 @@
 					</div>
 					 <input type="hidden" name="export" id="export" value="0">
 					
-					<div class="layui-input-inline" style="width:215px;">
+					<div class="layui-input-inline" style="width:395px;">
 						<button class="layui-btn layui-btn-sm unbtn_export" data-export="0" type="submit"> 搜索</button>
 						<button type="submit" name=""  data-export="1" value="1" class="layui-btn layui-btn-sm  btn_export">导出</button>
 						<?php if($order_status_id=='3'){ ?>
@@ -780,7 +780,7 @@ layui.use(['jquery', 'layer','form'], function(){
 		if(_val == 6){
 			_confirm_content = '是否处理筛选条件下所有订单<br>是否发送短信：<input name="send_sms" type="radio" value="1" />是&nbsp;<input name="send_sms" type="radio" value="0" checked/>否';
 		}else if(_val == 100){
-			_confirm_content = "是否处理筛选条件下所有订单<br>是否发送短信：";
+			_confirm_content = '是否处理筛选条件下所有订单<br>请输入日期：<input type="text" name="delivery_date" value="" placeholder="yyyy-mm-dd">';
 		}else{
 			_confirm_content = '是否处理筛选条件下所有订单';
 		}
@@ -788,8 +788,13 @@ layui.use(['jquery', 'layer','form'], function(){
         var s_url = that.attr('data-href');
 		layer.confirm(_confirm_content, function(index){
 			if(_val == 6){
+				var delivery = '';
 				var send_sms = $('input[name=send_sms]:checked').val();
+			}else if(_val == 100){
+				var delivery = $('input[name=delivery_date]').val();
+				var send_sms = 0;
 			}else{
+				var delivery = '';
 				var send_sms = 0;
 			}
 			//console.log(1);
@@ -797,14 +802,14 @@ layui.use(['jquery', 'layer','form'], function(){
 				url:s_url,
 				type:'post',
 				dataType:'json',
-				data:{ids:ids_arr,send_sms:send_sms},
+				data:{ids:ids_arr,send_sms:send_sms,delivery:delivery},
 				success:function(info){
 					console.log('info：',info);
 					$('#ajaxModal').removeClass('in');
 					$('.modal-backdrop').removeClass('in');
 					if(info.status == 0)
 					{
-						layer.msg(info.result.message,{icon: 1,time: 2000});
+						layer.msg(info.result.message,{time: 2000});
 					}else if(info.status == 1){
 						var go_url = location.href;
 						if( info.result.hasOwnProperty("url") )

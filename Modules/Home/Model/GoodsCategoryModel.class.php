@@ -36,6 +36,9 @@ class GoodsCategoryModel {
 			$need_data[$key]['id'] = $cate['id'];			
 			$need_data[$key]['name'] = $cate['name'];
 			$need_data[$key]['banner'] = $cate['banner'] && !empty($cate['banner']) ? tomedia($cate['banner']) : '';
+			//-------------- by lucas 【添加小程序图标，小程序展示分类需要图标】 Start ------------------------
+			$need_data[$key]['app_icon'] = $cate['app_icon'] && !empty($cate['app_icon']) ? tomedia($cate['app_icon']) : '';
+			//-------------- by lucas 【添加小程序图标，小程序展示分类需要图标】 End --------------------------
 			$need_data[$key]['logo'] = $cate['logo'] && !empty($cate['logo']) ? tomedia($cate['logo']) : '';
 			$need_data[$key]['sort_order'] = $cate['sort_order'];
 			
