@@ -13,15 +13,24 @@
  */
 namespace Seller\Controller;
 use Admin\Model\OrderModel;
+
 class OrderController extends CommonController{
 	
 	protected function _initialize(){
 		parent::_initialize();
 		
 	}
+
 	
      public function index(){
-     	
+  //    	//发送短信验证
+  //       $tempid = '580690'; //短信模板
+  //       $sendcode = random(6, 1);
+  //       $tempdata = [$sendcode,'3']; //模板参数
+  //       $phone = ['+8618674012767']; //手机号
+		// $data = D('Seller/Sms')->sendSms($tempid , $tempdata , $phone);
+  //    	p($data);
+
 		$time = I('request.time');
 		
 		$starttime = isset($time['start']) ? strtotime($time['start']) : strtotime(date('Y-m-d'.' 00:00:00'));
@@ -69,6 +78,7 @@ class OrderController extends CommonController{
 //dump($need_data['order_ids']);exit;
 		//-------------- by lucas 【】 Start ------------------------
 		$this->order_ids = json_encode($need_data['order_ids']);
+		$this->order_ids_to_string = implode(',',$need_data['order_ids']);
 		//-------------- by lucas 【】 End --------------------------
 		
 
@@ -369,9 +379,11 @@ class OrderController extends CommonController{
 	//-------------- by lucas 【确认送达团长】 Start ------------------------
 	public function opsend_tuanz_over_all()
 	{
+
 		$ids =  I('request.ids');
 		foreach ($ids as $id) {
 			$opdata = $this->check_order_data($id);
+			//p($opdata);
 			extract($opdata);
 			D('Seller/Order')->do_tuanz_over($item['order_id']);
 			D('Home/Frontorder')->send_order_operate($item['order_id']);	
@@ -380,6 +392,75 @@ class OrderController extends CommonController{
 	}
 	//-------------- by lucas 【确认送达团长】 End --------------------------
 	
+	public function auto_send_sms()
+	{
+		$ids =  I('request.ids');
+		$send_sms =  I('request.send_sms'); // 是否发送短信
+		if($send_sms){
+			//发短信 
+			//foreach ($ids as $i) {
+				//$row = M('lionfish_comshop_order')->where( array('order_id' => $i) )->field('shipping_tel')->find();
+			$random = random(10);
+			$ids = explode(',', $ids);
+			S('_all_send_quene_'.$random, $ids);
+			show_json(1, array('url' => 'seller.php?s=/order/do_auto_send/flag/'.$random));
+		}else{
+			show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
+		}
+		// 	$sql="SELECT o.order_id,o.type,o.telephone,o.order_num_alias,o.total,o.lottery_win,o.delivery,o.date_added,o.is_zhuli,o.is_balance,og.member_disc,og.level_name,og.head_disc,og.is_pin,og.quantity,o.shipping_method,o.shipping_no,o.shipping_name,o.shipping_tel,o.shipping_province_id,o.shipping_city_id,o.shipping_country_id,o.shipping_address,og.pin_id,o.ip_region,o.payment_code,o.shipping_method,o.date_added,o.comment,o.date_modified,m.uname,os.order_status_id,os.name,og.store_id FROM "
+		// .C('DB_PREFIX').'order o,'.C('DB_PREFIX').'order_goods as og,'.C('DB_PREFIX').'member m,'.C('DB_PREFIX').'order_status os WHERE o.member_id=m.member_id AND '
+		// .'o.order_status_id=os.order_status_id  and og.order_id =o.order_id   ';
+			//M('lionfish_comshop_order')->where( array('order_id' => $order_id) )->save( array('order_status_id' => 14, 'express_time' => time()) );
+		}
+		show_json(1, array('url' => 'seller.php?s=/order/do_auto_send/flag/'.$random));
+	}
+	public function do_auto_send() {
+		$flag =  I('request.flag');
+		//p($flag);
+        //-------------- by lucas 【】 Start ------------------------
+        // $_GPC = I('request.');
+        
+        // $delivery_date = $_GPC['delivery_date'];
+        // //dump($delivery_date);exit;
+        $this->flag = $flag;
+        //-------------- by lucas 【】 End --------------------------
+        $this->display();
+    }
+	public function do_quenu_auto_send()
+	{
+		@set_time_limit(0);
+
+		$flag =  I('request.flag');
+		$ids = S('_all_send_quene_'.$flag);
+		$num = count($ids);
+		//p($num);
+		if($num){
+			//foreach ($ids as $key => $value) {
+				array_pop($ids);
+			//}
+			
+			S('_all_send_quene_'.$flag,$ids);
+			$num = count($ids);
+		}
+		//$num = rand(1, 9);
+		$total = 10;
+		if($num == 0){
+			S('_all_send_quene_'.$flag,null);
+			echo json_encode(array(
+                'code' => 2
+            ));
+            die();
+		}else{
+			//S('_all_send_quene_'.$flag);
+			echo json_encode(array(
+	            'code' => 0,
+	            'msg' => '还剩' . $num . '个未发送成功'
+	        ));
+	        die();
+		}
+		
+	}
+
 	public function all_opprint()
 	{
 		$_GPC = I('request.');
