@@ -1029,8 +1029,12 @@ class IndexController extends CommonController {
 		if($gid == 'undefined' || $gid =='' || $gid =='null'  || $gid ==0)
 		{
 			$gid = 0;
-		} else {		
-			$cate_info = M('lionfish_comshop_goods_category')->field('banner,name')->where( array('id' => $gid ) )->find();
+		} else {
+			//-------------- by lucas 【添加小程序图标，小程序展示分类需要图标】 Start ------------------------
+			//$cate_info = M('lionfish_comshop_goods_category')->field('banner,name')->where( array('id' => $gid ) )->find();
+			$cate_info = M('lionfish_comshop_goods_category')->field('banner,name,app_icon')->where( array('id' => $gid ) )->find();	
+			//-------------- by lucas 【添加小程序图标，小程序展示分类需要图标】 End --------------------------		
+			
 			if(!empty($cate_info['banner'])) $cate_info['banner'] = tomedia($cate_info['banner']);
 		}
 		
