@@ -1032,7 +1032,8 @@ class IndexController extends CommonController {
 		} else {
 			//-------------- by lucas 【添加小程序图标，小程序展示分类需要图标】 Start ------------------------
 			//$cate_info = M('lionfish_comshop_goods_category')->field('banner,name')->where( array('id' => $gid ) )->find();
-			$cate_info = M('lionfish_comshop_goods_category')->field('banner,name,app_icon')->where( array('id' => $gid ) )->find();	
+			$cate_info = M('lionfish_comshop_goods_category')->field('banner,name,app_icon')->where( array('id' => $gid ) )->find();
+			if(!empty($cate_info['app_icon'])) $cate_info['app_icon'] = tomedia($cate_info['app_icon']);
 			//-------------- by lucas 【添加小程序图标，小程序展示分类需要图标】 End --------------------------		
 			
 			if(!empty($cate_info['banner'])) $cate_info['banner'] = tomedia($cate_info['banner']);

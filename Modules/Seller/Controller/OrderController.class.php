@@ -370,6 +370,22 @@ class OrderController extends CommonController{
 		show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
 	}
 
+	/**
+	 * 批量修改配送日期
+	 * =====================================
+	 * @author  Lucas 
+	 * email:   598936602@qq.com 
+	 * Website  address:  www.mylucas.com.cn
+	 * =====================================
+	 * 创建时间: 2020-04-28 16:09:29
+	 * @return  返回值  
+	 * @version 版本  1.0
+	 */
+	public function update_delivery_date()
+	{
+
+	}
+
 	//-------------- by lucas 【确认送达团长】 原版的，不带短信通知功能 Start ------------------------
 	public function opsend_tuanz_over_all_old()
 	{

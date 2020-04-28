@@ -260,6 +260,7 @@
 						<button type="button" data-confirm="确认批量确认付款吗？" data-href="{:U('order/oppay_all',array('order_status'=>3))}" name="batchprocess" value="1" class="layui-btn layui-btn-sm batchprocess">批量确认付款</button>
 						<?php }elseif($order_status_id=='1'){ ?>
 						<button type="button" data-confirm="确认批量配送吗？" data-href="{:U('order/opsend_tuanz_all',array('order_status'=>1))}" name="batchprocess" value="14" class="layui-btn layui-btn-sm batchprocess">批量配送</button>
+						<button type="button" data-confirm="确认修改配送日期吗？" data-href="{:U('order/update_delivery_date',array('order_status'=>1))}" name="batchprocess" value="100" class="layui-btn layui-btn-sm batchprocess">批量修改配送日期</button>
 						<?php }elseif($order_status_id=='14'){ ?>
 						<button type="button" data-confirm="确认批量送达团长吗？" data-href="{:U('order/opsend_tuanz_over_all',array('order_status'=>14))}" name="batchprocess" value="6" class="layui-btn layui-btn-sm batchprocess">批量送达团长</button>
 						<?php }elseif($order_status_id=='4'){ ?>
@@ -774,10 +775,12 @@ layui.use(['jquery', 'layer','form'], function(){
 			if(_val == 6){
 				var ids_arr = '{$order_ids_to_string}';
 			}
-			console.log('一个都不选就传这个值：',ids_arr);
+			//console.log('一个都不选就传这个值：',ids_arr);
 		}
 		if(_val == 6){
-			_confirm_content = '是否处理筛选条件下所有订单<br>是否发送短信：<input name="send_sms" type="radio" value="1" />是<input name="send_sms" type="radio" value="0" checked/>否';
+			_confirm_content = '是否处理筛选条件下所有订单<br>是否发送短信：<input name="send_sms" type="radio" value="1" />是&nbsp;<input name="send_sms" type="radio" value="0" checked/>否';
+		}else if(_val == 100){
+			_confirm_content = "是否处理筛选条件下所有订单<br>是否发送短信：";
 		}else{
 			_confirm_content = '是否处理筛选条件下所有订单';
 		}
@@ -789,7 +792,7 @@ layui.use(['jquery', 'layer','form'], function(){
 			}else{
 				var send_sms = 0;
 			}
-			console.log(1);
+			//console.log(1);
 			 $.ajax({
 				url:s_url,
 				type:'post',
