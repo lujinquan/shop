@@ -151,19 +151,33 @@ class CopyrightController extends CommonController{
 			D('Seller/Config')->update($param);
 			
 			//-------------- by lucas 【自定义设置图片同步到服务器供小程序初始化调用】 Start ------------------------
+			@unlink(ROOT_PATH.'static/images/needPayIcon.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_order_menu_icon1']), ROOT_PATH.'static/images/needPayIcon.png');
+			@unlink(ROOT_PATH.'static/images/undeli.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_order_menu_icon2']), ROOT_PATH.'static/images/undeli.png');
+			@unlink(ROOT_PATH.'static/images/distributionIcon.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_order_menu_icon3']), ROOT_PATH.'static/images/distributionIcon.png');
+			@unlink(ROOT_PATH.'static/images/completeIcon.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_order_menu_icon4']), ROOT_PATH.'static/images/completeIcon.png');
+			@unlink(ROOT_PATH.'static/images/refundIcon.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_order_menu_icon5']), ROOT_PATH.'static/images/refundIcon.png');
+			@unlink(ROOT_PATH.'static/images/wallet.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_tool_icon1']), ROOT_PATH.'static/images/wallet.png');
+			@unlink(ROOT_PATH.'static/images/con-score.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_tool_icon2']), ROOT_PATH.'static/images/con-score.png');
+			@unlink(ROOT_PATH.'static/images/coupon.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_tool_icon3']), ROOT_PATH.'static/images/coupon.png');
+			@unlink(ROOT_PATH.'static/images/refundIcon.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_tool_icon4']), ROOT_PATH.'static/images/refundIcon.png');
+			@unlink(ROOT_PATH.'static/images/groupCenterIcon.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_tool_icon5']), ROOT_PATH.'static/images/groupCenterIcon.png');
+			@unlink(ROOT_PATH.'static/images/icon-supplier.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_tool_icon6']), ROOT_PATH.'static/images/icon-supplier.png');
+			@unlink(ROOT_PATH.'static/images/protocolIcon.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_tool_icon7']), ROOT_PATH.'static/images/protocolIcon.png');
+			@unlink(ROOT_PATH.'static/images/serviceIcon.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_tool_icon8']), ROOT_PATH.'static/images/serviceIcon.png');
+			@unlink(ROOT_PATH.'static/images/aboutUsIcon.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_tool_icon9']), ROOT_PATH.'static/images/aboutUsIcon.png');
 			//-------------- by lucas 【自定义设置图片同步到服务器供小程序初始化调用】 End --------------------------
 

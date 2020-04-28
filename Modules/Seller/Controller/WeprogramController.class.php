@@ -375,7 +375,34 @@ class WeprogramController extends CommonController{
 			$param['wepro_tabbar_selectedColor'] = $data['wepro_tabbar_selectedColor'];
 			
 			D('Seller/Config')->update($param);
-			
+
+			//-------------- by lucas 【自定义设置图片同步到服务器供小程序初始化调用】 Start ------------------------
+			//首页选中图标
+			@unlink(ROOT_PATH.'static/images/icon-tab-index-active.png');
+			copy(ROOT_PATH.'Uploads/image/'.trim($data['wepro_tabbar_selectedIconPath1']), ROOT_PATH.'static/images/icon-tab-index-active.png');
+			//首页未选中图标
+			@unlink(ROOT_PATH.'static/images/icon-tab-index.png');
+			copy(ROOT_PATH.'Uploads/image/'.trim($data['wepro_tabbar_iconPath1']), ROOT_PATH.'static/images/icon-tab-index.png');
+			//分类未选中图标
+			@unlink(ROOT_PATH.'static/images/icon-tab-type.png');
+			copy(ROOT_PATH.'Uploads/image/'.trim($data['wepro_tabbar_iconPath4']), ROOT_PATH.'static/images/icon-tab-type.png');
+			//分类选中图标
+			@unlink(ROOT_PATH.'static/images/icon-tab-type-active.png');
+			copy(ROOT_PATH.'Uploads/image/'.trim($data['wepro_tabbar_selectedIconPath4']), ROOT_PATH.'static/images/icon-tab-type-active.png');
+			//购物车未选中图标
+			@unlink(ROOT_PATH.'static/images/icon-tab-shop.png');
+			copy(ROOT_PATH.'Uploads/image/'.trim($data['wepro_tabbar_iconPath2']), ROOT_PATH.'static/images/icon-tab-shop.png');
+			//购物车选中图标
+			@unlink(ROOT_PATH.'static/images/icon-tab-shop-active.png');
+			copy(ROOT_PATH.'Uploads/image/'.trim($data['wepro_tabbar_selectedIconPath2']), ROOT_PATH.'static/images/icon-tab-shop-active.png');
+			//个人中心未选中图标
+			@unlink(ROOT_PATH.'static/images/icon-tab-me.png');
+			copy(ROOT_PATH.'Uploads/image/'.trim($data['wepro_tabbar_iconPath3']), ROOT_PATH.'static/images/icon-tab-me.png');
+			//个人中心选中图标
+			@unlink(ROOT_PATH.'static/images/icon-tab-me-active.png');
+			copy(ROOT_PATH.'Uploads/image/'.trim($data['wepro_tabbar_selectedIconPath2']), ROOT_PATH.'static/images/icon-tab-me-active.png');
+
+			//-------------- by lucas 【自定义设置图片同步到服务器供小程序初始化调用】 End --------------------------
 			
 			show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
 		}
