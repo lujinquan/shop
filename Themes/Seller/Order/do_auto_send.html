@@ -159,6 +159,7 @@
 					<div class="col-sm-10">
 						<div id='count' class="alert alert-info" style="line-height:20px;">
 							<div id="update_content" style="height:400px;overflow-y:auto;">
+								<p>还剩{$total}个未发送</p>
 								<p>批量处理马上开始....批量处理结束前请勿关闭该页面</p>
 							</div>
 						</div>
@@ -264,10 +265,10 @@ layui.use(['jquery', 'layer','form'], function(){
 						load_next_updata();
 					},300);
 				}else if(ret.code ==2){
-					
-					layer.msg('所有清单生成完成！',{time: 1000,
+					$('#update_content').prepend("<p>"+ret.msg+"</p>");
+					layer.msg('所有清单生成完成！',{time: 5000,
 						end:function(){
-							//location.href = "<?php echo U("delivery/delivery" ); ?>";
+							location.href = "<?php echo U("order/index/order_status_id/14" ); ?>";
 						}
 					});
 					

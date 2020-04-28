@@ -23,13 +23,7 @@ class OrderController extends CommonController{
 
 	
      public function index(){
-  //    	//发送短信验证
-  //       $tempid = '580690'; //短信模板
-  //       $sendcode = random(6, 1);
-  //       $tempdata = [$sendcode,'3']; //模板参数
-  //       $phone = ['+8618674012767']; //手机号
-		// $data = D('Seller/Sms')->sendSms($tempid , $tempdata , $phone);
-  //    	p($data);
+
 
 		$time = I('request.time');
 		
@@ -376,8 +370,8 @@ class OrderController extends CommonController{
 		show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
 	}
 
-	//-------------- by lucas 【确认送达团长】 Start ------------------------
-	public function opsend_tuanz_over_all()
+	//-------------- by lucas 【确认送达团长】 原版的，不带短信通知功能 Start ------------------------
+	public function opsend_tuanz_over_all_old()
 	{
 
 		$ids =  I('request.ids');
@@ -390,77 +384,147 @@ class OrderController extends CommonController{
 		}
 		show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
 	}
-	//-------------- by lucas 【确认送达团长】 End --------------------------
+	//-------------- by lucas 【确认送达团长】 原版的，不带短信通知功能 End --------------------------
 	
-	public function auto_send_sms()
+	//-------------- by lucas 【确认送达团长】 改版的，带短信通知功能 Start ------------------------
+	public function opsend_tuanz_over_all()
 	{
+
 		$ids =  I('request.ids');
+		if(!is_array($ids)){
+			$ids = explode(',', $ids);
+		}
+		foreach ($ids as $id) {
+			$opdata = $this->check_order_data($id);
+			extract($opdata);
+			D('Seller/Order')->do_tuanz_over($item['order_id']);
+			D('Home/Frontorder')->send_order_operate($item['order_id']);
+		}
 		$send_sms =  I('request.send_sms'); // 是否发送短信
 		if($send_sms){
-			//发短信 
-			//foreach ($ids as $i) {
-				//$row = M('lionfish_comshop_order')->where( array('order_id' => $i) )->field('shipping_tel')->find();
+			
 			$random = random(10);
-			$ids = explode(',', $ids);
+			
 			S('_all_send_quene_'.$random, $ids);
+			//dump(S('_all_send_quene_'.$random));exit;
 			show_json(1, array('url' => 'seller.php?s=/order/do_auto_send/flag/'.$random));
 		}else{
 			show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
 		}
-		// 	$sql="SELECT o.order_id,o.type,o.telephone,o.order_num_alias,o.total,o.lottery_win,o.delivery,o.date_added,o.is_zhuli,o.is_balance,og.member_disc,og.level_name,og.head_disc,og.is_pin,og.quantity,o.shipping_method,o.shipping_no,o.shipping_name,o.shipping_tel,o.shipping_province_id,o.shipping_city_id,o.shipping_country_id,o.shipping_address,og.pin_id,o.ip_region,o.payment_code,o.shipping_method,o.date_added,o.comment,o.date_modified,m.uname,os.order_status_id,os.name,og.store_id FROM "
-		// .C('DB_PREFIX').'order o,'.C('DB_PREFIX').'order_goods as og,'.C('DB_PREFIX').'member m,'.C('DB_PREFIX').'order_status os WHERE o.member_id=m.member_id AND '
-		// .'o.order_status_id=os.order_status_id  and og.order_id =o.order_id   ';
-			//M('lionfish_comshop_order')->where( array('order_id' => $order_id) )->save( array('order_status_id' => 14, 'express_time' => time()) );
-		}
-		show_json(1, array('url' => 'seller.php?s=/order/do_auto_send/flag/'.$random));
+
 	}
 	public function do_auto_send() {
 		$flag =  I('request.flag');
-		//p($flag);
-        //-------------- by lucas 【】 Start ------------------------
-        // $_GPC = I('request.');
-        
-        // $delivery_date = $_GPC['delivery_date'];
-        // //dump($delivery_date);exit;
         $this->flag = $flag;
-        //-------------- by lucas 【】 End --------------------------
+        $ids = S('_all_send_quene_'.$flag);
+		//p($ids);
+		$this->total = count($ids);
         $this->display();
     }
 	public function do_quenu_auto_send()
 	{
 		@set_time_limit(0);
-
 		$flag =  I('request.flag');
 		$ids = S('_all_send_quene_'.$flag);
+		//p($ids);
 		$num = count($ids);
-		//p($num);
+		if($num > 100 && $num < 1000){
+			$rundom = rand(101, 990);
+		}
+		if($num > 30 && $num < 100){
+			$rundom = rand(31, 99);
+		}
+		if($num > 10 && $num < 30){
+			$rundom = rand(11, 29);
+		}
+		if($num < 10){
+			$rundom = rand(1, 9);
+		}
+		//$rundom = rand(100, 200);
+
 		if($num){
-			//foreach ($ids as $key => $value) {
-				array_pop($ids);
-			//}
+			// if($num == 1){
+			// 	echo json_encode(array(
+		 //            'code' => 0,
+		 //            'msg' => '还剩' . 1 . '个未发送'
+		 //        ));
+		 //        die();
+			// }
+			
+            
+			foreach($ids as $k => $i){
+				if($k == $rundom){
+					break;
+				}else{
+					$order_info = M('lionfish_comshop_order')->where( array('order_id' => $i) )->field('shipping_name,shipping_tel')->find();
+					//dump($order_info);exit;
+			     	//发送短信验证
+			        $tempid = '590406'; //短信模板
+			        //$sendcode = random(6, 1);
+			        $tempdata = array($order_info['shipping_name'],'24'); //模板参数
+			        // 如果开启，则进入调试模式，不发送短信
+					$free = false;
+					if($free){
+						 $phone = array('+8618674012767'); //手机号
+						 $data = array(
+							'SendStatusSet' => array(
+								array(
+									'Code' => 'Ok',
+									'SerialNo' => 'ceshide-xxx',
+									'phone' => '+8618674012767',
+								),
+							),
+							'RequestId' => 'ceshide-request-id',
+						);
+					}else{
+						$phone = ['+86'.$row['shipping_tel']]; //手机号
+						$data = D('Seller/Sms')->sendSms($tempid , $tempdata , $phone);
+					}
+					
+			     	if($data){
+			     		foreach($data['SendStatusSet'] as $row){
+							if($row['Code'] === 'Ok'){
+								//$row['PhoneNumber'] = substr($row['PhoneNumber'],3);
+								//session('sms_verification_', $login,);
+								
+								$sms_data = [];
+								$sms_data['content'] = $order_info['shipping_name'].',24';
+								$sms_data['request_id'] = $data['RequestId'];
+								$sms_data['serial_no'] = $row['SerialNo'];
+								$sms_data['order_id'] = $i;
+								$sms_data['phone'] = $order_info['shipping_tel'];
+								$sms_data['ctime'] = time();
+								M('sms')->add($sms_data);
+								
+							}else{
+								//return $this->error('发送失败,错误码：'.$row['Message']);
+							}
+						}
+			     	}
+			     	unset($ids[$k]);
+				}
+			}
 			
 			S('_all_send_quene_'.$flag,$ids);
 			$num = count($ids);
 		}
-		//$num = rand(1, 9);
-		$total = 10;
 		if($num == 0){
 			S('_all_send_quene_'.$flag,null);
 			echo json_encode(array(
-                'code' => 2
+                'code' => 2,
+                'msg' => '全部发送完毕'
             ));
             die();
 		}else{
-			//S('_all_send_quene_'.$flag);
 			echo json_encode(array(
 	            'code' => 0,
-	            'msg' => '还剩' . $num . '个未发送成功'
+	            'msg' => '还剩' . $num . '个未发送'
 	        ));
 	        die();
 		}
-		
 	}
-
+	//-------------- by lucas 【确认送达团长】 改版的，带短信通知功能 End ------------------------
+	
 	public function all_opprint()
 	{
 		$_GPC = I('request.');
