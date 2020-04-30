@@ -1649,7 +1649,10 @@ class IndexController extends CommonController {
 				$tmp_data['spuName'] = $val['goodsname'];
 				$tmp_data['spuCanBuyNum'] = $val['total'];
 				$tmp_data['spuDescribe'] = $val['subtitle'];
-				$tmp_data['end_time'] = $val['end_time'];
+				//-------------- by lucas 【】 Start ------------------------
+				$tmp_data['end_time'] = date('Y-m-d H:i:s',$val['end_time']);
+				//-------------- by lucas 【】 End --------------------------
+				
 				$tmp_data['soldNum'] = $val['seller_count'] + $val['sales'];
 				
 				$productprice = $val['productprice'];
@@ -1816,7 +1819,7 @@ class IndexController extends CommonController {
 				$tmp_data['spuName'] = $val['goodsname'];
 				$tmp_data['spuCanBuyNum'] = $val['total'];
 				$tmp_data['spuDescribe'] = $val['subtitle'];
-				$tmp_data['end_time'] = $val['end_time'];
+				$tmp_data['end_time'] = date('Y-m-d H:i:s',$val['end_time']);
 				$tmp_data['soldNum'] = $val['seller_count'] + $val['sales'];
 				
 				$productprice = $val['productprice'];
