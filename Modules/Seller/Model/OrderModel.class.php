@@ -1073,6 +1073,1014 @@ class OrderModel{
 				'count_status_14' => $count_status_14
 				);
 	}
+
+	public function load_goods_list($reorder_status_id = 0,$is_fenxiao =0,$is_pin =0,$integral =0,$is_soli=0)
+	{
+		$limit = 1000;
+		$time = I('request.time');
+		
+		$starttime = isset($time['start']) ? strtotime($time['start']) : strtotime(date('Y-m-d'.' 00:00:00'));
+		$endtime = isset($time['end']) ? strtotime($time['end']) : strtotime(date('Y-m-d'.' 23:59:59'));
+		
+		$order_status_id =  I('request.order_status_id', 0);
+		
+		if($reorder_status_id >0)
+		{
+			$order_status_id = $reorder_status_id;
+		}
+		
+		$searchtime = I('request.searchtime','');
+		$searchfield = I('request.searchfield', '');
+		
+		$searchtype = I('request.type', 'normal');
+		
+		if( $is_pin == 1  )
+		{
+			$searchtype = 'pintuan';
+		}
+		
+		if( $integral == 1 )
+		{
+			$searchtype = 'integral';
+		}
+		
+		$delivery = I('request.delivery', '');
+		
+		
+		$count_where = "";
+		$agentid = I('request.agentid', '');
+		
+		
+		$head_id = I('request.headid', ''); 
+		//$is_fenxiao = I('request.is_fenxiao', 0); 
+		
+		//-------------- by lucas 【】 Start ------------------------
+		$group_id = I('request.groupid', ''); 
+		//-------------- by lucas 【】 End --------------------------
+		
+		$pindex = I('request.page', 1);
+		$psize = 20;
+		
+		
+		$paras =array();
+		
+		$sqlcondition = "";
+		
+		$condition = " 1 ";
+		
+		$is_soli_type = I('request.type', '');
+		if($is_soli_type == 'soli')
+		{
+			$is_soli = 1;
+		}
+		
+		if($is_soli > 0)
+		{
+			$condition .= " and o.soli_id > 0 ";
+		}
+		
+		
+		
+		if (defined('ROLE') && ROLE == 'agenter' ) 
+		{
+			$supper_info = get_agent_logininfo();
+				
+			$order_ids_list_tmp = M('lionfish_comshop_order_goods')->field('order_id')->where( array('supply_id' => $supper_info['id'] ) )->select();								
+											
+			if( !empty($order_ids_list_tmp) )
+			{
+				$order_ids_tmp_arr = array();
+				foreach($order_ids_list_tmp as  $vv)
+				{
+					$order_ids_tmp_arr[] = $vv['order_id'];
+				}
+				$order_ids_tmp_str = implode(',', $order_ids_tmp_arr);
+				
+				$condition .= " and o.order_id in({$order_ids_tmp_str}) ";
+			}
+			else{
+				$condition .= " and o.order_id in(0) ";
+			}
+		}
+		
+		if( $is_fenxiao == 1)
+		{
+			//分销订单
+			
+			$condition .= " and o.is_commission = 1  ";
+			$count_where .= " and is_commission = 1 ";
+			
+			$commiss_member_id = I('request.commiss_member_id', '');
+			
+			if( $commiss_member_id > 0 )
+			{
+				$order_ids = M('lionfish_comshop_member_commiss_order')->field('order_id')->where( array('member_id' => $commiss_member_id ) )->select();
+				
+				if(!empty($order_ids))
+				{
+					$order_ids_arr = array();
+					foreach($order_ids as $vv)
+					{
+						$order_ids_arr[] = $vv['order_id'];
+					}
+					$order_ids_str = implode(",",$order_ids_arr);
+					$condition .= ' AND ( o.order_id in('.$order_ids_str.') ) ';
+					$count_where .= ' AND ( order_id in('.$order_ids_str.') ) ';
+				}else{
+					$condition .= " and o.order_id in(0) ";
+					$count_where .= ' AND order_id in(0)  ';
+				}
+			}
+			
+			
+			
+		}
+		
+		if( !empty($searchtype) && in_array($searchtype, array('normal','pintuan','integral'))  )
+		{
+			$condition .= " and o.type ='{$searchtype}'  ";
+		}
+		
+		if( !empty($delivery) )
+		{
+			$condition .= " and o.delivery ='{$delivery}'  ";
+		}
+		
+		
+		if( !empty($head_id) && $head_id >0 )
+		{
+			$condition .= " and o.head_id ='{$head_id}'  ";
+			
+			$count_where .= " and head_id ='{$head_id}'  ";
+		}
+		//---------------------- by lucas S ---------------------
+		if( !empty($group_id) && $group_id >0 )
+		{
+			$head_ingroup = M('lionfish_community_head')->field('id')->where( array('groupid' => $group_id ) )->select();
+			$cols = [];
+			foreach ($head_ingroup as $h => $e) {
+				$cols[] = $e['id'];
+			}
+			$headidin = implode(',', $cols);
+
+			// dump($head_ingroup);exit;
+			$condition .= " and o.head_id in (".$headidin.")  ";
+			
+			$count_where .= " and head_id in (".$headidin.")  ";
+		}
+		//---------------------- by lucas E ---------------------
+		if($order_status_id > 0)
+		{
+			//$condition .= " and o.order_status_id={$order_status_id} ";
+			
+			if($order_status_id ==12 )
+			{
+				$condition .= " and (o.order_status_id={$order_status_id} or o.order_status_id=10 ) ";
+			
+			}else if($order_status_id ==11)
+			{
+				$condition .= " and (o.order_status_id={$order_status_id} or o.order_status_id=6 ) ";
+			}
+			else{
+				$condition .= " and o.order_status_id={$order_status_id} ";
+			}
+			
+		}
+		
+		//$is_fenxiao = I('request.is_fenxiao','intval',0);
+		
+		$keyword = I('request.keyword');
+		if( !empty($searchfield) && !empty($keyword))
+		{
+			$keyword = trim($keyword);
+			
+			$keyword = htmlspecialchars_decode($keyword, ENT_QUOTES);
+			
+			switch($searchfield)
+			{
+				case 'ordersn':
+					$condition .= ' AND locate("'.$keyword.'",o.order_num_alias)>0'; 
+				break;
+				case 'member':
+					$condition .= ' AND (locate("'.$keyword.'",m.username)>0 or locate("'.$keyword.'",m.telephone)>0 or "'.$keyword.'"=o.member_id ) and o.member_id >0 ';
+					$sqlcondition .= ' left join ' . C('DB_PREFIX') . 'lionfish_comshop_member m on m.member_id = o.member_id ';
+				break;
+				case 'member_id':
+					$keyword = intval($keyword);
+					$condition .= ' AND o.member_id = '.$keyword.' '; 
+				break;
+				
+				case 'address':
+					$condition .= ' AND ( locate("'.$keyword.'",o.shipping_name)>0 )';
+					//shipping_address
+				break;
+				case 'mobile':
+					$condition .= ' AND ( locate("'.$keyword.'",o.shipping_tel)>0 )';
+					//shipping_address
+				break;
+				case 'location':
+					$condition .= ' AND (locate("'.$keyword.'",o.shipping_address)>0 )';
+				break;
+				case 'shipping_no':
+					$condition .= ' AND (locate("'.$keyword.'",o.shipping_no)>0 )';
+				break;
+				
+				case 'head_address':
+					$head_ids = M('lionfish_community_head')->field('id')->where( 'community_name like "%'.$keyword.'%"' )->select();
+					
+					
+					if(!empty($head_ids))
+					{
+						$head_ids_arr = array();
+						foreach($head_ids as $vv)
+						{
+							$head_ids_arr[] = $vv['id'];
+						}
+						$head_ids_str = implode(",",$head_ids_arr);
+						$condition .= ' AND ( o.head_id in('.$head_ids_str.') )';
+					}else{
+						$condition .= " and o.order_id in(0) ";
+					}
+					
+				break;
+				case 'head_name':
+					// SELECT * FROM `ims_lionfish_community_head` WHERE `head_name` LIKE '%黄%'
+					
+					$head_ids = M('lionfish_community_head')->field('id')->where( 'head_name like "%'.$keyword.'%"' )->select();
+					
+					if(!empty($head_ids))
+					{
+						$head_ids_arr = array();
+						foreach($head_ids as $vv)
+						{
+							$head_ids_arr[] = $vv['id'];
+						}
+						$head_ids_str = implode(",",$head_ids_arr);
+						$condition .= ' AND ( o.head_id in('.$head_ids_str.') )';
+					}else{
+						
+						$condition .= " and o.order_id in(0) ";
+		
+					}
+					
+				break;
+				case 'goodstitle':
+					$sqlcondition = ' inner join ( select DISTINCT(og.order_id) from ' . C('DB_PREFIX').'lionfish_comshop_order_goods og  where  (locate("'.$keyword.'",og.name)>0)) gs on gs.order_id=o.order_id';
+				//var_dump($sqlcondition);
+				//die();
+				
+				break;
+				case 'supply_name':
+					
+					$supply_name_sql = 'SELECT id FROM ' . C('DB_PREFIX'). 
+										'lionfish_comshop_supply where shopname like "%'.$keyword.'%"';
+					$supply_ids = M()->query($supply_name_sql);
+					
+					
+					if(!empty($supply_ids))
+					{
+						$supply_ids_arr = array();
+						foreach($supply_ids as $vv)
+						{
+							$supply_ids_arr[] = $vv['id'];
+						}
+						$supply_ids_str = implode(",",$supply_ids_arr);
+						
+						$order_ids_list_tmp = M('lionfish_comshop_order_goods')->field('order_id')->where( "supply_id in ({$supply_ids_str})" )->select();
+						
+						if( !empty($order_ids_list_tmp) )
+						{
+							$order_ids_tmp_arr = array();
+							foreach($order_ids_list_tmp as  $vv)
+							{
+								$order_ids_tmp_arr[] = $vv['order_id'];
+							}
+							$order_ids_tmp_str = implode(',', $order_ids_tmp_arr);
+							
+							$condition .= " and o.order_id in({$order_ids_tmp_str}) ";
+						}else{
+							$condition .= " and o.order_id in(0) ";
+						}
+					}else{
+						$condition .= " and o.order_id in(0) ";
+					}
+				break;
+				case 'trans_id':
+					$condition .= ' AND (locate('.$keyword.',o.transaction_id)>0 )';
+				break;
+				
+			}
+		}
+		
+		if( !empty($searchtime) )
+		{
+			switch( $searchtime )
+			{
+				case 'create':
+					//下单时间 date_added
+					$condition .= " and o.date_added>={$starttime} and o.date_added <= {$endtime}";
+				break;
+				case 'pay':
+					//付款时间 
+					$condition .= " and o.pay_time>={$starttime} and o.pay_time <= {$endtime}";
+				break;
+				case 'send':
+					//发货时间 
+					$condition .= " and o.express_time>={$starttime} and o.express_time <= {$endtime}";
+				break;
+				case 'finish':
+					//完成时间 
+					$condition .= " and o.finishtime>={$starttime} and o.finishtime <= {$endtime}";
+				break;
+			}
+		}
+		
+		
+		//----begin----
+		
+		if (defined('ROLE') && ROLE == 'agenter' ) {
+			
+			$supper_info = get_agent_logininfo();
+		
+		
+			$total_where = " and supply_id= ".$supper_info['id'];
+			
+			$order_ids_list = M()->query("select og.order_id,og.total,og.shipping_fare,og.voucher_credit,og.fullreduction_money from ".
+								C('DB_PREFIX')."lionfish_comshop_order_goods as og , ".C('DB_PREFIX')."lionfish_comshop_order as o  where  og.order_id =o.order_id and og.supply_id = ".$supper_info['id'] );
+			
+			$order_ids_arr = array();
+			$order_ids_arr_dan = array();
+			
+			$total_money = 0;
+			foreach($order_ids_list as $vv)
+			{
+				if( empty($order_ids_arr) || !isset($order_ids_arr[$vv['order_id']]) )
+				{
+					$order_ids_arr[$vv['order_id']] = $vv;
+					$order_ids_arr_dan[] = $vv['order_id'];
+				}
+			}
+			
+			if( !empty($order_ids_arr_dan) )
+			{
+				$sql = 'SELECT count(o.order_id) as count FROM ' . C('DB_PREFIX'). 'lionfish_comshop_order as o  '.$sqlcondition.' where ' .  $condition." and o.order_id in (".implode(',', $order_ids_arr_dan).") " ;
+				
+				$total_arr = M()->query($sql);
+				
+				$total = $total_arr[0]['count'];
+				
+				
+				$order_ids_list = M()->query("select og.order_id,og.total,og.shipping_fare,og.voucher_credit,og.fullreduction_money from ".C('DB_PREFIX').
+								"lionfish_comshop_order_goods as og , ".C('DB_PREFIX')."lionfish_comshop_order as o  where {$condition} and og.order_id =o.order_id and og.supply_id = ".$supper_info['id']."  ");
+				
+				if( !empty($order_ids_list) )
+				{
+					foreach($order_ids_list as $vv)
+					{
+						$total_money += $vv['total']+$vv['shipping_fare']-$vv['voucher_credit']-$vv['fullreduction_money'];
+					}
+				}
+			}else{
+				$total = 0; 
+			}
+			
+			
+		}else{
+			$sql = 'SELECT count(o.order_id) as count FROM ' . C('DB_PREFIX'). 'lionfish_comshop_order as o  '.$sqlcondition.' where ' .  $condition ;
+		
+			$total_arr = M()->query( $sql );
+			
+			$total = $total_arr[0]['count'];
+			
+			
+			
+			
+			$sql = 'SELECT sum(o.total+o.shipping_fare-o.voucher_credit-o.fullreduction_money) as total_money FROM ' .  C('DB_PREFIX') . 'lionfish_comshop_order as o '.$sqlcondition.' where ' .  $condition ;
+			
+			$total_money_arr = M()->query($sql);
+			
+			$total_money = $total_money_arr[0]['total_money'];
+		}
+		//---------end----
+		
+		if($total_money < 0)
+		{
+			$total_money = 0;
+		}
+		
+		
+		$total_money =  number_format($total_money,2);
+		
+		$order_status_arr = $this->get_order_status_name();
+		
+		$export = I('request.export', 0);
+		
+		
+		if ($export == 1 || $export == 2) 
+		{
+			@set_time_limit(0);
+			
+			$is_can_look_headinfo = true;
+			$supply_can_look_headinfo = D('Home/Front')->get_config_by_name('supply_can_look_headinfo');
+			
+		
+			if (defined('ROLE') && ROLE == 'agenter' ) 
+			{
+				if( isset($supply_can_look_headinfo) && $supply_can_look_headinfo == 2 )
+				{
+					$is_can_look_headinfo = false;
+				}
+			}
+			
+			
+			$columns = array(
+				array('title' => '订单流水号', 'field' => 'day_paixu', 'width' => 24),
+				array('title' => '订单编号', 'field' => 'order_num_alias', 'width' => 24),
+				array('title' => '昵称', 'field' => 'name', 'width' => 12),
+				//array('title' => '会员姓名', 'field' => 'mrealname', 'width' => 12),
+				array('title' => 'openid', 'field' => 'openid', 'width' => 24),
+				array('title' => '会员手机号', 'field' => 'telephone', 'width' => 12),
+				array('title' => '会员备注', 'field' => 'member_content', 'width' => 24),
+				array('title' => '收货姓名(或自提人)', 'field' => 'shipping_name', 'width' => 12),
+				array('title' => '联系电话', 'field' => 'shipping_tel', 'width' => 12),
+				//array('title' => '收货地址', 'field' => 'address_province', 'width' => 12),
+				//array('title' => '', 'field' => 'address_city', 'width' => 12),
+				//array('title' => '', 'field' => 'address_area', 'width' => 12),
+				
+				array('title' => '完整收货地址', 'field' => 'address_province_city_area', 'width' => 12),
+				//array('title' => '', 'field' => 'address_street', 'width' => 12),
+				array('title' => '提货详细地址', 'field' => 'address_address', 'width' => 12),
+				array('title' => '团长配送送货详细地址', 'field' => 'tuan_send_address', 'width' => 22),
+				array('title' => '商品名称', 'field' => 'goods_title', 'width' => 24),
+				array('title' => '商品编码', 'field' => 'goods_goodssn', 'width' => 12),
+				array('title' => '商品规格', 'field' => 'goods_optiontitle', 'width' => 12),
+				array('title' => '商品数量', 'field' => 'quantity', 'width' => 12),
+				array('title' => '商品单价', 'field' => 'goods_price1', 'width' => 12),
+				//array('title' => '商品单价(折扣后)', 'field' => 'goods_price2', 'width' => 12),
+				//array('title' => '商品价格(折扣前)', 'field' => 'goods_rprice1', 'width' => 12),
+				array('title' => '商品价格', 'field' => 'goods_rprice2', 'width' => 12),
+				array('title' => '支付方式', 'field' => 'paytype', 'width' => 12),
+				array('title' => '配送方式', 'field' => 'delivery', 'width' => 12),
+				//array('title' => '自提门店', 'field' => 'pickname', 'width' => 24),
+				//array('title' => '商品小计', 'field' => 'goodsprice', 'width' => 12),
+				array('title' => '运费', 'field' => 'dispatchprice', 'width' => 12),
+				array('title' => '积分抵扣', 'field' => 'score_for_money', 'width' => 12),
+				//array('title' => '余额抵扣', 'field' => 'deductcredit2', 'width' => 12),
+				array('title' => '满额立减', 'field' => 'fullreduction_money', 'width' => 12),
+				array('title' => '优惠券优惠', 'field' => 'voucher_credit', 'width' => 12),
+				//array('title' => '订单改价', 'field' => 'changeprice', 'width' => 12),
+				//array('title' => '运费改价', 'field' => 'changedispatchprice', 'width' => 12),
+				array('title' => '应收款(该笔订单总款)', 'field' => 'price', 'width' => 12),
+				array('title' => '状态', 'field' => 'status', 'width' => 12),
+				array('title' => '团长佣金', 'field' => 'head_money', 'width' => 12),
+				array('title' => '下单时间', 'field' => 'createtime', 'width' => 24),
+				array('title' => '付款时间', 'field' => 'paytime', 'width' => 24),
+				array('title' => '发货时间', 'field' => 'sendtime', 'width' => 24),
+				
+				array('title' => '收货时间', 'field' => 'receive_time', 'width' => 24),
+				
+				array('title' => '退款商品数量', 'field' => 'has_refund_quantity', 'width' => 12),
+				array('title' => '退款金额', 'field' => 'has_refund_money', 'width' => 12),
+				
+				array('title' => '完成时间', 'field' => 'finishtime', 'width' => 24),
+				array('title' => '快递公司', 'field' => 'expresscom', 'width' => 24),
+				array('title' => '快递单号', 'field' => 'expresssn', 'width' => 24),
+				
+				array('title' => '小区名称', 'field' => 'community_name', 'width' => 12),
+				array('title' => '团长姓名', 'field' => 'head_name', 'width' => 12),
+				array('title' => '团长电话', 'field' => 'head_mobile', 'width' => 12),
+				array('title' => '团长完整地址', 'field' => 'fullAddress', 'width' => 24),
+				
+				
+				array('title' => '订单备注', 'field' => 'remark', 'width' => 36),
+				array('title' => '卖家订单备注', 'field' => 'remarksaler', 'width' => 36),
+				//array('title' => '核销员', 'field' => 'salerinfo', 'width' => 24),
+				//array('title' => '核销门店', 'field' => 'storeinfo', 'width' => 36),
+				//array('title' => '订单自定义信息', 'field' => 'order_diyformdata', 'width' => 36),
+				//array('title' => '商品自定义信息', 'field' => 'goods_diyformdata', 'width' => 36)
+			);
+			
+			
+			//modify_explode_arr
+			
+			$modify_explode_arr = I('request.modify_explode_arr', '');
+			
+			$columns_keys = array();
+			
+			foreach($columns as  $val)
+			{
+				$columns_keys[ $val['field'] ] = array('title' => $val['title'],'width' => $val['width'] );
+				
+			}
+			
+			if( !empty($modify_explode_arr) )
+			{
+				/**
+					order_num_alias,
+					name,telephone,member_content,shipping_name,shipping_tel,
+					address_province_city_area,address_address,goods_title,goods_rprice2,quantity,paytype,
+					delivery,tuan_send_address,goods_optiontitle,goods_price1,receive_time,expresssn,createtime,
+					community_name,head_name,head_mobile
+				**/
+				
+				
+				$ziduan_arr = explode(',', $modify_explode_arr);
+				
+				$length = count($ziduan_arr);
+				
+				$columns = array();
+				
+				$save_columns = array();
+				
+				foreach( $ziduan_arr as $fields )
+				{
+					$columns[] = array('title' => $columns_keys[$fields]['title'], 'field' => $fields, 'width' => $columns_keys[$fields]['width'] );
+					$save_columns[$fields] = $length;
+					$length--;
+				}
+				
+				D('Seller/Config')->update( array('modify_export_fields' => json_encode($save_columns) ) );
+			}
+			
+			
+			$exportlist = array();
+			
+			
+			
+		
+			if (!(empty($total))) {
+					
+					//begin 
+					set_time_limit(0);
+					 
+					$fileName = date('YmdHis', time());
+					header('Content-Type: application/vnd.ms-execl');
+					header('Content-Disposition: attachment;filename="订单数据' . $fileName . '.csv"');
+
+					$begin = microtime(true);
+					
+					$fp = fopen('php://output', 'a');
+					
+					$step = 100;
+					$nums = 10000;
+					
+					//设置标题
+					//$title = array('ID', '用户名', '用户年龄', '用户描述', '用户手机', '用户QQ', '用户邮箱', '用户地址');
+					
+					$title  = array();
+					
+					foreach($columns as $key => $item) {
+						$title[$item['field']] = iconv('UTF-8', 'GBK', $item['title']);
+					}
+
+					fputcsv($fp, $title);
+					
+					//$page = ceil($total / 500);
+			
+					
+					$sqlcondition .= ' left join ' .C('DB_PREFIX') . 'lionfish_comshop_order_goods ogc on ogc.order_id = o.order_id ';
+					
+					
+					$sql_count = 'SELECT count(o.order_id) as count   
+								FROM ' . C('DB_PREFIX'). 'lionfish_comshop_order as o  '.$sqlcondition.' where '  . $condition ;
+						
+					$total_arr = M()->query($sql_count);	
+					
+					$total = $total_arr[0]['count'];
+					
+					$page = ceil($total / 500);
+			
+					
+					
+					for($s = 1; $s <= $page; $s++) {
+						//$offset = ($s-1)* 500;	
+						
+						
+						$sql = 'SELECT o.*,ogc.name as goods_title,ogc.supply_id,ogc.order_goods_id ,ogc.quantity as ogc_quantity,ogc.price,ogc.statements_end_time, 
+									ogc.total as goods_total ,ogc.model,ogc.score_for_money as g_score_for_money, ogc.fullreduction_money as g_fullreduction_money,ogc.voucher_credit as g_voucher_credit ,ogc.has_refund_money,ogc.has_refund_quantity , ogc.shipping_fare as g_shipping_fare,ogc.model as codes  
+								FROM ' . C('DB_PREFIX') . 'lionfish_comshop_order as o  '.$sqlcondition.' where '  . $condition . ' ORDER BY o.head_id asc,ogc.goods_id desc,  o.`order_id` DESC limit '.$limit;
+						
+						$list = M()->query( $sql );
+						
+						
+					
+						$look_member_arr = array();
+						$area_arr = array();
+						
+						if( !empty($list) )
+						{
+							foreach($list as $val)
+							{
+								if (defined('ROLE') && ROLE == 'agenter' ) 
+								{
+									$supper_info = get_agent_logininfo();
+									if($supper_info['id'] != $val['supply_id'])
+									{
+										continue;
+									}
+								}
+					
+					
+								if( empty($look_member_arr) || !isset($look_member_arr[$val['member_id']]) )
+								{
+									$member_info = M('lionfish_comshop_member')->where( array('member_id' =>  $val['member_id']) )->find();
+									
+									$look_member_arr[$val['member_id']] = $member_info;
+								}
+								$tmp_exval= array();
+								$tmp_exval['order_num_alias'] = $val['order_num_alias']."\t";
+								$tmp_exval['day_paixu'] = '#'.$val['day_paixu'];
+								$tmp_exval['name'] = $look_member_arr[$val['member_id']]['username'];
+								//from_type
+								if($val['from_type'] == 'wepro')
+								{
+									$tmp_exval['openid'] = $look_member_arr[$val['member_id']]['we_openid'];
+								}else{
+									$tmp_exval['openid'] = $look_member_arr[$val['member_id']]['openid'];
+								}
+								$tmp_exval['telephone'] = $look_member_arr[$val['member_id']]['telephone'];
+								$tmp_exval['member_content'] = $look_member_arr[$val['member_id']]['content'];
+								
+								$tmp_exval['shipping_name'] = $val['shipping_name'];
+								$tmp_exval['shipping_tel'] = $val['shipping_tel'];
+								
+								//area_arr
+								if( empty($area_arr) || !isset($area_arr[$val['shipping_province_id']]) )
+								{ 
+									$area_arr[$val['shipping_province_id']] = D('Seller/Front')->get_area_info($val['shipping_province_id']);
+								}
+								
+								if( empty($area_arr) || !isset($area_arr[$val['shipping_city_id']]) )
+								{ 
+									$area_arr[$val['shipping_city_id']] = D('Seller/Front')->get_area_info($val['shipping_city_id']);
+								}
+								
+								if( empty($area_arr) || !isset($area_arr[$val['shipping_country_id']]) )
+								{ 
+									$area_arr[$val['shipping_country_id']] = D('Seller/Front')->get_area_info($val['shipping_country_id']);
+								}
+								
+								$province_info = $area_arr[$val['shipping_province_id']];
+								$city_info = $area_arr[$val['shipping_city_id']];
+								$area_info = $area_arr[$val['shipping_country_id']];
+								
+							
+								$tmp_exval['address_province_city_area'] = $province_info['name'].$city_info['name'].$area_info['name'].$val['shipping_address'];
+						
+								//$tmp_exval['address_province'] = $province_info['name'];
+								//$tmp_exval['address_city'] = $city_info['name'];
+								//$tmp_exval['address_area'] = $area_info['name'];
+								$tmp_exval['goods_goodssn'] = $val['model'];
+								
+								
+								$tmp_exval['address_address'] = $val['shipping_address'];
+								
+								if( $val['delivery'] == 'tuanz_send'){ 
+								//	$tmp_exval['address_address'] = $val['tuan_send_address'];							
+								}
+								
+								$tmp_exval['tuan_send_address'] = $val['tuan_send_address'];
+								
+								$tmp_exval['goods_title'] = $val['goods_title'];
+								
+								$goods_optiontitle = $this->get_order_option_sku($val['order_id'], $val['order_goods_id']);
+								$tmp_exval['goods_optiontitle'] = $goods_optiontitle;
+								$tmp_exval['quantity'] = $val['ogc_quantity'];
+								$tmp_exval['goods_price1'] = $val['price'];
+								$tmp_exval['goods_rprice2'] = $val['goods_total'];
+								
+								$tmp_exval['has_refund_money'] = $val['has_refund_money'];
+								$tmp_exval['has_refund_quantity'] = $val['has_refund_quantity'];
+								
+								$paytype = $val['payment_code'];
+								switch($paytype)
+								{
+									case 'admin':
+										$paytype='后台支付';
+										break;
+									case 'yuer':
+										$paytype='余额支付';
+										break;
+									case 'weixin':
+										$paytype='微信支付';
+									break;
+									default:
+										$paytype = '未支付';
+
+								}
+								
+								//has_refund_quantity has_refund_money
+								//$val['order_id'], $val['order_goods_id']
+								
+								$has_refund_quantity = D('Seller/Commonorder')->refund_order_goods_quantity( $val['order_id'], $val['order_goods_id'] );
+								
+								$tmp_exval['has_refund_quantity'] = $has_refund_quantity;
+								
+								$has_refund_money = D('Seller/Commonorder')->get_order_goods_refund_money( $val['order_id'], $val['order_goods_id'] );
+								
+								$tmp_exval['has_refund_money'] = $has_refund_money;
+								
+								
+								if(!empty($val['head_id'])){
+							
+									$community_info = D('Seller/Front')->get_community_byid($val['head_id']);
+									$tmp_exval['community_name'] = $community_info['communityName'];
+									
+									if( $is_can_look_headinfo )
+									{
+										$tmp_exval['fullAddress'] = $community_info['fullAddress'];
+										$tmp_exval['head_name'] = $community_info['disUserName'];
+										$tmp_exval['head_mobile'] = $community_info['head_mobile'];
+									}else{
+										$tmp_exval['fullAddress'] = '';
+										$tmp_exval['head_name'] = '';
+										$tmp_exval['head_mobile'] = '';
+									}
+								}else{
+										$tmp_exval['community_name'] = '';
+										$tmp_exval['fullAddress'] = '';
+										$tmp_exval['head_name'] = '';
+										$tmp_exval['head_mobile'] = '';
+								}
+								
+								
+								
+								$tmp_exval['paytype'] = $paytype;
+								
+								//express 快递, pickup 自提, tuanz_send 团长配送
+								//$tmp_exval['delivery'] =  $val['delivery'] == 'express'? '快递':'自提';
+								if($val['delivery'] == 'express'){
+									$tmp_exval['delivery'] = '快递';
+								}elseif($val['delivery'] == 'pickup'){
+									$tmp_exval['delivery'] = '自提';
+								}elseif($val['delivery'] == 'tuanz_send'){
+									$tmp_exval['delivery'] = '团长配送';
+								}
+								
+								$tmp_exval['dispatchprice'] = $val['g_shipping_fare'];
+								
+								$tmp_exval['score_for_money'] = $val['g_score_for_money'];
+								$tmp_exval['fullreduction_money'] = $val['g_fullreduction_money'];
+								$tmp_exval['voucher_credit'] = $val['g_voucher_credit'];
+								
+								
+								
+								$tmp_exval['changeprice'] = $val['changedtotal'];
+								$tmp_exval['changedispatchprice'] = $val['changedshipping_fare'];
+								
+								
+								$val['total'] = $val['goods_total']+$val['g_shipping_fare']-$val['g_score_for_money']-$val['g_fullreduction_money'] - $val['g_voucher_credit'];
+							
+							
+								if($val['total'] < 0)
+								{
+									$val['total'] = 0;
+								}
+								
+								
+								$tmp_exval['price'] = $val['total'];
+								
+								
+								$tmp_exval['head_money'] = 0;
+								
+								
+								$head_commiss_order = M('lionfish_community_head_commiss_order')->where( array('order_id' => $val['order_id'],'order_goods_id' => $val['order_goods_id']) )->find();
+								
+								if( !empty($head_commiss_order) )
+								{
+									$tmp_exval['head_money'] = $head_commiss_order['money'];
+								}
+								
+								
+								
+								
+								$tmp_exval['status'] = $order_status_arr[$val['order_status_id']];
+								
+								$tmp_exval['createtime'] = date('Y-m-d H:i:s', $val['date_added']);
+								
+								
+								$tmp_exval['paytime'] = empty($val['pay_time']) ? '' : date('Y-m-d H:i:s', $val['pay_time']);
+								$tmp_exval['sendtime'] = empty($val['express_time']) ? '': date('Y-m-d H:i:s', $val['express_time']);
+								$tmp_exval['finishtime'] =  empty($val['finishtime']) ? '' : date('Y-m-d H:i:s', $val['finishtime']);
+								
+								$tmp_exval['receive_time'] =  empty($val['receive_time']) ? '' : date('Y-m-d H:i:s', $val['receive_time']);
+						
+								$tmp_exval['expresscom'] = $val['dispatchname'];
+								$tmp_exval['expresssn'] = $val['shipping_no'];
+								$tmp_exval['remark'] = $val['comment'];
+								$tmp_exval['remarksaler'] = $val['remarksaler'];
+								
+								$exportlist[] = $tmp_exval;
+								
+								$row_arr = array();
+						
+								foreach($columns as $key => $item) {
+									
+									$row_arr[$item['field']] = iconv('UTF-8', 'GBK//IGNORE', $tmp_exval[$item['field']]);
+								}
+								
+								fputcsv($fp, $row_arr);
+							}
+							
+							ob_flush();
+							flush();
+							
+							unset($list);
+						}
+						
+					}
+					
+					die();
+			
+				//D('Seller/Excel')->export($exportlist, array('title' => '订单数据', 'columns' => $columns));
+			}
+		
+		}
+		
+			
+		if (!(empty($total))) {
+			
+			$sql = 'SELECT o.* FROM ' .C('DB_PREFIX'). 'lionfish_comshop_order as o  '.$sqlcondition.' where '  . $condition . ' ORDER BY  o.`order_id` DESC limit '.$limit;
+			//-------------- by lucas 【】 Start ------------------------
+			$sql1 = 'SELECT o.order_id FROM ' .C('DB_PREFIX'). 'lionfish_comshop_order as o  '.$sqlcondition.' where '  . $condition . ' ORDER BY  o.`order_id` DESC limit '.$limit;
+			$order_ids_all = M()->query($sql1);
+			$order_ids = [];
+			foreach($order_ids_all as $order_id){
+				$order_ids[] = $order_id['order_id'];
+			}
+			//-------------- by lucas 【】 End --------------------------
+			
+			$list = M()->query($sql);
+			$need_list = array();
+			
+			
+			foreach ($list as $key => &$value ) {
+				$sql_goods = "select og.* from ".C('DB_PREFIX')."lionfish_comshop_order_goods as og  
+								where og.order_id = {$value[order_id]} ";
+				
+				$goods = M()->query($sql_goods);
+				
+				
+				
+				$need_goods = array();
+				
+				$shipping_fare = 0;
+				$fullreduction_money = 0;
+				$voucher_credit = 0;
+				$totals = 0;
+				
+				foreach($goods as $key =>$goods_val)
+				{
+					if( $goods_val['is_statements_state'] == 1 )
+					{
+						$value['is_statements_state'] = 1;
+					}
+					
+					$goods_val['option_sku'] = $this->get_order_option_sku($value['order_id'], $goods_val['order_goods_id']);
+					
+					$goods_val['commisson_info'] = array();//load_model_class('commission')->get_order_goods_commission( $value['order_id'], $goods_val['order_goods_id']);
+					
+					//供应商名称
+					$goods_val['shopname'] =  M('lionfish_comshop_supply')->field('shopname,type')->where( array('id' => $goods_val['supply_id'] ) )->find();
+
+					
+					if( $goods_val['is_refund_state'] == 1 )
+					{
+						
+						$refund_info = M('lionfish_comshop_order_refund')->where( array('order_id' => $value['order_id'] ,'order_goods_id' => $goods_val['order_goods_id']) )->find();
+						
+						$goods_val['refund_info'] = $refund_info;
+					}
+					
+					if (defined('ROLE') && ROLE == 'agenter' ) 
+					{
+						$supper_info = get_agent_logininfo();
+						
+						if($supper_info['id'] != $goods_val['supply_id'])
+						{
+							continue;
+						}
+					}
+					$shipping_fare += $goods_val['shipping_fare'];
+					$fullreduction_money += $goods_val['fullreduction_money'];
+					$voucher_credit += $goods_val['voucher_credit'];
+					$totals += $goods_val['total'];
+					
+					$need_goods[$key] = $goods_val;
+				}
+				
+				if (defined('ROLE') && ROLE == 'agenter' ) 
+				{
+					$value['shipping_fare'] = $shipping_fare;
+					$value['fullreduction_money'] = $fullreduction_money;
+					$value['voucher_credit'] = $voucher_credit;
+					$value['total'] = $totals;
+				}
+				
+				//member_id ims_  nickname
+				
+				$nickname_info = M('lionfish_comshop_member')->field('username as nickname,content')->where( array('member_id' =>  $value['member_id']) )->find();
+				
+				$nickname = $nickname_info['nickname'];
+					
+				$value['nickname'] = $nickname;
+				$value['member_content'] = $nickname_info['content'];
+				
+				
+				$value['goods'] = $need_goods;
+				
+				if($value['head_id'] <=0 )
+				{
+					$value['community_name'] = '';
+					$value['head_name'] = '';
+					$value['head_mobile'] = '';
+					
+					$value['province'] = '';
+					$value['city'] = '';
+
+				}else{
+					$community_info = D('Seller/Front')->get_community_byid($value['head_id']);
+					
+				
+					$value['community_name'] = $community_info['communityName'];
+					$value['head_name'] = $community_info['disUserName'];
+					$value['head_mobile'] = $community_info['head_mobile'];
+					
+					$value['province'] = $community_info['province'];
+					$value['city'] = $community_info['city'];
+				}
+				
+				
+				
+				
+			}
+			//dump($total);dump($pindex);dump($psize);exit;
+			$pager = pagination2($total, $pindex, $psize);
+		}
+		
+		//get_order_count($where = '',$uniacid = 0)
+		
+		if( !empty($searchtype) )
+		{
+			$count_where .= " and type = '{$searchtype}' ";
+		}
+		
+		
+		if (defined('ROLE') && ROLE == 'agenter' ) 
+		{
+			$supper_info = get_agent_logininfo();
+				
+			$order_ids_list = M()->query("select og.order_id,og.total,og.shipping_fare,og.voucher_credit,og.fullreduction_money from ".C('DB_PREFIX').
+								"lionfish_comshop_order_goods as og , ".C('DB_PREFIX')."lionfish_comshop_order as o  where  og.order_id =o.order_id  and og.supply_id = ".$supper_info['id']."  ");
+			$order_ids_arr = array();
+			
+			$seven_refund_money= 0;
+			
+			foreach($order_ids_list as $vv)
+			{
+				if( empty($order_ids_arr) || !isset($order_ids_arr[$vv['order_id']]) )
+				{
+					$order_ids_arr[$vv['order_id']] = $vv['order_id'];
+				}
+			}
+			if( !empty($order_ids_arr) )
+			{
+				$count_where .= " and order_id in (".implode(',', $order_ids_arr).")";
+			}else{
+				$count_where .= " and order_id in (0)";
+			}
+			
+		}
+		
+		
+		// $all_count = $this->get_order_count($count_where);
+		// $count_status_1 = $this->get_order_count(" {$count_where} and order_status_id = 1 ");
+		// $count_status_3 = $this->get_order_count(" {$count_where} and order_status_id = 3 ");
+		// $count_status_4 = $this->get_order_count(" {$count_where} and order_status_id = 4 ");
+		// $count_status_5 = $this->get_order_count(" {$count_where} and order_status_id = 5 ");
+		// $count_status_7 = $this->get_order_count(" {$count_where} and order_status_id = 7 ");
+		// $count_status_11 = $this->get_order_count(" {$count_where} and (order_status_id = 11 or order_status_id = 6) ");
+		// $count_status_14 = $this->get_order_count(" {$count_where} and order_status_id = 14 ");
+		
+
+		return $list;
+		
+		/*return array(
+			'total' => $total, 
+			'total_money' => $total_money,
+			'pager' => $pager, 
+			'all_count' => $all_count,
+			'list' =>$list,
+			// 'order_ids' =>$order_ids,
+			// 'count_status_1' => $count_status_1,
+			// 'count_status_3' => $count_status_3,
+			// 'count_status_4' => $count_status_4,
+			// 'count_status_5' => $count_status_5, 
+			// 'count_status_7' => $count_status_7, 
+			// 'count_status_11' => $count_status_11,
+			// 'count_status_14' => $count_status_14
+		);*/
+	}
 	
 	//---copy begin 
 	

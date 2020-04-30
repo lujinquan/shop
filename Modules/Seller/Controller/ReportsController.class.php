@@ -1132,6 +1132,8 @@ class ReportsController extends CommonController{
 		
 		$goods_categorys = M('lionfish_comshop_goods_category')->getField('id,name');
 		$goods_to_categorys = M('lionfish_comshop_goods_to_category')->group('goods_id')->getField('goods_id,group_concat(cate_id) as cate_ids');
+		$goods_daysalescount = M('lionfish_comshop_goods')->getField('id,day_salescount');
+		//p($goods_daysalescount);
 
 		//p($goods_to_categorys);
 		// $sql = 'SELECT COUNT(g.id) as count FROM ' .C('DB_PREFIX'). 'lionfish_comshop_goods g ' ;
@@ -1139,72 +1141,217 @@ class ReportsController extends CommonController{
 		
 		// $total_arr = M()->query($sql);
 		
+		// 搜索关键词
+        $keyword = $_GPC['keyword'];
+		$this->keyword = $keyword;
+		$goodsids = [];
+		if($keyword){
+			$goodsids = M('lionfish_comshop_goods')->where("goodsname like '%".$keyword."%'")->getField('id',true);
+			//p($goodsid);
+		}
+
+		// 搜索订单状态
+        $order_status_id = isset($_GPC['order_status_id']) ? $_GPC['order_status_id'] : '';
+        $this->order_status_id = $order_status_id;
+        
 
 		// 搜索配送日期
-        $delivery_type = isset($gpc['delivery_type']) ? $gpc['delivery_type'] : 'delivery';
+        $delivery_type = isset($_GPC['delivery_type']) ? $_GPC['delivery_type'] : 'delivery';
         $this->delivery_type = $delivery_type;
 
-        $delivery_date = isset($gpc['delivery_date']) ? $gpc['delivery_date'] : date('Y-m-d',time()+86400);
+        $delivery_date = isset($_GPC['delivery_date']) ? $_GPC['delivery_date'] : date('Y-m-d',time()+86400);
+        //p($delivery_date);
         $this->delivery_time = strtotime($delivery_date);
         $this->delivery_date = $delivery_date;
         $need_list = [];
+        //p($gpc['delivery_date']);
         if($delivery_date && $delivery_type){
 
         	$list_ids = M('lionfish_comshop_deliverylist')->where("delivery_date = '".$delivery_date."'")->getField("group_concat(id) as ids");
         	if($list_ids){
         		$goods_list = M('lionfish_comshop_deliverylist_goods')->where("list_id in ( " . $list_ids . " )")->select();
-	        	
-	        	$k = 0;
-	        	foreach ($goods_list as $val) {
 
-	                $gd_info = M('lionfish_comshop_good_common')->field('supply_id')->where( array('goods_id' => $val['goods_id'] ) )->find();
+	        	if($order_status_id){ // 如果搜索了订单状态
+	        		$orders = M('lionfish_comshop_deliverylist_order')->where("list_id in ( " . $list_ids . " )")->getField('order_id',true);
 
-					// 处理商品分类
-					$cates = explode(',',$goods_to_categorys[$val['goods_id']]);
-					$cate_name = [];
-					foreach ($cates as $cate) {
-						$cate_name[] = $goods_categorys[$cate];
-					}
+	        		$access_orders = M('lionfish_comshop_order')->where("order_id in ( " . implode(',',$orders) . ") and order_status_id in ( " . $order_status_id . " )")->getField('order_id',true);
+					if($access_orders){
+						$goods_list = M('lionfish_comshop_order_goods')->where("order_id in ( " . implode(',',$access_orders) . ") ")->field('goods_id,supply_id,total,name,quantity')->select();
+						foreach ($goods_list as $val) {
+		        			if($goodsids && !in_array($val['goods_id'], $goodsids)){
+			        			//p(1);
+			        			continue;
+			        		}
+			                $gd_info = M('lionfish_comshop_good_common')->field('supply_id')->where( array('goods_id' => $val['goods_id'] ) )->find();
 
-					
-					// 处理商品供应商
-					$supply_name = '平台';
-					if( $gd_info['supply_id'] > 0 )
-					{
-						$supply_info = M('lionfish_comshop_supply')->field('shopname,type')->where( array('id' => $gd_info['supply_id'] ) )->find();
-						
-						if( !empty($supply_info) )
-						{
-							if( $supply_info['type'] == 1 )
+			                $totals = M('lionfish_comshop_order_goods')->field('supply_id')->where( array('goods_id' => $val['goods_id'] ) )->getField('sum(old_total) as totals');
+
+			                //p($totals);
+
+							// 处理商品分类
+							$cates = explode(',',$goods_to_categorys[$val['goods_id']]);
+							$cate_name = [];
+							foreach ($cates as $cate) {
+								$cate_name[] = $goods_categorys[$cate];
+							}
+
+							
+							// 处理商品供应商
+							$supply_name = '平台';
+							if( $gd_info['supply_id'] > 0 )
 							{
-								$supply_name = $supply_info['shopname'].'(独立供应商)';
-							}else{
-								$supply_name = $supply_info['shopname'].'(平台供应商)';
+								$supply_info = M('lionfish_comshop_supply')->field('shopname,type')->where( array('id' => $gd_info['supply_id'] ) )->find();
+								
+								if( !empty($supply_info) )
+								{
+									if( $supply_info['type'] == 1 )
+									{
+										$supply_name = $supply_info['shopname'].'(独立供应商)';
+									}else{
+										$supply_name = $supply_info['shopname'].'(平台供应商)';
+									}
+								}
+							}
+							$need_list[$val['goods_id']]['goods_id'] = $val['goods_id'];
+							$need_list[$val['goods_id']]['goods_name'] = $val['name'];
+							$need_list[$val['goods_id']]['supply_name'] = $supply_name; //供应商
+							if(!isset($need_list[$val['goods_id']]['goods_count'])){
+								$need_list[$val['goods_id']]['goods_count'] = 0;
+							}
+							if(!isset($need_list[$val['goods_id']]['total_money'])){
+								$need_list[$val['goods_id']]['total_money'] = 0;
+							}
+							$need_list[$val['goods_id']]['goods_count'] += $val['quantity']; //商品规格
+							$need_list[$val['goods_id']]['day_money'] = $goods_daysalescount[$val['goods_id']]; //商品日销量
+							$need_list[$val['goods_id']]['total_money'] += $totals; //累计销售额
+							$need_list[$val['goods_id']]['cate_names'] = implode(',',$cate_name); //商品类别
+							//$need_list[$k]['supply_name'] = $supply_name;
+							$k++;
+		        		}
+					}
+	        		
+	        		
+	        		//dump($access_orders);dump($orders);exit;
+        		}else{ // 如果没有搜索了订单状态
+        			$k = 0;
+		        	foreach ($goods_list as $val) {
+		        		if($goodsids && !in_array($val['goods_id'], $goodsids)){
+		        			//p(1);
+		        			continue;
+		        		}
+		                $gd_info = M('lionfish_comshop_good_common')->field('supply_id')->where( array('goods_id' => $val['goods_id'] ) )->find();
+
+		                $totals = M('lionfish_comshop_order_goods')->field('supply_id')->where( array('goods_id' => $val['goods_id'] ) )->getField('sum(old_total) as totals');
+
+		                //p($totals);
+
+						// 处理商品分类
+						$cates = explode(',',$goods_to_categorys[$val['goods_id']]);
+						$cate_name = [];
+						foreach ($cates as $cate) {
+							$cate_name[] = $goods_categorys[$cate];
+						}
+
+						
+						// 处理商品供应商
+						$supply_name = '平台';
+						if( $gd_info['supply_id'] > 0 )
+						{
+							$supply_info = M('lionfish_comshop_supply')->field('shopname,type')->where( array('id' => $gd_info['supply_id'] ) )->find();
+							
+							if( !empty($supply_info) )
+							{
+								if( $supply_info['type'] == 1 )
+								{
+									$supply_name = $supply_info['shopname'].'(独立供应商)';
+								}else{
+									$supply_name = $supply_info['shopname'].'(平台供应商)';
+								}
 							}
 						}
-					}
-					$need_list[$k]['goods_id'] = $val['goods_id'];
-					$need_list[$k]['goods_name'] = $val['goods_name'];
-					$need_list[$k]['supply_name'] = $supply_name; //供应商
-					$need_list[$k]['options'] = '1000'; //商品规格
-					$need_list[$k]['day_money'] = '100'; //商品日销量
-					$need_list[$k]['total_money'] = 100000.01; //累计销售额
-					$need_list[$k]['cate_names'] = implode(',',$cate_name); //商品类别
-					//$need_list[$k]['supply_name'] = $supply_name;
-					$k++;
-	            }
+						$need_list[$val['goods_id']]['goods_id'] = $val['goods_id'];
+						$need_list[$val['goods_id']]['goods_name'] = $val['goods_name'];
+						$need_list[$val['goods_id']]['supply_name'] = $supply_name; //供应商
+						if(!isset($need_list[$val['goods_id']]['goods_count'])){
+							$need_list[$val['goods_id']]['goods_count'] = 0;
+						}
+						if(!isset($need_list[$val['goods_id']]['total_money'])){
+							$need_list[$val['goods_id']]['total_money'] = 0;
+						}
+						$need_list[$val['goods_id']]['goods_count'] += $val['goods_count']; //商品规格
+						$need_list[$val['goods_id']]['day_money'] = $goods_daysalescount[$val['goods_id']]; //商品日销量
+						$need_list[$val['goods_id']]['total_money'] += $totals; //累计销售额
+						$need_list[$val['goods_id']]['cate_names'] = implode(',',$cate_name); //商品类别
+						//$need_list[$k]['supply_name'] = $supply_name;
+						$k++;
+		            }
+        		}
+
+	        	
         	}
         	
         	//p($need_list);
         }
 
+        //按商品数量倒叙排
+        $last_ages = array_column($need_list,'goods_count');
+		array_multisort($last_ages ,SORT_DESC,$need_list);
+        // $data = [];
+        // $x = 0;
+        // foreach ($need_list as $needk1 => $needv1) {
+        // 	$data[$needv1['goods_id']]['goods_id'] = 
+        // }
+
         // 搜索订单类型,默认正常
         $type = isset($_GPC['type']) ? $_GPC['type'] : '';
         $this->type = $type;
-        if($type){
-        	
-        }
+        
+        // 如果是搜索订单
+        $data = $need_list;
+        
+    //     if($need_data_order && $need_list){ //如果搜索了 订单 && 配送
 
+    //     }else if(!$need_data_order && $need_list){//如果搜索了 !订单 && 配送
+    //     	$data = $need_list;
+    //     }else{//如果搜索了 订单 && !配送
+    //     	$need_data_order = D('Seller/Order')->load_goods_list();
+	   //      $need_data_goods = [];
+	   //      foreach($need_data_order as $n => $d){
+	   //      	foreach ($d['goods'] as $a => $b) {
+	   //      		$need_data_goods[$b['goods_id']][] = $b;
+	   //      	}
+	   //      }
+	   //      $i = 0;
+	   //      //p($need_data_goods);
+	   //      $need_list = [];
+	   //      foreach ($need_data_goods as $needk => $needv) {
+	   //      	$total_money = 0;
+	   //      	$goods_count = 0;
+	   //      	foreach ($needv as $needk1 => $needv1) {
+	   //      		$total_money = $needv1['total'] * 1000;
+	   //      		$goods_count += $needv1['quantity'];
+	   //      	}
+	   //      	$cates = explode(',',$goods_to_categorys[$needk]);
+				// $cate_name = [];
+				// foreach ($cates as $cate) {
+				// 	$cate_name[] = $goods_categorys[$cate];
+				// }
+	   //      	$need_list1[$i] = array(
+	   //      		'goods_id' => $needk,
+	   //      		'goods_name' => $needv[0]['name'],
+	   //      		'supply_name' => $$needv[0]['shopname']['shopname'],
+	   //      		'goods_count' => $goods_count,
+	   //      		'day_money' => $goods_daysalescount[$needk],
+	   //      		'total_money' => $total_money / 1000,
+	   //      		'cate_names' => implode(',',$cate_name),
+	   //      	);
+	   //      	$i++;
+	   //      }
+	   //      $data = $need_list1;
+    //     }
+//dump($need_list);exit;
+        
+        //dump($need_data1);exit;
         // 搜索订单时间类型
         $ordertime_type = isset($_GPC['ordertime_type']) ? $_GPC['ordertime_type'] : '';
         $this->ordertime_type = $ordertime_type;
@@ -1247,19 +1394,14 @@ class ReportsController extends CommonController{
 
         }
 
-		// 搜索关键词
-        $keyword = $_GPC['keyword'];
-		$this->keyword = $keyword;
-		if($keyword){
-
-		}
+		
 		
 
 		
 		
-		$data = array();
+		//$data = array();
 		//$data = $this->head_sale_analys($keyword,$searchtime , $starttime , $endtime );
-		$data = $need_list;
+		//$data = $need_list;
 		$this->data = $data;
 		$this->_GPC = $_GPC;
 		

@@ -65,7 +65,7 @@
         <div class="page-content">
             <form action="" method="get" class="form-horizontal form-search layui-form" role="form" id="search">
         		<input type="hidden" name="c" value="reports" />
-                <input type="hidden" name="a" value="communitystatics" />
+                <input type="hidden" name="a" value="goodsstatics" />
                
                 <input type="hidden" name="type" value="{$_GPC['type']}" />
 			   
@@ -73,7 +73,7 @@
                     <div class="layui-form-item">
     					<span class="layui-input-inline" style="width: 100px;">
     						<select name='delivery_type' class='form-control' id="searchtime">
-    							<option value=''>不按时间</option>
+    							<!-- <option value=''>不按时间</option> -->
                                 <!-- <option value='create_time' <?php if( $gpc['searchtime']=='create_time'){ ?>selected<?php } ?>>创建清单时间</option>
                                 <option value='express_time' <?php if( $gpc['searchtime']=='express_time'){ ?>selected<?php } ?>>配送时间</option>
                                 <option value='head_get_time' <?php if( $gpc['searchtime']=='head_get_time'){ ?>selected<?php } ?>>送达时间</option> -->
@@ -83,76 +83,33 @@
     					<span class="layui-input-inline" style="width: 100px;">
                             {:tpl_form_field_date('delivery_date', date('Y-m-d',$delivery_time),false);}
                         </span>
-                        <div class="layui-input-inline" style="width:100px;">
-							<select name='type'  class='layui-input layui-unselect' lay-ignore style="width:100px;padding:0 5px;"  id="type">
-								<option value=''>订单类型</option>
-								<option value='normal' <?php if(  $type=='normal'){ ?>selected<?php } ?>>普通订单</option>
-								<option value='soli' <?php if(  $is_soli==1){ ?> selected <?php } ?>>接龙订单</option>
-								
+                        
+                        <div class="layui-input-inline" style="width:200px;">
+							<select name='order_status_id'  class='form-control'>
+								<option value=''>订单状态</option>
+								<option value='1' <?php if(  $order_status_id==1){ ?>selected<?php } ?>>已付款待发货</option>
+                                <option value='2' <?php if(  $order_status_id==2){ ?>selected<?php } ?>>拼团中，已付款</option>
+                                <option value='3' <?php if(  $order_status_id==3){ ?>selected<?php } ?>>待付款</option>
+                                <option value='4' <?php if(  $order_status_id==4){ ?>selected<?php } ?>>已发货，待收货</option>
+                                <option value='5' <?php if(  $order_status_id==5){ ?>selected<?php } ?>>交易已取消</option>
+                                <option value='6' <?php if(  $order_status_id==6){ ?>selected<?php } ?>>已签收</option>
+                                <option value='7' <?php if(  $order_status_id==7){ ?>selected<?php } ?>>已退款</option>
+                                <option value='8' <?php if(  $order_status_id==8){ ?>selected<?php } ?>>退款并送券</option>
+								<option value='9' <?php if(  $order_status_id==9){ ?>selected<?php } ?>>二等奖，已退款并送券</option>
+                                <option value='10' <?php if(  $order_status_id==10){ ?>selected<?php } ?>>退款失败，请手动退款</option>
+                                <option value='11' <?php if(  $order_status_id==11){ ?>selected<?php } ?>>已完成</option>
+                                <option value='12' <?php if(  $order_status_id==12){ ?>selected<?php } ?>>申请退款中</option>
+                                <option value='13' <?php if(  $order_status_id==13){ ?>selected<?php } ?>>平台介入退款</option>
+                                <option value='14' <?php if(  $order_status_id==14){ ?>selected<?php } ?>>配送中</option>
 							</select>
 						</div>
-    					<div class="layui-input-inline" style="width:100px;">
-						<select name='ordertime_type' lay-ignore  class='layui-input layui-unselect' style="width:100px;padding:0 5px;"  id="searchtime">
-							<option value=''>不按时间</option>
-							<option value='create' <?php if(  $searchtime=='create'){ ?>selected<?php } ?>>下单时间</option>
-							<option value='pay' <?php if(  $searchtime=='pay'){ ?>selected<?php } ?>>付款时间</option>
-							<option value='send' <?php if(  $searchtime=='send'){ ?>selected<?php } ?>>发货时间</option>
-							<option value='finish' <?php if(  $searchtime=='finish'){ ?>selected<?php } ?>>完成时间</option>
-						</select>
-					</div>
-					<div class="layui-input-inline" style="width:280px;">
-						{:tpl_form_field_daterange('time', array('starttime'=>date('Y-m-d H:i', $starttime),'endtime'=>date('Y-m-d H:i', $endtime)),true);}
-					</div>
-					<div class="layui-input-inline" style="width:100px;">
-						<select name='delivery' lay-ignore class='layui-input layui-unselect' style="width:100px;padding:0 5px;"  id="type">
-							<option value=''>配送方式</option>
-							<option value='pickup' <?php if( $delivery=='pickup'){ ?>selected<?php } ?>>自提</option>
-							<option value='tuanz_send' <?php if( $delivery=='tuanz_send'){ ?>selected<?php } ?>>团长配送</option>
-							<option value='express' <?php if( $delivery=='express'){ ?>selected<?php } ?>>快递</option>
-						</select>	
-					</div>
-					<!-- by lucas Start -->
-					<div class="layui-input-inline" style="width:140px;">
-						<select name='groupid' lay-ignore class='layui-input layui-unselect' style="width:140px;padding:0 5px;"  id="type">
-							<option value="" <?php if( empty($groupid) ){ ?>selected<?php } ?> >团长分类</option>
-							<?php foreach($headgroups as $cp){ ?>
-							<option value="{$cp['id']}" <?php if( $groupid==$cp['id'] ){ ?>selected<?php } ?> >{$cp['groupname']}</option>
-							<?php } ?>
-						</select>	
-					</div>
-					<!-- by lucas End -->
-					<div class="layui-input-inline" style="width:110px;">
-						<select name='searchfield' lay-ignore class='layui-input layui-unselect'   style="width:110px;padding:0 5px;"  >
-							<option value='ordersn' <?php if( $searchfield=='ordersn'){ ?>selected<?php } ?>>订单号</option>
-							<option value='member' <?php if( $searchfield=='member'){ ?>selected<?php } ?>>会员信息</option>
-							<option value='mobile' <?php if( $searchfield=='mobile'){ ?>selected<?php } ?>>手机号</option>
-							<option value='address' <?php if( $searchfield=='address'){ ?>selected<?php } ?>>收件人信息</option>
-							<option value='location' <?php if( $searchfield=='location'){ ?>selected<?php } ?>>地址信息</option>
-							<option value='shipping_no' <?php if( $searchfield=='shipping_no'){ ?>selected<?php } ?>>快递单号</option>
-							<option value='goodstitle' <?php if( $searchfield=='goodstitle'){ ?>selected<?php } ?>>商品名称</option>
-							<option value='trans_id' <?php if( $searchfield=='trans_id'){ ?>selected<?php } ?>>微信支付单号</option>
-							<?php if($is_community != 1){ ?>
-							<option value='head_name' <?php if( $searchfield=='head_name'){ ?>selected<?php } ?>>团长姓名</option>
-							<option value='head_address' <?php if( $searchfield=='head_address'){ ?>selected<?php } ?>>小区名称</option>
-							<?php } ?>
-							<?php 
-							if (!defined('ROLE') || ROLE != 'agenter' ) 
-							{
-							?>
-							<option value='supply_name' <?php if( $searchfield=='supply_name'){ ?>selected<?php } ?>>供应商名称</option>
-							<?php } ?>
-							<option value='member_id' <?php if( $searchfield=='member_id'){ ?>selected<?php } ?>>会员ID</option>
-							
-							<!--<option value='goodssn' <?php if( $searchfield=='goodssn'){ ?>selected<?php } ?>>商品编码</option>-->
-						   
-						</select>
-					</div>
-					<div class="layui-input-inline" >
-						<input type="text" class="layui-input"  name="keyword" value="{$keyword}" placeholder="请输入关键词"/>
+                        <input type="hidden" name="export" id="export" value="0">
+					<div class="layui-input-inline" style="width:200px;">
+						<input type="text" class="layui-input"  name="keyword" value="{$keyword}" placeholder="请输入商品名"/>
 					</div>
                         <div class="layui-input-inline">
                             <button class="layui-btn btn-submit layui-btn-sm" data-export="0" type="submit"> 搜索</button>
-    						<button data-export="1" type="submit" class="layui-btn layui-btn-sm btn-submit layui-btn-primary">导出</button>
+    						<!-- <button data-export="1" type="submit" class="layui-btn layui-btn-sm btn-submit layui-btn-primary">导出</button> -->
                         </div>
                     </div>
                 </div>
@@ -168,24 +125,25 @@
                                         <input type='checkbox' name="checkall" lay-skin="primary" lay-filter="checkboxall" />
                                     </th>
             						<th style="width:50px;text-align:center;">ID</th>
-            						<th style="width: 200px;">商品编号</th>
+            						<th style="width: 150px;">商品编号</th>
             						<th style="width: 180px;">商品名称</th>
-            						<th style="width: 200px;">日销量</th>
-            						<th style="width: 200px;">累计金额</th>
+            						<th style="width: 150px;">日销量</th>
+                                    <th style="width: 150px;">商品数量</th>
+            						<th style="width: 150px;">累计配送金额</th>
             						<th style="width: 200px;">产品类别</th>
             						<th style="width: 300px;">供应商</th>
-            						<th style="width: 300px;text-align:right;">操作</th>
+            						<th style="width: 130px;text-align:center;">操作</th>
             					</tr>
                             </thead>
                             <tbody>
                                
-								<?php foreach($data as $it => $item){ ?>
+								<?php $ji = 0; foreach($data as $it => $item){ ?>
                                 <tr>
                 					<td style="width:25px;">
                 						<input type='checkbox' value="{$item['goods_id']}" name="item_checkbox" lay-skin="primary" />
                 					</td>
                 					<td style="width:100px;text-align:center;">
-                						<?php echo $it+1; ?>
+                						<?php echo $ji+1; $ji++;?>
                 					</td>
                 					<td>
                 						{$item['goods_id']}
@@ -196,6 +154,9 @@
                 					<td>
                 						{$item['day_money']}
                 					</td>
+                                    <td>
+                                        {$item['goods_count']}
+                                    </td>
                 					<td>
                 						{$item['total_money']}
                 					</td>
