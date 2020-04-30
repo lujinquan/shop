@@ -121,9 +121,9 @@
                         <table class="layui-table" lay-skin="line" lay-size="lg">
                             <thead>
                                 <tr>
-            						<th style="width:25px;">
+            						<!-- <th style="width:25px;">
                                         <input type='checkbox' name="checkall" lay-skin="primary" lay-filter="checkboxall" />
-                                    </th>
+                                    </th> -->
             						<th style="width:50px;text-align:center;">ID</th>
             						<th style="width: 150px;">商品编号</th>
             						<th style="width: 180px;">商品名称</th>
@@ -132,16 +132,16 @@
             						<th style="width: 150px;">累计配送金额</th>
             						<th style="width: 200px;">产品类别</th>
             						<th style="width: 300px;">供应商</th>
-            						<th style="width: 130px;text-align:center;">操作</th>
+            			
             					</tr>
                             </thead>
                             <tbody>
                                
 								<?php $ji = 0; foreach($data as $it => $item){ ?>
                                 <tr>
-                					<td style="width:25px;">
+                					<!-- <td style="width:25px;">
                 						<input type='checkbox' value="{$item['goods_id']}" name="item_checkbox" lay-skin="primary" />
-                					</td>
+                					</td> -->
                 					<td style="width:100px;text-align:center;">
                 						<?php echo $ji+1; $ji++;?>
                 					</td>
@@ -169,24 +169,7 @@
                 					</td>
                 					
             					
-                					<td  style="overflow:visible;position:relative;text-align:right;">
-                						
-										<?php if( isset($_GPC['searchtime']) && $_GPC['searchtime'] == 'create_time' ){ ?>
-										<a class="layui-btn layui-btn-primary layui-btn-xs" href="{:U('order/index',array('time[end]' => date('Y-m-d H:i', $endtime),'time[start]'=>date('Y-m-d H:i', $starttime),'searchtime' => 'create','searchfield'=>'head_name','keyword' => $item['head_name'],'ok'=>1));}">
-                							<span data-toggle="tooltip" data-placement="top" title="" data-original-title="查看订单明细">
-                								查看订单明细
-                							</span>
-                						</a>	
-										<?php }else{ ?>
-										<a class="layui-btn layui-btn-primary layui-btn-xs" href="{:U('order/index',array('searchfield'=>'head_name','keyword' => $item['head_name'],'ok'=>1));}">
-                							<span data-toggle="tooltip" data-placement="top" title="" data-original-title="查看订单明细">
-                								查看订单明细
-                							</span>
-                						</a>
-										<?php } ?>
-                						
-                						
-                					</td>
+                					
                                 </tr>
                                 <?php } ?>
                             </tbody>
