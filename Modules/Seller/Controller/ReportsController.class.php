@@ -1164,8 +1164,75 @@ class ReportsController extends CommonController{
         $this->delivery_time = strtotime($delivery_date);
         $this->delivery_date = $delivery_date;
         $need_list = [];
-        //p($gpc['delivery_date']);
+
+
+        $where = '';
         if($delivery_date && $delivery_type){
+        	$where .= "delivery_date = '".$delivery_date."'";
+        }
+        if($order_status_id){
+        	$where .= " and order_status_id = ".$order_status_id;
+        }
+
+        $access_orders = M('lionfish_comshop_order')->where($where)->getField('order_id',true);
+        //p($access_orders);
+        if($access_orders){
+			$goods_list = M('lionfish_comshop_order_goods')->where("order_id in ( " . implode(',',$access_orders) . ") ")->field('goods_id,supply_id,total,name,quantity')->select();
+			foreach ($goods_list as $val) {
+    			if($goodsids && !in_array($val['goods_id'], $goodsids)){
+        			//p(1);
+        			continue;
+        		}
+                $gd_info = M('lionfish_comshop_good_common')->field('supply_id')->where( array('goods_id' => $val['goods_id'] ) )->find();
+
+                $totals = M('lionfish_comshop_order_goods')->field('supply_id')->where( array('goods_id' => $val['goods_id'] ) )->getField('sum(old_total) as totals');
+
+                //p($totals);
+
+				// 处理商品分类
+				$cates = explode(',',$goods_to_categorys[$val['goods_id']]);
+				$cate_name = [];
+				foreach ($cates as $cate) {
+					$cate_name[] = $goods_categorys[$cate];
+				}
+
+				
+				// 处理商品供应商
+				$supply_name = '平台';
+				if( $gd_info['supply_id'] > 0 )
+				{
+					$supply_info = M('lionfish_comshop_supply')->field('shopname,type')->where( array('id' => $gd_info['supply_id'] ) )->find();
+					
+					if( !empty($supply_info) )
+					{
+						if( $supply_info['type'] == 1 )
+						{
+							$supply_name = $supply_info['shopname'].'(独立供应商)';
+						}else{
+							$supply_name = $supply_info['shopname'].'(平台供应商)';
+						}
+					}
+				}
+				$need_list[$val['goods_id']]['goods_id'] = $val['goods_id'];
+				$need_list[$val['goods_id']]['goods_name'] = $val['name'];
+				$need_list[$val['goods_id']]['supply_name'] = $supply_name; //供应商
+				if(!isset($need_list[$val['goods_id']]['goods_count'])){
+					$need_list[$val['goods_id']]['goods_count'] = 0;
+				}
+				if(!isset($need_list[$val['goods_id']]['total_money'])){
+					$need_list[$val['goods_id']]['total_money'] = 0;
+				}
+				$need_list[$val['goods_id']]['goods_count'] += $val['quantity']; //商品规格
+				$need_list[$val['goods_id']]['day_money'] = $goods_daysalescount[$val['goods_id']]; //商品日销量
+				$need_list[$val['goods_id']]['total_money'] += $totals; //累计销售额
+				$need_list[$val['goods_id']]['cate_names'] = implode(',',$cate_name); //商品类别
+				//$need_list[$k]['supply_name'] = $supply_name;
+				$k++;
+    		}
+		}
+
+        //p($gpc['delivery_date']);
+        /*if($delivery_date && $delivery_type){
 
         	$list_ids = M('lionfish_comshop_deliverylist')->where("delivery_date = '".$delivery_date."'")->getField("group_concat(id) as ids");
         	if($list_ids){
@@ -1291,7 +1358,7 @@ class ReportsController extends CommonController{
         	}
         	
         	//p($need_list);
-        }
+        }*/
 
         //按商品数量倒叙排
         $last_ages = array_column($need_list,'goods_count');
