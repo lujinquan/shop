@@ -1111,6 +1111,160 @@ class ReportsController extends CommonController{
 		$this->_GPC = $_GPC;
 		include $this->display();
 	}
+
+	/**
+	 * 商品统计
+	 * =====================================
+	 * @author  Lucas 
+	 * email:   598936602@qq.com 
+	 * Website  address:  www.mylucas.com.cn
+	 * =====================================
+	 * 创建时间: 2020-04-29 09:05:32
+	 * @return  返回值  
+	 * @version 版本  1.0
+	 */
+	public function goodsstatics()
+	{
+		 $_GPC = I('request.');
+		
+		
+		
+		
+		$goods_categorys = M('lionfish_comshop_goods_category')->getField('id,name');
+		$goods_to_categorys = M('lionfish_comshop_goods_to_category')->group('goods_id')->getField('goods_id,group_concat(cate_id) as cate_ids');
+
+		//p($goods_to_categorys);
+		// $sql = 'SELECT COUNT(g.id) as count FROM ' .C('DB_PREFIX'). 'lionfish_comshop_goods g ' ;
+		
+		
+		// $total_arr = M()->query($sql);
+		
+
+		// 搜索配送日期
+        $delivery_type = isset($gpc['delivery_type']) ? $gpc['delivery_type'] : 'delivery';
+        $this->delivery_type = $delivery_type;
+
+        $delivery_date = isset($gpc['delivery_date']) ? $gpc['delivery_date'] : date('Y-m-d',time()+86400);
+        $this->delivery_time = strtotime($delivery_date);
+        $this->delivery_date = $delivery_date;
+        $need_list = [];
+        if($delivery_date && $delivery_type){
+
+        	$list_ids = M('lionfish_comshop_deliverylist')->where("delivery_date = '".$delivery_date."'")->getField("group_concat(id) as ids");
+        	if($list_ids){
+        		$goods_list = M('lionfish_comshop_deliverylist_goods')->where("list_id in ( " . $list_ids . " )")->select();
+	        	
+	        	$k = 0;
+	        	foreach ($goods_list as $val) {
+
+	                $gd_info = M('lionfish_comshop_good_common')->field('supply_id')->where( array('goods_id' => $val['goods_id'] ) )->find();
+
+					// 处理商品分类
+					$cates = explode(',',$goods_to_categorys[$val['goods_id']]);
+					$cate_name = [];
+					foreach ($cates as $cate) {
+						$cate_name[] = $goods_categorys[$cate];
+					}
+
+					
+					// 处理商品供应商
+					$supply_name = '平台';
+					if( $gd_info['supply_id'] > 0 )
+					{
+						$supply_info = M('lionfish_comshop_supply')->field('shopname,type')->where( array('id' => $gd_info['supply_id'] ) )->find();
+						
+						if( !empty($supply_info) )
+						{
+							if( $supply_info['type'] == 1 )
+							{
+								$supply_name = $supply_info['shopname'].'(独立供应商)';
+							}else{
+								$supply_name = $supply_info['shopname'].'(平台供应商)';
+							}
+						}
+					}
+					$need_list[$k]['goods_id'] = $val['goods_id'];
+					$need_list[$k]['goods_name'] = $val['goods_name'];
+					$need_list[$k]['supply_name'] = $supply_name; //供应商
+					$need_list[$k]['options'] = '1000'; //商品规格
+					$need_list[$k]['day_money'] = '100'; //商品日销量
+					$need_list[$k]['total_money'] = 100000.01; //累计销售额
+					$need_list[$k]['cate_names'] = implode(',',$cate_name); //商品类别
+					//$need_list[$k]['supply_name'] = $supply_name;
+					$k++;
+	            }
+        	}
+        	
+        	//p($need_list);
+        }
+
+        // 搜索订单类型,默认正常
+        $type = isset($_GPC['type']) ? $_GPC['type'] : '';
+        $this->type = $type;
+        if($type){
+        	
+        }
+
+        // 搜索订单时间类型
+        $ordertime_type = isset($_GPC['ordertime_type']) ? $_GPC['ordertime_type'] : '';
+        $this->ordertime_type = $ordertime_type;
+        if($ordertime_type){
+
+        }
+
+        // 搜索订单时间
+        $starttime = strtotime( date('Y-m-d').' 00:00:00' );
+		$endtime   = $starttime + 86400;
+		$this->searchtime = $_GPC['searchtime'];
+		if( !empty($ordertime_type) )
+		{
+			$starttime = isset($_GPC['time']['start']) ? strtotime($_GPC['time']['start']) : strtotime(date('Y-m-d'.' 00:00:00'));
+			$endtime = isset($_GPC['time']['end']) ? strtotime($_GPC['time']['end']) : strtotime(date('Y-m-d'.' 23:59:59'));
+		}
+		$this->starttime = $starttime;
+		$this->endtime = $endtime;
+
+        // 搜索配送方式
+        $delivery = isset($_GPC['delivery']) ? $_GPC['delivery'] : '';
+        $this->delivery = $delivery;
+        if($delivery){
+
+        }
+
+        // 搜索团长分类
+        $groupid = isset($_GPC['groupid']) ? $_GPC['groupid'] : '';
+        $headgroups = M('lionfish_community_head_group')->where( array('goods_id' => $value['id'] ) )->select();
+		$this->headgroups = $headgroups;
+        $this->groupid = $groupid;
+        if($groupid){
+
+        }
+
+        // 搜索订单号或其他标识编号
+        $groupid = isset($_GPC['groupid']) ? $_GPC['groupid'] : '';
+        $this->groupid = $groupid;
+        if($groupid){
+
+        }
+
+		// 搜索关键词
+        $keyword = $_GPC['keyword'];
+		$this->keyword = $keyword;
+		if($keyword){
+
+		}
+		
+
+		
+		
+		$data = array();
+		//$data = $this->head_sale_analys($keyword,$searchtime , $starttime , $endtime );
+		$data = $need_list;
+		$this->data = $data;
+		$this->_GPC = $_GPC;
+		
+		$this->display();
+	}
 	
 	public function communitystatics()
 	{

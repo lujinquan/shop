@@ -708,6 +708,9 @@ class MenuModel{
 				'items'    => array(
 					array('title' => '营业数据', 'route' => 'reports/index', 'desc' => ''),
 					array('title' => '数据统计', 'route' => 'reports/datastatics', 'desc' => ''),
+					//-------------- by lucas 【添加商品统计菜单】 Start ------------------------
+					array('title' => '商品统计', 'route' => 'reports/goodsstatics', 'desc' => ''),
+					//-------------- by lucas 【添加商品统计菜单】 End --------------------------
 					array('title' => '团长统计', 'route' => 'reports/communitystatics', 'desc' => ''),
 				)
 			),

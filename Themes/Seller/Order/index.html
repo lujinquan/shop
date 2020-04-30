@@ -260,7 +260,7 @@
 						<button type="button" data-confirm="确认批量确认付款吗？" data-href="{:U('order/oppay_all',array('order_status'=>3))}" name="batchprocess" value="1" class="layui-btn layui-btn-sm batchprocess">批量确认付款</button>
 						<?php }elseif($order_status_id=='1'){ ?>
 						<button type="button" data-confirm="确认批量配送吗？" data-href="{:U('order/opsend_tuanz_all',array('order_status'=>1))}" name="batchprocess" value="14" class="layui-btn layui-btn-sm batchprocess">批量配送</button>
-						<!-- <button type="button" data-confirm="确认修改配送日期吗？" data-href="{:U('order/update_delivery_date',array('order_status'=>1))}" name="batchprocess" value="100" class="layui-btn layui-btn-sm batchprocess">批量修改配送日期</button> -->
+						<button type="button" data-confirm="确认修改配送日期吗？" data-href="{:U('order/update_delivery_date',array('order_status'=>1))}" name="batchprocess" value="100" class="layui-btn layui-btn-sm batchprocess">批量修改配送日期</button>
 						<?php }elseif($order_status_id=='14'){ ?>
 						<button type="button" data-confirm="确认批量送达团长吗？" data-href="{:U('order/opsend_tuanz_over_all',array('order_status'=>14))}" name="batchprocess" value="6" class="layui-btn layui-btn-sm batchprocess">批量送达团长</button>
 						<?php }elseif($order_status_id=='4'){ ?>
