@@ -125,7 +125,9 @@
                                         <input type='checkbox' name="checkall" lay-skin="primary" lay-filter="checkboxall" />
                                     </th> -->
             						<th style="width:50px;text-align:center;">ID</th>
-            						<th style="width: 150px;">商品编号</th>
+                                    <th style="width: 150px;">商品编号</th>
+            						<th style="width: 150px;">商品编码</th>
+                                    <th style="width: 150px;">商品规格/g</th>
             						<th style="width: 180px;">商品名称</th>
             						<th style="width: 150px;">日销量</th>
                                     <th style="width: 150px;">商品数量</th>
@@ -148,6 +150,12 @@
                 					<td>
                 						{$item['goods_id']}
                 					</td>
+                                    <td>
+                                        {$item['codes']}
+                                    </td>
+                                    <td>
+                                        {$item['weight']}
+                                    </td>
                 					<td>
 										{$item['goods_name']}
                 					</td>

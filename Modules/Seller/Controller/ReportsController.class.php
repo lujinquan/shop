@@ -1132,7 +1132,7 @@ class ReportsController extends CommonController{
 		
 		$goods_categorys = M('lionfish_comshop_goods_category')->getField('id,name');
 		$goods_to_categorys = M('lionfish_comshop_goods_to_category')->group('goods_id')->getField('goods_id,group_concat(cate_id) as cate_ids');
-		$goods_daysalescount = M('lionfish_comshop_goods')->getField('id,day_salescount');
+		$goods_daysalescount = M('lionfish_comshop_goods')->getField('id,day_salescount,codes,weight');
 		//p($goods_daysalescount);
 
 		//p($goods_to_categorys);
@@ -1185,7 +1185,7 @@ class ReportsController extends CommonController{
         		}
                 $gd_info = M('lionfish_comshop_good_common')->field('supply_id')->where( array('goods_id' => $val['goods_id'] ) )->find();
 
-                $totals = M('lionfish_comshop_order_goods')->field('supply_id')->where( array('goods_id' => $val['goods_id'] ) )->getField('sum(old_total) as totals');
+                $totals = M('lionfish_comshop_order_goods')->field('supply_id')->where( array('goods_id' => $val['goods_id'] ) )->getField('sum(total) as totals');
 
                 //p($totals);
 
@@ -1223,7 +1223,9 @@ class ReportsController extends CommonController{
 					$need_list[$val['goods_id']]['total_money'] = 0;
 				}
 				$need_list[$val['goods_id']]['goods_count'] += $val['quantity']; //商品规格
-				$need_list[$val['goods_id']]['day_money'] = $goods_daysalescount[$val['goods_id']]; //商品日销量
+				$need_list[$val['goods_id']]['day_money'] = $goods_daysalescount[$val['goods_id']]['day_salescount']; //商品日销量
+				$need_list[$val['goods_id']]['codes'] = $goods_daysalescount[$val['goods_id']]['codes']; //商品日销量
+				$need_list[$val['goods_id']]['weight'] = $goods_daysalescount[$val['goods_id']]['weight']; //商品日销量
 				$need_list[$val['goods_id']]['total_money'] += $totals; //累计销售额
 				$need_list[$val['goods_id']]['cate_names'] = implode(',',$cate_name); //商品类别
 				//$need_list[$k]['supply_name'] = $supply_name;

@@ -1263,7 +1263,7 @@ class OrderController extends CommonController{
 		$post_data['export'] = 1;
 
 		//-------------- by lucas 【根据团长类型导出】 Start ------------------------
-		//$post_data['groupid'] = $_GPC['groupid'];
+		$post_data['groupid'] = $_GPC['groupid'];
 		//-------------- by lucas 【根据团长类型导出】 End --------------------------
 		
 		$columns = array(
