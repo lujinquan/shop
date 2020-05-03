@@ -513,8 +513,11 @@ class OrderController extends CommonController{
 						// 	'RequestId' => 'ceshide-request-id',
 						// );
 					}else{
-						$phone = ['+86'.$row['shipping_tel']]; //手机号
+						//dump($row);exit;
+						$phone = ['+86'.$order_info['shipping_tel']]; //手机号
+						//dump($tempid);dump($tempdata);dump($phone);
 						$data = D('Seller/Sms')->sendSms($tempid , $tempdata , $phone);
+						//dump($data);exit;
 					}
 					
 			     	if($data){
@@ -2674,7 +2677,7 @@ class OrderController extends CommonController{
 			$data['is_print_dansupply_order'] = isset($data['is_print_dansupply_order']) ? $data['is_print_dansupply_order'] : 0;
 			
 			
-			
+			//dump(D('Seller/Redisorder')->get_redis_object_do());exit;
 			
 			//----------redis begin 
 			$data['open_redis_server'] = intval($data['open_redis_server']);
