@@ -243,6 +243,7 @@ class PermController extends CommonController{
 				'reports'     => array(
 					'index'   => '营业数据',
 					'datastatics'   => '数据统计',
+					'goodsstatics'   => '商品统计',
 					'communitystatics'   => '团长统计',
 				)
 		);
