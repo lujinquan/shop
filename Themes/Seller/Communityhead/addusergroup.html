@@ -16,13 +16,21 @@
                             <input type="text" name="groupname" class="form-control" value="{$group['groupname']}" data-rule-required="true" />
                         </div>
                     </div> -->
-                    
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label must">配送方式</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <label class="radio-inline coupon-radio send-type"><input type="radio" name="send_type" value="1"  title="按周期配送" <?php if($group['send_type'] == 1){; ?>checked<?php }; ?> />按周期配送</label>
+                            <label class="radio-inline coupon-radio send-type"><input type="radio" name="send_type" value="0"  title="按星期配送" <?php if($group['send_type'] == 0){; ?>checked<?php }; ?>/>按星期配送</label>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label class="col-sm-2 control-label must">分组名称</label>
                         <div class="col-sm-9 col-xs-12">
                             <input type="text" name="groupname" class="form-control" value="{$group['groupname']}" data-rule-required="true" />
                         </div>
                     </div>
+                    <div class="zhouqi">
+                    
                     <!-- -- by lucas Start -- -->
 
                     <div class="form-group">
@@ -57,6 +65,44 @@
                             </select>
                         </div>
                     </div>
+                    </div>
+                    <div class="xingqi">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label must">结单时间</label>
+                        <div class="col-sm-5 col-xs-5">
+                            {// 这是个时间段选择的模板 :tpl_form_field_daterange('time', array('starttime'=>date('Y-m-d H:i', $item['begin_time']),'endtime'=>date('Y-m-d H:i', $item['end_time'])),true);}
+                            {:tpl_form_field_date('close_order_time1', date('Y-m-d H:i',$group['close_order_time']),true);}
+                        </div>
+                         <div class="col-sm-5 col-xs-5"><div class="layui-form-mid layui-word-aux">日期只能精确到小时,去除分秒</div></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label must">配送时间</label>
+                        <div class="col-sm-6 col-xs-6">
+                            <label class="radio-inline coupon-radio">
+                                <input type='checkbox' name="item_checkbox[]" lay-skin="primary" value="1" <?php if(strpos($group['date_nodes'],'1') !== false){; ?>checked<?php }; ?>/>星期一
+                            </label>
+                            <label class="radio-inline coupon-radio">
+                                <input type='checkbox' name="item_checkbox[]" lay-skin="primary" value="2" <?php if(strpos($group['date_nodes'],'2') !== false){; ?>checked<?php }; ?>/>星期二
+                            </label>
+                            <label class="radio-inline coupon-radio">
+                                <input type='checkbox' name="item_checkbox[]" lay-skin="primary" value="3" <?php if(strpos($group['date_nodes'],'3') !== false){; ?>checked<?php }; ?>/>星期三
+                            </label>
+                            <label class="radio-inline coupon-radio">
+                                <input type='checkbox' name="item_checkbox[]" lay-skin="primary" value="4" <?php if(strpos($group['date_nodes'],'4') !== false){; ?>checked<?php }; ?>/>星期四
+                            </label>
+                            <label class="radio-inline coupon-radio">
+                                <input type='checkbox' name="item_checkbox[]" lay-skin="primary" value="5" <?php if(strpos($group['date_nodes'],'5') !== false){; ?>checked<?php }; ?>/>星期五
+                            </label>
+                            <label class="radio-inline coupon-radio">
+                                <input type='checkbox' name="item_checkbox[]" lay-skin="primary" value="6" <?php if(strpos($group['date_nodes'],'6') !== false){; ?>checked<?php }; ?>/>星期六
+                            </label>
+                            <label class="radio-inline coupon-radio">
+                                <input type='checkbox' name="item_checkbox[]" lay-skin="primary" value="0" <?php if(strpos($group['date_nodes'],'0') !== false){; ?>checked<?php }; ?>/>星期日
+                            </label>
+                        </div>
+                        <!-- <div class="col-sm-5 col-xs-5"><div class="layui-form-mid layui-word-aux">日期只能精确到小时,去除分秒</div></div> -->
+                    </div>
+                </div>
                      <!-- -- by lucas End -- -->
                 </div>
                 <div class="modal-footer">
@@ -66,3 +112,43 @@
             </div>
     </div>
 </form>
+<script src="/layuiadmin/layui/layui.js"></script>
+
+
+<script>
+    
+    var send_type = $('input:radio[name=send_type]:checked').val();
+    if(send_type == 1){
+       $('.zhouqi').show();
+       $('.xingqi').hide(); 
+    }else{
+       
+       $('.zhouqi').hide(); 
+       $('.xingqi').show(); 
+    }
+    $('input:radio[name=send_type]').on('click',function(){
+        //$(this).prop('checked');
+        var send_type = $('input:radio[name=send_type]:checked').val();
+       // console.log(typeof(send_type));
+        if(send_type == 1){
+            console.log('a:',send_type);
+           $('.zhouqi').show();
+           $('.xingqi').hide();
+        }else{
+            console.log('b:',send_type);
+            
+           $('.zhouqi').hide(); 
+           $('.xingqi').show(); 
+        }
+    })
+    //console.log();
+// //由于模块都一次性加载，因此不用执行 layui.use() 来加载对应模块，直接使用即可：
+// var layer = layui.layer;
+// var $;
+
+// layui.use(['jquery', 'layer','form'], function(){ 
+//   $ = layui.$;
+//   var form = layui.form;
+//   console.log(11);
+// })
+</script>

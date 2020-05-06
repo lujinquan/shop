@@ -25,7 +25,6 @@ class CommunityheadController extends CommonController {
 	
 	public function index(){
 		
-		
 		$params[':uniacid'] = $uniacid;
 		$condition = '  ';
 		$pindex = I('get.page',1);
@@ -455,6 +454,9 @@ class CommunityheadController extends CommonController {
 	
 	public function usergroup()
 	{
+		// $c = new CommunityheadModel;
+		// $res = $c->get_delivery_date(13);
+		// var_dump($res);exit;
 		
 		$_GPC = I('request.');
 		
@@ -532,18 +534,46 @@ class CommunityheadController extends CommonController {
 		$group = M('lionfish_community_head_group')->where( array('id' => $id ) )->find();		
 
 		if (IS_POST) {
-			$close_order_date = trim($_GPC['close_order_time']);
-			// if(substr($close_order_date,14,2) != '00' || substr($close_order_date,17,2) != '00'){
-			// 	show_json(0, array('msg' => '结单时间格式错误！') );
-			// }
-			$close_order_date = substr($close_order_date,0,13).':00:00';
+			$send_type = trim($_GPC['send_type']);
+			$groupname = trim($_GPC['groupname']);
+			if(!$groupname){
+				show_json(0,  array('message' => '名称不能为空') );die();
+			}
+			
+			if($send_type){ // 按周期配送
+				$close_order_date = trim($_GPC['close_order_time']);
+				// if(substr($close_order_date,14,2) != '00' || substr($close_order_date,17,2) != '00'){
+				// 	show_json(0, array('msg' => '结单时间格式错误！') );
+				// }
+				$close_order_date = substr($close_order_date,0,13).':00:00';
+				$data = array( 
+					'send_type' => $send_type,
+					'groupname' =>  $groupname,
+					'close_order_time' => strtotime($close_order_date) ,
+					'send_order_time' => trim(strtotime($_GPC['send_order_time'])) ,
+					'delivery_cycle' => trim($_GPC['delivery_cycle']) ,
+				);
+			}else{ // 按星期配送
+				$close_order_date = trim($_GPC['close_order_time1']);
+				// if(substr($close_order_date,14,2) != '00' || substr($close_order_date,17,2) != '00'){
+				// 	show_json(0, array('msg' => '结单时间格式错误！') );
+				// }
+				$close_order_date = substr($close_order_date,0,13).':00:00';
 
-			$data = array( 
-				'groupname' => trim($_GPC['groupname']) ,
-				'close_order_time' => strtotime($close_order_date) ,
-				'send_order_time' => trim(strtotime($_GPC['send_order_time'])) ,
-				'delivery_cycle' => trim($_GPC['delivery_cycle']) ,
-			);
+				$item_checkbox = $_GPC['item_checkbox'];
+				//var_dump($item_checkbox);exit;
+				if(!$item_checkbox){
+					show_json(0,  array('message' => '请选择星期节点') );die();
+				}
+				$data = array( 
+					'send_type' => $send_type,
+					'groupname' => $groupname ,
+					'close_order_time' => strtotime($close_order_date) ,
+					'date_nodes' =>  implode(',',$item_checkbox),
+					
+				);
+			}
+			
 			//dump($close_order_date);exit;
 			if (!(empty($id))) {
 				M('lionfish_community_head_group')->where( array('id' => $id) )->save( $data );
