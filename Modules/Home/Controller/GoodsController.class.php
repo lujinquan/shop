@@ -121,11 +121,14 @@ class GoodsController extends CommonController {
 		
 		$where = "";
 		
-		$where = " and (total_count =-1 or total_count>send_count) and is_index_alert =0 and  is_index_show=1 and (end_time>".time()." or timelimit =1 ) ";
+		$where = " and is_index_alert =0 and  is_index_show=1 and ((end_time>".time()." and timelimit =1 ) or timelimit =0) ";
+		//$where = " and (total_count =-1 or total_count>send_count) and is_index_alert =0 and  is_index_show=1 and (end_time>".time()." or timelimit =1 ) ";
 		
 		
-		$quan_list = M()->query("select * from ".C('DB_PREFIX')."lionfish_comshop_coupon where 1 {$where} order by displayorder desc ,id asc limit 4 ");
+		$quan_list = M()->query("select * from ".C('DB_PREFIX')."lionfish_comshop_coupon where 1 {$where} order by displayorder desc ,id asc ");
+		//$quan_list = M()->query("select * from ".C('DB_PREFIX')."lionfish_comshop_coupon where 1 {$where} order by displayorder desc ,id asc limit 4 ");
 		
+//dump($quan_list);exit;		
 		$need_list = array();
 		
 		//----------------- by lucas S 添加优惠券中文名-------------------------
@@ -138,6 +141,8 @@ class GoodsController extends CommonController {
 		
 		foreach($quan_list as  $key => $val )
 		{
+			$val['quan_status'] = 1;
+
 			$val['thumb'] = tomedia($val['thumb']);
 			$voucher_id = $val['id'];
 			
@@ -150,7 +155,10 @@ class GoodsController extends CommonController {
 			  $get_count = M('lionfish_comshop_coupon_list')->where( array('user_id' => $member_id,'voucher_id' => $voucher_id ) )->count();
 			   
 			  if($voucher_info['person_limit_count'] > 0 && $voucher_info['person_limit_count'] <= $get_count) {
-				 continue;
+			  	//-------------- by lucas 【优惠券状态标识】 Start ------------------------
+				$val['quan_status'] = 0;
+				//continue;
+				//-------------- by lucas 【优惠券状态标识】 End -------------------------- 
 			  }
 			}
 			
@@ -188,8 +196,13 @@ class GoodsController extends CommonController {
 		
 			$need_list[$key] = $val;
 		}
-		
-		
+		//-------------- by lucas 【优惠券状态标识,将领过的券排在后面】 Start ------------------------
+		$arr = array();
+		foreach ( $need_list as $key => $row ){
+		    $arr[$key] = $row ['quan_status'];
+		}
+		array_multisort( $arr, SORT_DESC, $need_list);
+		//-------------- by lucas 【优惠券状态标识,将领过的券排在后面】 End --------------------------
 		
 		
 		$where2 = "";

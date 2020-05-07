@@ -1487,6 +1487,7 @@ class IndexController extends CommonController {
 				$tmp_data['spuCanBuyNum'] = $val['total'];
 				$tmp_data['spuDescribe'] = $val['subtitle'];
 				$tmp_data['end_time'] = $val['end_time'];
+				$tmp_data['begin_time'] = $val['begin_time'];
 				$tmp_data['soldNum'] = $val['seller_count'] + $val['sales'];
 				
 				$productprice = $val['productprice'];
@@ -1650,6 +1651,9 @@ class IndexController extends CommonController {
 				$tmp_data['spuCanBuyNum'] = $val['total'];
 				$tmp_data['spuDescribe'] = $val['subtitle'];
 				$tmp_data['end_time'] = $val['end_time'];
+				//-------------- by lucas 【显示即将开始倒计时】 Start ------------------------
+				$tmp_data['begin_time'] = $val['begin_time'];
+				//-------------- by lucas 【显示即将开始倒计时】 End --------------------------
 				
 				$tmp_data['soldNum'] = $val['seller_count'] + $val['sales'];
 				
@@ -1817,6 +1821,9 @@ class IndexController extends CommonController {
 				$tmp_data['spuName'] = $val['goodsname'];
 				$tmp_data['spuCanBuyNum'] = $val['total'];
 				$tmp_data['spuDescribe'] = $val['subtitle'];
+				//-------------- by lucas 【显示即将开始倒计时】 Start ------------------------
+				$tmp_data['begin_time'] = $val['begin_time'];
+				//-------------- by lucas 【显示即将开始倒计时】 End --------------------------
 				$tmp_data['end_time'] = $val['end_time'];
 				$tmp_data['soldNum'] = $val['seller_count'] + $val['sales'];
 				
