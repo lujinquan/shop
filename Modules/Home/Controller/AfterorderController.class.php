@@ -621,6 +621,24 @@ class AfterorderController extends CommonController {
 				$refund_images[] = $refund_image;
 
 			}
+
+			//-------------- by lucas 【修改申请后图片应该显示为最后提交的图片】 Start ------------------------
+			$order_ref_ids = M('lionfish_comshop_order_refund_history')->where( array('order_id' => $order_id,'ref_id' =>$order_refund['ref_id'] ) )->field('id')->order('addtime desc')->limit(1)->select(); //倒叙只取一条记录
+			if(!empty($order_ref_ids)){
+				$refund_images1 = array();
+				foreach ($order_ref_ids as $order_ref_id) {
+					$find_his_images = M('lionfish_comshop_order_refund_history_image')->where( array('orh_id' =>$order_ref_id['id'] ) )->getField('image',true);
+					if($find_his_images){
+						foreach ($find_his_images as $find_his_image) {
+							$refund_images1[] = array('thumb_image'=>$find_his_image);
+						}
+					}
+				}
+				if($refund_images1){
+					$refund_images = $refund_images1;
+				}
+			}
+			//-------------- by lucas 【修改申请后图片应该显示为最后提交的图片】 End --------------------------
 		}
 		
 		if($order_refund['order_goods_id'] > 0)
