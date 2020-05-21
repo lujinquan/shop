@@ -1108,16 +1108,16 @@ class IndexController extends CommonController {
 		{
 			$where = " g.grounding =1 and g.is_seckill =1 and  g.type ='normal'   ";
 		}
-		//----------------------- by lucas S ------------------------
-		else
-		{
-			 $where = " g.grounding =1 and  g.type ='normal'   ";
-		}
+		//----------------------- by lucas 首页全部商品不显示秒杀商品 S ------------------------
 		// else
 		// {
-		// 	 $where = " g.grounding =1 and g.is_seckill =0 and  g.type ='normal'   ";
+		// 	 $where = " g.grounding =1 and  g.type ='normal'   ";
 		// }
-		//----------------------- by lucas E ------------------------
+		else
+		{
+			 $where = " g.grounding =1 and g.is_seckill =0 and  g.type ='normal'   ";
+		}
+		//----------------------- by lucas 首页全部商品不显示秒杀商品 E ------------------------
 		
 		//head_id
 		if( !empty($keyword) )
@@ -1151,10 +1151,10 @@ class IndexController extends CommonController {
 		{
 				
 		}else{
-			//----------------------- by lucas S ------------------------
-			$where .= " and gc.is_new_buy=0 ";
-			//$where .= " and gc.is_new_buy=0 and gc.is_spike_buy = 0 ";
-			//----------------------- by lucas E ------------------------
+			//----------------------- by lucas 首页全部商品不显示秒杀商品 S ------------------------
+			//$where .= " and gc.is_new_buy=0 ";
+			$where .= " and gc.is_new_buy=0 and gc.is_spike_buy = 0 ";
+			//----------------------- by lucas 首页全部商品不显示秒杀商品 E ------------------------
 		}
 		
 		if( $is_video == 1 )
