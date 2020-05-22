@@ -118,7 +118,8 @@
                                         {$row['service_charge']}
                                     </td>
                                     <td> 
-										<?php echo round( $row['money']- $row['service_charge'], 2); ?>
+										<?php //echo round( $row['money']- $row['service_charge'], 2); ?>
+                                        {$row['money']}
                                     </td>
                                     <td>
                                         <?php if( $row['state'] ==2 ){ ?>
