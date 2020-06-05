@@ -1335,6 +1335,356 @@ class IndexController extends CommonController {
 			die();
 		}
 	}
+
+	public function load_gps_goodslist_index()
+	{
+		$gpc = I('request.');
+		
+		$token = $gpc['token'];
+		$head_id = $gpc['head_id'];
+
+		$is_only_express = $gpc['is_only_express'];
+		$is_open_only_express = 0;
+		if($is_only_express==1) {
+			$is_open_only_express = D('Home/Front')->get_config_by_name('is_open_only_express');
+		}
+		
+		if($head_id == 'undefined') $head_id = '';
+		$pageNum = $gpc['pageNum'];
+		$gid = $gpc['gid'];
+		
+		$keyword = $gpc['keyword'];
+		
+		$is_random = isset($gpc['is_random']) ? $gpc['is_random'] : 0;
+		$is_video = isset($gpc['is_video']) ? $gpc['is_video'] : 0;
+		$per_page = isset($gpc['per_page']) ? $gpc['per_page'] : 10;
+		$cate_info = '';
+		
+		if($gid == 'undefined' || $gid =='' || $gid =='null'  || $gid ==0)
+		{
+			$cate_info = M('lionfish_comshop_goods_category')->field('id,banner,name,app_icon')->where( array('is_show' => 1 ,'cate_type' => 'normal') )->order('sort_order desc')->find();
+			//dump($cate_info);exit;
+			$gid = $cate_info['id'];
+			if(!empty($cate_info['app_icon'])) $cate_info['app_icon'] = tomedia($cate_info['app_icon']);
+			if(!empty($cate_info['banner'])) $cate_info['banner'] = tomedia($cate_info['banner']);
+		} else if($gid == -1){
+			$gid = 0;
+
+		}else{
+			$cate_info = M('lionfish_comshop_goods_category')->field('banner,name')->where( array('id' => $gid ) )->find();
+
+			if(!empty($cate_info['app_icon'])) $cate_info['app_icon'] = tomedia($cate_info['app_icon']);
+		}
+		//dump($gid);exit;
+		// if($gid == 'undefined' || $gid =='' || $gid =='null'  || $gid ==0)
+		// {
+		// 	$gid = 0;
+		// } else {
+			//-------------- by lucas 【添加小程序图标，小程序展示分类需要图标】 Start ------------------------
+			//$cate_info = M('lionfish_comshop_goods_category')->field('banner,name')->where( array('id' => $gid ) )->find();
+			// $cate_info = M('lionfish_comshop_goods_category')->field('banner,name,app_icon')->where( array('id' => $gid ) )->order()->find();
+			// if(!empty($cate_info['app_icon'])) $cate_info['app_icon'] = tomedia($cate_info['app_icon']);
+			// //-------------- by lucas 【添加小程序图标，小程序展示分类需要图标】 End --------------------------		
+			
+			// if(!empty($cate_info['banner'])) $cate_info['banner'] = tomedia($cate_info['banner']);
+		//}
+		
+		if( !empty($gid) && $gid > 0)
+		{
+			$gids = D('Home/GoodsCategory')->get_index_goods_category($gid);
+			$gidArr = array();
+			$gidArr[] = $gid;
+			
+			foreach ($gids as $key => $val) {
+				$gidArr[] = $val['id'];
+			}
+			
+			$gid = implode(',', $gidArr);
+		}
+		
+		//$per_page = 10;
+		$offset = ($pageNum - 1) * $per_page;
+		$limit = "{$offset},{$per_page}";
+		
+		$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
+		$is_member_level_buy = 0;
+		$is_vip_card_member = 0;
+		$is_open_vipcard_buy = D('Home/Front')->get_config_by_name('is_open_vipcard_buy');
+		$is_open_vipcard_buy = !empty($is_open_vipcard_buy) && $is_open_vipcard_buy ==1 ? 1:0; 
+		
+		if(  empty($weprogram_token) ||  empty($weprogram_token['member_id']) )
+		{
+			//echo json_encode( array('code' => 2) );
+			//die();
+		}else{
+			$member_id = $weprogram_token['member_id'];
+			$is_vip_card_member = 0;
+		
+			//member_id
+			if( $member_id > 0 )
+			{
+				$member_info = M('lionfish_comshop_member')->where( array('member_id' => $member_id ) )->find();
+				
+				if( !empty($is_open_vipcard_buy) && $is_open_vipcard_buy == 1 )
+				{
+					
+					$now_time = time();
+					
+					if( $member_info['card_id'] >0 && $member_info['card_end_time'] > $now_time )
+					{
+						$is_vip_card_member = 1;//还是会员
+					}else if( $member_info['card_id'] >0 && $member_info['card_end_time'] < $now_time ){
+						$is_vip_card_member = 2;//已过期
+					}
+				}
+				
+				if($is_vip_card_member != 1 && $member_info['level_id'] >0 )
+				{
+					$is_member_level_buy = 1;
+				}
+			}
+			
+		}
+		
+	    $member_id = $weprogram_token['member_id'];
+	    
+		//整点秒杀begin
+		$is_seckill = isset($gpc['is_seckill']) ? 1:0;
+		$seckill_time = isset($gpc['seckill_time']) ? intval($gpc['seckill_time']):0;
+		//整点秒杀end
+		
+	    $now_time = time();
+		if($is_seckill ==1)
+		{
+			$where = " g.grounding =1 and g.is_seckill =1 and  g.type ='normal'   ";
+		}
+		//----------------------- by lucas 首页全部商品不显示秒杀商品 S ------------------------
+		// else
+		// {
+		// 	 $where = " g.grounding =1 and  g.type ='normal'   ";
+		// }
+		else
+		{
+			 $where = " g.grounding =1 and g.is_seckill =0 and  g.type ='normal'   ";
+		}
+		//----------------------- by lucas 首页全部商品不显示秒杀商品 E ------------------------
+		
+		//head_id
+		if( !empty($keyword) )
+		{
+			$where .= " and g.goodsname like '%{$keyword}%'  ";
+		}
+		
+		//$where .= " and g.is_index_show = 1 and gc.begin_time <={$now_time} and gc.end_time > {$now_time} ";
+		
+		if($is_seckill ==1)
+		{
+			$bg_time = strtotime(  date('Y-m-d').' '.$seckill_time.':00:00' );
+			
+			$ed_time = $bg_time + 3600;
+			
+			if($gid == 0 && $keyword == ''){
+				$where .= "  and gc.begin_time >={$bg_time} and gc.begin_time <{$ed_time}  ";
+			} else {
+				$where .= " and gc.begin_time >={$bg_time} and gc.begin_time <{$ed_time}  ";
+			}
+			
+		} else {
+			if($gid == 0 && $keyword == ''){
+				$where .= " and g.is_index_show = 1 and gc.begin_time <={$now_time} and gc.end_time > {$now_time} ";
+			} else {
+				$where .= " and gc.begin_time <={$now_time} and gc.end_time > {$now_time} ";
+			}
+		}
+		
+		if($is_seckill ==1)
+		{
+				
+		}else{
+			//----------------------- by lucas 首页全部商品不显示秒杀商品 S ------------------------
+			//$where .= " and gc.is_new_buy=0 ";
+			$where .= " and gc.is_new_buy=0 and gc.is_spike_buy = 0 ";
+			//----------------------- by lucas 首页全部商品不显示秒杀商品 E ------------------------
+		}
+		
+		if( $is_video == 1 )
+		{
+			$where .= " and gc.video !=''  ";
+		}
+
+		if($is_open_only_express==1 && $is_only_express==1) {
+			$where .= " and gc.is_only_express =1 ";
+		}
+		
+		
+		$index_sort_method = D('Home/Front')->get_config_by_name('index_sort_method');
+		if( empty($index_sort_method) )
+		{
+			$order_sort = 'g.istop DESC, g.settoptime DESC,g.index_sort desc,g.id desc ';
+		}
+		
+		if( $index_sort_method == 1 )
+		{
+			$order_sort = 'g.index_sort desc,g.id desc ';
+		}
+		//--------- 获取小程序商品列表供应商 Start ------ Author Lucas by 2019-12-26 16:04-----------------
+		if($is_random == 1)
+		{
+			$community_goods = D('Home/Pingoods')->get_new_community_index_goods($head_id,$gid,'g.*,gc.begin_time,gc.end_time,gc.big_img,gc.is_take_fullreduction,gc.labelname,gc.video,gc.pick_up_type,gc.pick_up_modify,gs.shopname ', $where,$offset,$per_page,$order_sort,' rand() ');
+		}else{
+			$community_goods = D('Home/Pingoods')->get_new_community_index_goods($head_id,$gid,'g.*,gc.begin_time,gc.end_time,gc.big_img,gc.is_take_fullreduction,gc.labelname,gc.video,gc.pick_up_type,gc.pick_up_modify,gs.shopname ', $where,$offset,$per_page,$order_sort);
+		}
+		// if($is_random == 1)
+		// {
+		// 	$community_goods = D('Home/Pingoods')->get_new_community_index_goods($head_id,$gid,'g.*,gc.begin_time,gc.end_time,gc.big_img,gc.is_take_fullreduction,gc.labelname,gc.video,gc.pick_up_type,gc.pick_up_modify', $where,$offset,$per_page,$order_sort,' rand() ');
+		// }else{
+		// 	$community_goods = D('Home/Pingoods')->get_new_community_index_goods($head_id,$gid,'g.*,gc.begin_time,gc.end_time,gc.big_img,gc.is_take_fullreduction,gc.labelname,gc.video,gc.pick_up_type,gc.pick_up_modify', $where,$offset,$per_page,$order_sort);
+		// }
+		//--------- 获取小程序商品列表供应商 End ---------------------------------------------------------
+		
+		if( !empty($community_goods) )
+		{
+			$is_open_fullreduction = D('Home/Front')->get_config_by_name('is_open_fullreduction');
+			$full_money = D('Home/Front')->get_config_by_name('full_money');
+			$full_reducemoney = D('Home/Front')->get_config_by_name('full_reducemoney');
+			
+			$is_open_vipcard_buy = D('Home/Front')->get_config_by_name('is_open_vipcard_buy');
+			
+			$is_open_vipcard_buy = !empty($is_open_vipcard_buy) && $is_open_vipcard_buy == 1 ? 1:0;
+			
+			
+			if(empty($full_reducemoney) || $full_reducemoney <= 0)
+			{
+				$is_open_fullreduction = 0;
+			}
+			
+			$cart= D('Home/Car');
+			
+			$list = array();
+			$copy_text_arr = array();
+			$today_time = strtotime( date('Y-m-d').' 00:00:00' );
+			
+			
+			foreach($community_goods as $val)
+			{
+				$tmp_data = array();
+				$tmp_data['actId'] = $val['id'];
+				//--------- 获取小程序商品列表供应商 Start ------ Author Lucas by 2019-12-26 16:04-----------------
+				$tmp_data['supplier'] = $val['shopname']?$val['shopname']:'平台自营';
+				//--------- 获取小程序商品列表供应商 End ----------------------------------------------------------
+				$tmp_data['spuName'] = $val['goodsname'];
+				$tmp_data['spuCanBuyNum'] = $val['total'];
+				$tmp_data['spuDescribe'] = $val['subtitle'];
+				$tmp_data['end_time'] = $val['end_time'];
+				$tmp_data['is_take_vipcard'] = $val['is_take_vipcard'];
+				$tmp_data['soldNum'] = $val['seller_count'] + $val['sales'];
+				
+				
+				$tmp_data['begin_time'] = date('Y-m-d', $val['begin_time']);
+				
+				if($val['pick_up_type'] == 0)
+				{
+					$val['pick_up_modify'] = date('Y-m-d', $today_time);
+				}else if( $val['pick_up_type'] == 1 ){
+					$val['pick_up_modify'] = date('Y-m-d', $today_time+86400);
+				}else if( $val['pick_up_type'] == 2 )
+				{
+					$val['pick_up_modify'] = date('Y-m-d', $today_time+86400*2);
+				}
+				
+				$tmp_data['pick_up_modify'] = $val['pick_up_modify'];
+				
+				
+				$productprice = $val['productprice'];
+				$tmp_data['marketPrice'] = explode('.', $productprice);
+
+				if( !empty($val['big_img']) )
+				{
+					$tmp_data['bigImg'] = tomedia($val['big_img']);
+				}
+				
+				
+				$good_image = D('Home/Pingoods')->get_goods_images($val['id']);
+				if( !empty($good_image) )
+				{
+					$tmp_data['skuImage'] = tomedia($good_image['image']);
+				}
+				$price_arr = D('Home/Pingoods')->get_goods_price($val['id'], $member_id);
+				
+				$price = $price_arr['price'];
+				
+				if( $pageNum == 1 )
+				{
+					$copy_text_arr[] = array('goods_name' => $val['goodsname'], 'price' => $price);
+				}
+				
+				$tmp_data['actPrice'] = explode('.', $price);
+				$tmp_data['card_price'] = $price_arr['card_price'];
+				
+				$tmp_data['levelprice'] = $price_arr['levelprice']; // 会员等级价格
+				$tmp_data['is_mb_level_buy'] = $price_arr['is_mb_level_buy']; //是否 会员等级 可享受
+				
+				$tmp_data['skuList']= D('Home/Pingoods')->get_goods_options($val['id'], $member_id);
+				
+				
+				if( !empty($tmp_data['skuList']) )
+				{
+					$tmp_data['car_count'] = 0;
+				}else{
+					
+					$car_count = $cart->get_wecart_goods($val['id'],"",$head_id ,$token);
+					
+					if( empty($car_count)  )
+					{
+						$tmp_data['car_count'] = 0;
+					}else{
+						$tmp_data['car_count'] = $car_count;
+					}
+					
+				}
+				
+				if($is_open_fullreduction == 0)
+				{
+					$tmp_data['is_take_fullreduction'] = 0;
+				}else if($is_open_fullreduction == 1){
+					$tmp_data['is_take_fullreduction'] = $val['is_take_fullreduction'];
+				}
+				
+				
+				// 商品角标
+				$label_id = unserialize($val['labelname']);
+				if($label_id){
+					$label_info = D('Home/Pingoods')->get_goods_tags($label_id);
+					if($label_info){
+						if($label_info['type'] == 1){
+							$label_info['tagcontent'] = tomedia($label_info['tagcontent']);
+						} else {
+							$label_info['len'] = mb_strlen($label_info['tagcontent'], 'utf-8');
+						}
+					}
+					$tmp_data['label_info'] = $label_info;
+				}
+				
+				$tmp_data['is_video'] = empty($val['video']) ? false : true;
+				
+				$list[] = $tmp_data;
+			}
+			
+			
+			$is_show_list_timer = D('Home/Front')->get_config_by_name('is_show_list_timer');
+			$is_show_cate_tabbar = D('Home/Front')->get_config_by_name('is_show_cate_tabbar');
+
+
+			echo json_encode(array('code' => 0,'now_time' => time(),  'list' => $list ,'is_show_cate_tabbar' => $is_show_cate_tabbar,'is_vip_card_member' => $is_vip_card_member,'is_member_level_buy' => $is_member_level_buy , 'copy_text_arr' => $copy_text_arr, 'cur_time' => time() ,'full_reducemoney' => $full_reducemoney,'full_money' => $full_money,'is_open_vipcard_buy' => $is_open_vipcard_buy,'is_open_fullreduction' => $is_open_fullreduction,'is_show_list_timer'=>$is_show_list_timer , 'cate_info' => $cate_info, 'is_show_cate_tabbar'=>$is_show_cate_tabbar ));
+			die();
+			
+		}else{
+			$is_show_cate_tabbar = D('Home/Front')->get_config_by_name('is_show_cate_tabbar');
+			
+			echo json_encode( array('code' => 1 , 'cate_info' => $cate_info , 'is_show_cate_tabbar'=>$is_show_cate_tabbar ) );
+			die();
+		}
+	}
 	
 	public function get_index_category()	
 	{
