@@ -106,7 +106,7 @@
 						  
 						</td>
 						<td>
-							<input type="text" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}"  class="layui-input" lay-verify="required|number"  name="quantity[{$i}]" value="0" placeholder="请输入补货数量">
+							<input type="text" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^0-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}"  class="layui-input" lay-verify="required|number"  name="quantity[{$i}]" value="0" placeholder="请输入补货数量">
 						</td>
 						<td>
 							<select name="reson[{$i}]" lay-ignore="" class="layui-input layui-unselect">
