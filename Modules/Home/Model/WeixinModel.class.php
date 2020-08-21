@@ -50,7 +50,7 @@ class WeixinModel{
 		}else{
 			$total_fee = ($order_info["total"] + $order_info["shipping_fare"]-$order_info['voucher_credit']-$order_info['fullreduction_money'] - $order_info['score_for_money'] )*100;
 		}
-		
+//dump($total_fee);exit;	
 		
 		$refund_fee = $total_fee;
 		
@@ -348,8 +348,7 @@ class WeixinModel{
 			//检测是否有需要退回积分的订单
 			
 		} else {
-			
-			
+				
             
             $order_relate_info = M('lionfish_comshop_order_relate')->where( array('order_id' => $order_id ) )->order('id desc')->find();
             
@@ -388,15 +387,21 @@ class WeixinModel{
                     $url = "https://api.mch.weixin.qq.com/pay/orderquery";
             
                     $result = http_request($url,$post_xml);
-            
+            //dump($result);
                     $array = xml($result);
-            
+            //dump($array);
                     if( $array['RETURN_CODE'] == 'SUCCESS' && $array['RETURN_MSG'] == 'OK' )
                     {
                         if( $array['TRADE_STATE'] == 'SUCCESS' )
-                        {
-                           $total_fee = $array['TOTAL_FEE'];
+                        {//dump($array);
+                           $total_fee = $array['TOTAL_FEE'];//dump($total_fee);exit;
                         }
+                        //-------------- by lucas 【有过退款记录后，查询微信返回的状态就是REFUND,修复多次退款总金额与约定金额不符的BUG】 Start ------------------------
+                        if( $array['TRADE_STATE'] == 'REFUND' )
+                        {//dump($array);
+                           $total_fee = $array['TOTAL_FEE'];//dump($total_fee);exit;
+                        }
+                        //-------------- by lucas 【批量配送团长，查询微信返回的状态就是REFUND,修复多次退款总金额与约定金额不符的BUG】 End ------------------------
                     }
             
                 }
@@ -409,6 +414,7 @@ class WeixinModel{
 			
 			$input->SetTransaction_id($transaction_id);
 			$input->SetTotal_fee($total_fee);
+			//$input->SetTotal_fee(5.00);
 			$input->SetRefund_fee($refund_fee);
 			
 			$mchid = D('Home/Front')->get_config_by_name('wepro_partnerid');
@@ -418,9 +424,9 @@ class WeixinModel{
 			$input->SetOut_refund_no($refund_no);
 			$input->SetOp_user_id($mchid);
 			
-			
+//dump($input);exit;			
 			$res = \WxPayApi::refund($input,6,$order_info['from_type']);
-			
+	//dump($res);exit;		
 			
 			
 			if( $res['err_code_des'] == '订单已全额退款' )

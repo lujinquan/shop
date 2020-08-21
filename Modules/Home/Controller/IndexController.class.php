@@ -2999,8 +2999,10 @@ class IndexController extends CommonController {
 				$where .= " and gc.is_new_buy=0 and gc.is_spike_buy = 0 ";
 				
 				$community_goods = '';
-				$community_goods = D('Home/Pingoods')->get_community_index_goods('g.*,gc.begin_time,gc.end_time,gc.big_img,gc.is_take_fullreduction,gc.labelname,gc.video ', $where, 0, 10000);
-
+				//-------------- by lucas 【加上单次限购字段，返回给小程序】 Start ------------------------
+				//$community_goods = D('Home/Pingoods')->get_community_index_goods('g.*,gc.begin_time,gc.end_time,gc.big_img,gc.is_take_fullreduction,gc.labelname,gc.video ', $where, 0, 10000);
+				$community_goods = D('Home/Pingoods')->get_community_index_goods('g.*,gc.begin_time,gc.end_time,gc.big_img,gc.supply_id,gc.is_take_fullreduction,gc.labelname,gc.one_limit_count,gc.video ', $where, 0, 10000);
+				//-------------- by lucas 【上单次限购字段，返回给小程序】 End ------------------------
 				$list = $cart = array();
 				if( !empty($community_goods) )
 				{
@@ -3019,7 +3021,17 @@ class IndexController extends CommonController {
 						
 						$productprice = $val['productprice'];
 						$tmp_data['marketPrice'] = explode('.', $productprice);
-
+						//-------------- by lucas 【加上单次限购字段，返回给小程序】 Start 
+						$tmp_data['one_limit_count'] = $val['one_limit_count'];
+						//-------------- by lucas 【上单次限购字段，返回给小程序】 End ------------------------
+						//-------------- by lucas 【加上供应商字段，返回给小程序】 Start ------------------------ 
+						if($val['supply_id']){ // 如果有供应商
+							$supply_info = M('lionfish_comshop_supply')->field('storename')->where( array('id' => $val['supply_id']) )->find();
+							$tmp_data['supplier'] = $supply_info['storename'];
+						}else{
+							$tmp_data['supplier'] = '';
+						}
+						//-------------- by lucas 【加上供应商字段，返回给小程序】 End ------------------------ 
 						if( !empty($val['big_img']) )
 						{
 							$tmp_data['bigImg'] = tomedia($val['big_img']);

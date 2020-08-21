@@ -18,7 +18,6 @@ class ConfigModel{
 	
 	public function update($data)
 	{
-
 		foreach($data as $name => $value)
 		{
 			

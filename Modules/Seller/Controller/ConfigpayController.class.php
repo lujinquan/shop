@@ -38,7 +38,7 @@ class ConfigpayController extends CommonController{
 			if(trim($data['app_apiclient_cert_pem'])) $param['app_apiclient_cert_pem'] = trim($data['app_apiclient_cert_pem']);
 			if(trim($data['app_apiclient_key_pem'])) $param['app_apiclient_key_pem'] = trim($data['app_apiclient_key_pem']);
 			if(trim($data['app_rootca_pem'])) $param['app_rootca_pem'] = trim($data['app_rootca_pem']);
-			
+
 			D('Seller/Config')->update($param);
 			
 			show_json(1, array('url' => $_SERVER['HTTP_REFERER']));

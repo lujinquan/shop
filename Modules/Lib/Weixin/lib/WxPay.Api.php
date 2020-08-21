@@ -759,10 +759,10 @@ class WxPayApi
 			$wechat_apiclient_key_pem = D('Home/Front')->get_config_by_name('wechat_apiclient_key_pem');
 			$file_cert_name = mt_rand(1,99).'_cert.pem';
 			$file_key_name = mt_rand(100,999).'_key.pem';
-			
+//var_dump($wechat_apiclient_cert_pem);var_dump($wechat_apiclient_key_pem);exit;
 			file_put_contents($path.$file_cert_name,$wechat_apiclient_cert_pem);
 			file_put_contents($path.$file_key_name,$wechat_apiclient_key_pem);
-			
+//var_dump($path.$file_cert_name);var_dump($path.$file_key_name);exit;		
 			//设置证书
 			//使用证书：cert 与 key 分别属于两个.pem文件
 			curl_setopt($ch,CURLOPT_SSLCERTTYPE,'PEM');

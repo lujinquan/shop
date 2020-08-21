@@ -21,7 +21,188 @@ class OrderController extends CommonController{
 		
 	}
 
-	
+		/**
+	 * 后台给已发货的订单补货
+	 * 需求描述：创建补货订单，金额为0，0金额导出时加备注（通过备注去筛选），统计时将补货（非损坏）统计销量；同时对库存的时候（除非损坏外）不减库存。
+	 * =====================================
+	 * @author  Lucas 
+	 * email:   598936602@qq.com 
+	 * Website  address:  www.mylucas.com.cn
+	 * =====================================
+	 * 创建时间: 2020-08-20 16:27:17
+	 * @param order_id 订单id 
+	 * @return  返回值  
+	 * @version 版本  1.0
+	 */
+	public function supple_order(){
+
+		$gpc = I('request');
+
+		$gpc = [
+			'order_id' => 29075,
+			'goods' => [
+				[
+					'goods_id' => 982, //商品id
+					'quantity' => 2, // 发货数量
+				],
+				[
+					'goods_id' => 983, //商品id
+					'quantity' => 3, // 发货数量
+				],
+			],
+		];
+//dump($gpc);exit;
+
+		// 获取原order信息
+		$old_order_info = M('lionfish_comshop_order')->where( array('order_id' => $gpc['order_id']) )->find();
+
+		// 创建 order_all 订单
+		$order_all_data = array();
+		$order_all_data['member_id'] = $old_order_info['member_id'];
+		$order_all_data['order_num_alias'] = build_order_no($old_order_info['member_id']);
+		$order_all_data['transaction_id'] = '';
+		$order_all_data['order_status_id'] = 3;
+		$order_all_data['is_pin'] = $order['is_pin'];
+		$order_all_data['paytime'] = 0;
+		$order_all_data['total_money'] = 0;
+		$order_all_data['addtime'] = time();
+		$order_all_data['extra'] = 1;
+		$order_all_id = M('lionfish_comshop_order_all')->add($order_all_data);
+
+		// 创建 order 订单
+		$order = array();
+	    $order['member_id'] = $old_order_info['member_id'];
+	    $order['order_num_alias']=build_order_no($old_order_info['member_id']);
+	    $order['name']=$old_order_info['name'];	
+		$order['from_type']=$old_order_info['from_type'];
+		$order['telephone']=$old_order_info['telephone'];
+		$order['shipping_name']=$old_order_info['shipping_name'];
+	    $order['type']=$old_order_info['type'];
+	    $order['score_for_money']=$old_order_info['score_for_money'];
+	    $order['shipping_address']=$old_order_info['shipping_address'];
+	    $order['shipping_city_id']=$old_order_info['shipping_city_id'];
+		$order['ziti_name']=$old_order_info['ziti_name'];
+		$order['ziti_mobile']=$old_order_info['ziti_mobile'];
+		$order['tuan_send_address']=$old_order_info['tuan_send_address'];
+		$order['shipping_stree_id']=$old_order_info['shipping_stree_id'];
+	    $order['shipping_country_id']=$old_order_info['shipping_country_id'];
+	    $order['shipping_province_id']=$old_order_info['shipping_province_id'];
+	    $order['shipping_tel']=$old_order_info['shipping_tel'];
+	    $order['order_status_id'] = 3;
+		$order['voucher_id']=$old_order_info['voucher_id'];	
+		$order['voucher_credit']=$old_order_info['voucher_credit'];
+		$order['is_free_shipping_fare']=$old_order_info['is_free_shipping_fare'];			
+		$order['shipping_fare'] = 0;
+	    $order['ip']=get_client_ip();
+		$order['shipping_fare'] = $old_order_info['shipping_fare'];
+	    $order['ip_region'] = '';
+	    $data['total'] = 0;
+	    $order['date_added'] =time();
+	    $order['old_price'] =0;
+	    $order['user_agent']=$old_order_info['user_agent'];
+	    $order['shipping_method']=0;//快递id
+	    $order['delivery']=$old_order_info['delivery'];
+	    $order['payment_code']=$old_order_info['payment_method'];
+	    $order['address_id']=$old_order_info['address_id'];
+	    $order['comment']=$old_order_info['comment'];
+		$order['score_for_money']=0;
+	    $order['store_id'] = $old_order_info['store_id'];
+		$order['supply_id'] = $old_order_info['supply_id'];
+		$order['head_id'] = $old_order_info['head_id'];
+		$order['fullreduction_money'] = 0;
+		$man_total_free = $old_order_info['man_total_free'];
+		$order_id = M('lionfish_comshop_order')->add($order);
+
+		// 创建order_relate表（order与order_all的关系表）数据
+		$order_relate_data = array();
+		$order_relate_data['order_all_id'] = $order_all_id;
+		$order_relate_data['order_id'] = $order_id;
+		$order_relate_data['addtime'] = time();
+		M('lionfish_comshop_order_relate')->add($order_relate_data);
+
+		$old_order_goods_data = M('lionfish_comshop_order_goods')->where( array('order_id' => $gpc['order_id']) )->select();
+
+		foreach ($old_order_goods_data as $old_val) {
+			foreach ($gpc['goods'] as $val) {
+				// 如果有补货
+				if($val['goods_id'] == $old_val['goods_id'] && $val['quantity'] > 0){
+					$order_goods_data = array();
+					$order_goods_data['order_id'] = $order_id; // 取上面生成的order表的id数据
+					$order_goods_data['goods_id'] = $val['goods_id'];
+					$order_goods_data['quantity'] = $val['quantity']; // 取表单的数据
+					$order_goods_data['store_id'] = $old_val['store_id'];
+					$order_goods_data['supply_id'] = $old_val['supply_id'];
+					$order_goods_data['name'] = $old_val['name'];
+					$order_goods_data['model'] = $old_val['model'];
+					$order_goods_data['commiss_one_money'] = 0;
+					$order_goods_data['commiss_two_money'] = 0;
+					$order_goods_data['commiss_three_money'] = 0;
+					$order_goods_data['commiss_fen_one_money'] = 0;
+					$order_goods_data['commiss_fen_two_money'] = 0;
+					$order_goods_data['commiss_fen_three_money'] = 0;
+					$order_goods_data['head_disc'] = $old_val['header_disc'];
+					$order_goods_data['member_disc'] = $old_val['member_disc'];
+					$order_goods_data['level_name'] = $old_val['level_name'];
+					$order_goods_data['is_pin'] = $old_val['is_pin'];
+					$order_goods_data['goods_images'] = $old_val['goods_images'];
+					$order_goods_data['goods_type'] = $old_val['goods_type'];
+					$order_goods_data['price'] = 0; // $old_val['price'];
+					$order_goods_data['oldprice'] = 0; // $old_val['oldprice'];
+					$order_goods_data['total'] = $old_val['total'];
+					$order_goods_data['old_total'] = $old_val['old_total'];
+					$order_goods_data['is_vipcard_buy'] = 0;
+					$order_goods_data['is_level_buy'] = 0;	
+					$order_goods_data['rela_goodsoption_valueid'] = $old_val['rela_goodsoption_valueid'];
+					$order_goods_data['comment'] = $old_val['comment'];
+					$order_goods_data['is_statements_state'] = 0;
+					$order_goods_data['statements_end_time'] = 0;
+					$order_goods_data['addtime'] = time();
+					$order_goods_id = M('lionfish_comshop_order_goods')->add($order_goods_data);
+				}
+			}
+			
+		}
+		//dump($old_order_goods_data);exit;
+		// 创建order_goods表数据
+		/*foreach($gpc['goods'] as $val){
+			$order_goods_data = array();
+			$order_goods_data['order_id'] = $order_id;
+			$order_goods_data['goods_id'] = $val['goods_id'];
+			$order_goods_data['quantity'] = $val['quantity'];
+			$order_goods_data['store_id'] = $goods_info['store_id'];
+			$order_goods_data['supply_id'] = $supply_id_info['supply_id'];
+			$order_goods_data['name'] = addslashes($goods['name']);
+			$order_goods_data['model'] = $codes;
+			$order_goods_data['commiss_one_money'] = $commiss_one_money;
+			$order_goods_data['commiss_two_money'] = $commiss_two_money;
+			$order_goods_data['commiss_three_money'] = $commiss_three_money;
+			$order_goods_data['commiss_fen_one_money'] = $commiss_fen_one_money;
+			$order_goods_data['commiss_fen_two_money'] = $commiss_fen_two_money;
+			$order_goods_data['commiss_fen_three_money'] = $commiss_fen_three_money;
+			$order_goods_data['head_disc'] = $goods['header_disc'];
+			$order_goods_data['member_disc'] = $goods['member_disc'];
+			$order_goods_data['level_name'] = $goods['level_name'];
+			$order_goods_data['is_pin'] = $is_pin;
+			$order_goods_data['goods_images'] = $goods_info['image'];
+			$order_goods_data['goods_type'] = $type;
+			$order_goods_data['price'] = $goods['price'];
+			$order_goods_data['oldprice'] = $goods['price'];
+			$order_goods_data['total'] = $goods['total'];
+			$order_goods_data['old_total'] = $goods['total'];
+			$order_goods_data['is_vipcard_buy'] = 0;
+			$order_goods_data['is_level_buy'] = 0;	
+			$order_goods_data['quantity'] = $goods['quantity'];
+			$order_goods_data['rela_goodsoption_valueid'] = $goods['option'] == 'undefined' ? '':$goods['option'];
+			$order_goods_data['comment'] = $goods['comment'];
+			$order_goods_data['is_statements_state'] = 0;
+			$order_goods_data['statements_end_time'] = 0;
+			$order_goods_data['addtime'] = time();
+			$order_goods_id = M('lionfish_comshop_order_goods')->add($order_goods_data);
+		}*/
+
+		dump($order_all_id);dump($order_id);exit;
+	}
+
      public function index(){
 
 
@@ -746,7 +927,7 @@ class OrderController extends CommonController{
 			
 			
 			//以及退款了多少钱了 has_refund_money
-			
+		
 			if($refund_money + $has_refund_money > $can_free_tongji){
 					show_json(0, array('message' => '总退款金额大于可退款金额') );
 			}
@@ -758,7 +939,7 @@ class OrderController extends CommonController{
 			{
 				show_json(0, array('message' => '填写正确的退库存数量，最大'.$total_quantity.'个' ) );
 			}
-			else{
+			else{   //dump($id);dump($refund_money);dump($order_goods_id);dump($is_back_sellcount);dump($refund_quantity);exit;	
 				//is_back_sellcount 
 				$res = $weixin_model->refundOrder($id,$refund_money,0,$order_goods_id,$is_back_sellcount, $refund_quantity,1);
 				
@@ -809,11 +990,10 @@ class OrderController extends CommonController{
 	public function oprefund_do()
 	{
 		$_GPC = I('request.');
-		
+	
 		$opdata = $this->check_order_data();		
 		extract($opdata);
-		
-		
+				
 		$id = $_GPC['id'];
 		
 		//付款总额
@@ -1402,6 +1582,226 @@ class OrderController extends CommonController{
 	//-------------- by lucas 【订单列表批量处理页面】 End --------------------------
 
 	public function detail()
+	{
+		$id = I('get.id');
+		
+		
+		$item = M('lionfish_comshop_order')->where( array('order_id' => $id ) )->find();
+
+		if($item['type'] == 'pintuan'){			
+			
+			$pin_order = M('lionfish_comshop_pin_order')->field('pin_id')->where( array('order_id' => $id ) )->find();
+			
+			$pin_id = $pin_order['pin_id'];	
+			
+			$this->pin_id = $pin_id;
+		}
+		
+		$order_goods = array();
+
+	
+		
+		$order_goods = M('lionfish_comshop_order_goods')->where( array('order_id' => $id) )->select();
+		
+		$need_order_goods = array();
+		
+		$shipping_fare = 0;
+		$fullreduction_money = 0;
+		$voucher_credit = 0;
+		$total = 0;
+			
+		foreach($order_goods as $key => $value)
+		{
+			// lionfish_community_head_commiss_order
+			
+			$head_commission_order_info = M('lionfish_community_head_commiss_order')->where( array('order_goods_id' => $value['order_goods_id'],'order_id' => $item['order_id']) )->select();
+			
+			
+			if( !empty($head_commission_order_info) )
+			{
+				foreach( $head_commission_order_info as  &$vv)
+				{
+					$head_info_tp = M('lionfish_community_head')->field('head_name')->where( array('id' => $vv['head_id'] ) )->find();
+					
+					$vv['head_name'] = $head_info_tp['head_name'];		
+				}
+				unset($vv);
+			}
+			
+			if( $value['is_refund_state'] == 1 )
+			{
+				$refund_info = M('lionfish_comshop_order_refund')->where( array('order_id' => $id,'order_goods_id' => $value['order_goods_id'] ) )->find();
+				
+				$value['refund_info'] = $refund_info;
+			}
+			
+			
+			
+			if( $item['is_commission'] == 1 )
+			{
+				$member_commission_list = M('lionfish_comshop_member_commiss_order')->where( array('order_goods_id' => $value['order_goods_id'],'order_id' => $item['order_id']) )->order('id asc')->select();
+				
+				if( !empty($member_commission_list) )
+				{
+					foreach( $member_commission_list as $kk => $vv )
+					{
+						$tmp_if = M('lionfish_comshop_member')->field('username')->where( array('member_id' => $vv['member_id'] ) )->find();
+						
+						$vv['username'] = $tmp_if['username'];
+						
+						$member_commission_list[$kk] = $vv;
+					}
+					
+				}
+				
+				
+				
+				$value['member_commission_list'] = $member_commission_list;
+			}
+			
+			
+			$value['head_commission_order_info'] = $head_commission_order_info;
+			
+			
+			$value['option_sku'] = D('Seller/Order')->get_order_option_sku($item['order_id'], $value['order_goods_id']);
+			
+
+
+			if (defined('ROLE') && ROLE == 'agenter' )
+			{
+				$supper_info = get_agent_logininfo();
+				if($supper_info['id'] != $value['supply_id'])
+				{
+					continue;
+				}
+			}
+					
+			if( $value['supply_id'] > 0 )
+			{
+				$supply_info = D('Home/Front')->get_supply_info($value['supply_id']);
+				$value['supply_name'] = $supply_info['shopname'];
+				$value['supply_type'] = $supply_info['type'] == 1 ? '独立' :'自营';
+			}else{
+				$value['supply_name'] = '平台自营';
+				$value['supply_type'] = '自营';
+			}
+			
+			$shipping_fare += $value['shipping_fare'];
+			$fullreduction_money += $value['fullreduction_money'];
+			$voucher_credit += $value['voucher_credit'];
+			$total += $value['total'];
+			
+			$need_order_goods[$key] = $value;		
+		}
+		
+		if (defined('ROLE') && ROLE == 'agenter' )
+		{
+			$item['shipping_fare'] = $shipping_fare;
+			$item['fullreduction_money'] = $fullreduction_money;
+			$item['voucher_credit'] = $voucher_credit;
+			$item['total'] = $total;
+		}
+			
+		$order_goods = $need_order_goods;
+					
+		
+
+		if (empty($item)) {
+			$this->message('抱歉，订单不存在!', $_SERVER['HTTP_REFERER'], 'error');
+		}
+
+			
+		$member = M('lionfish_comshop_member')->where( array('member_id' => $item['member_id'] ) )->find();	
+		
+		
+		$province_info = D('Home/Front')->get_area_info($item['shipping_province_id']);
+		$city_info = D('Home/Front')->get_area_info($item['shipping_city_id']);
+		$area_info = D('Home/Front')->get_area_info($item['shipping_country_id']);
+		
+		$express_info = array();
+		if( !empty($item['shipping_method']) )
+		{
+			$express_info = D('Seller/Express')->get_express_info($item['shipping_method']);
+		}
+		$this->express_info = $express_info;
+		
+		$coupon = array();
+		//voucher_id voucher_credit
+		//ims_ 
+		if( $item['voucher_id'] > 0 )
+		{
+			$coupon = array();
+			
+			//$coupon = pdo_fetch("select * from ".tablename('lionfish_comshop_coupon_list')." where uniacid=:uniacid and id=:id ", 
+			//array(':uniacid' => $_W['uniacid'], ':id' => $item['voucher_id']));
+		}
+		
+		
+		$this->id = $id;
+		$this->item = $item;
+		$this->order_goods = $order_goods;
+		$this->member = $member;
+		$this->province_info = $province_info;
+		$this->city_info = $city_info;
+		$this->area_info = $area_info;
+		
+		
+		$history_list = M('lionfish_comshop_order_history')->where( array('order_id' => $id ) )->order('order_history_id asc')->select();
+		
+		$order_status_arr = D('Seller/Order')->get_order_status_name();
+		
+		//$order_history['order_status_id'] = 18;
+		
+		$order_status_arr[18] = '已结算';
+		$order_status_arr[19] = '商品部分退款';
+		$order_status_arr[20] = '拒绝商品部分退款';
+		
+		foreach( $history_list as  &$val )
+		{
+			$val['order_status_name'] = $order_status_arr[$val['order_status_id']];
+		}
+		unset($val);
+		
+		$this->history_list = $history_list;
+		$this->order_status_arr = $order_status_arr;
+		
+		$is_can_look_headinfo = true;
+		$is_can_nowrfund_order = true;
+		
+		$supply_can_look_headinfo = D('Home/Front')->get_config_by_name('supply_can_look_headinfo');
+		
+		$supply_can_nowrfund_order = D('Home/Front')->get_config_by_name('supply_can_nowrfund_order');
+		
+		if (defined('ROLE') && ROLE == 'agenter' )
+		{
+			if( isset($supply_can_look_headinfo) && $supply_can_look_headinfo == 2 )
+			{
+				$is_can_look_headinfo = false;
+			}
+			if( isset($supply_can_nowrfund_order) && $supply_can_nowrfund_order == 2 )
+			{
+				$is_can_nowrfund_order = false;
+			}
+		}
+		
+		$this->is_can_look_headinfo = $is_can_look_headinfo;
+		$this->is_can_nowrfund_order = $is_can_nowrfund_order;
+		
+		$this->display();
+	}
+
+	/**
+	 * 补货页面的详情页面
+	 * =====================================
+	 * @author  Lucas 
+	 * email:   598936602@qq.com 
+	 * Website  address:  www.mylucas.com.cn
+	 * =====================================
+	 * 创建时间: 2020-08-21 08:35:57
+	 * @return  返回值  
+	 * @version 版本  1.0
+	 */
+	public function sup_detail()
 	{
 		$id = I('get.id');
 		
