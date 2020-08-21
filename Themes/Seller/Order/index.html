@@ -371,7 +371,7 @@
 												<?php } ?>
 												
 												
-												<?php if( in_array($item['order_status_id'], array(1,4,6,10,11,12,14)) && $is_can_nowrfund_order ){ ?>
+												<?php if( in_array($item['order_status_id'], array(1,4,6,10,11,12,14)) && $is_can_nowrfund_order && $item['total'] > 0){ ?>
 												<a href="javascript:;" style="display:none;" data-confirm="确认立即退款吗？" class="deldom" data-href="{:U('order/oprefund_do',array('id'=>$item['order_id']))}">
 												  &nbsp;&nbsp;立即退款
 												</a>&nbsp;&nbsp;
@@ -673,7 +673,11 @@
 												<?php  }else{  ?>
 												  
 												  <a class="btn btn-primary btn-xs deldom"  style="display:none;" href="javascript:;" data-href="{:U('order/opfinish', array('id' => $item['order_id']))}" data-confirm="确认完成订单吗？">确认完成</a><br />
-												  <a class="btn btn-primary btn-xs replenishing" data-id="{$item['order_id']}" href="javascript:;">补货</a>
+												 <!--  by lucas Start 有价格才补货 -->
+												 <?php if( $free_tongji && !$item['supple_order_id']){ ?>
+												 <a class="btn btn-primary btn-xs replenishing" data-id="{$item['order_id']}" href="javascript:;">补货</a>
+												 <?php } ?>
+												 <!--  by lucas End 有价格才补货 -->
 												<?php } ?>
 											<?php }elseif($item['order_status_id'] == 3){ ?>
 

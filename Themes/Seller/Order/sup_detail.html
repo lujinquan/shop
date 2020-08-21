@@ -67,7 +67,7 @@
 
 </head>
 <body>
-	<form action="" class="layui-form"  method="post" >
+	<form action="" class="layui-form" id="form_ajax" method="post" >
 		<input type="hidden" name="order_id" value="{$item['order_id']}" />
 		<div style="padding:0 20px;">
 			<table class="layui-table" style="padding-bottom: 90px;">
@@ -102,14 +102,14 @@
 						</td>
 						<td>
 							<a target="_blank" href="{:U('goods/edit', array('id' => $goods['goods_id']))}"title="查看">{$goods['name']}</a>
-							<input type="hidden" name="goods_id[{$i}]" value="{$goods['goods_id']}" />
+							<input type="hidden" name="goods[{$i}][goods_id]" value="{$goods['goods_id']}" />
 						  
 						</td>
 						<td>
-							<input type="text" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^0-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}"  class="layui-input" lay-verify="required|number"  name="quantity[{$i}]" value="0" placeholder="请输入补货数量">
+							<input type="text" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^0-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}"  class="layui-input" lay-verify="required|number"  name="goods[{$i}][quantity]" value="0" placeholder="请输入补货数量">
 						</td>
 						<td>
-							<select name="reson[{$i}]" lay-ignore="" class="layui-input layui-unselect">
+							<select name="goods[{$i}][reason]" lay-ignore="" class="layui-input layui-unselect">
 								<option value="0">补发</option>
 								<option value="1">破损</option>
 								<option value="2">其它</option>
@@ -121,7 +121,7 @@
 				</tbody>
 			</table>
 			<div class="modal-footer">
-				<button class="btn btn-primary j-submit" type="submit" lay-submit="" lay-filter="demo1" id="ck_opgoodsrefund">提交</button>
+				<button class="btn btn-primary j-submit" type="button" lay-submit="" lay-filter="demo1" id="ck_opgoodsrefund">提交</button>
 				<button data-dismiss="modal" class="btn btn-default j-cancel" type="button">取消</button>
 			</div>
 		</form>
@@ -148,8 +148,41 @@ layui.use(['jquery', 'layer','form'], function(){
 	   parent.layer.close(index);//关闭当前页
    });
     //监听提交
-    form.on('submit(demo1)', function(data){
-		parent.layer.close(index);//关闭当前页
+    form.on('submit(demo1)', function(res){
+    	var data = $('#form_ajax').serialize();
+    	// console.log(data);
+    	// return false;
+    	$.ajax({
+			url:'{:U("order/supple_order")}',
+			type:'post',
+			dataType:'json',
+			data:data,
+			success:function(info){
+				console.log(info);
+
+				if(info.status == 0)
+				{
+					layer.msg(info.result.message,{icon: 1,time: 2000});
+				}else if(info.status == 1){
+					var go_url = location.href;
+					if( info.result.hasOwnProperty("url") )
+					{
+						go_url = info.result.url;
+					}
+					
+					layer.msg('操作成功',{time: 1000,
+						end:function(){
+							location.href = info.result.url;
+							parent.layer.close(index);//关闭当前页
+						}
+					}); 
+				}
+				return false;
+			}
+		})
+				
+    	//console.log(res.status);
+		//parent.layer.close(index);//关闭当前页
 	}); 
   });
 </script>

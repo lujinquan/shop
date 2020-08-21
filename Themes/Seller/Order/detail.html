@@ -471,13 +471,19 @@
 				<!---订单详情end-->
 				
 				<h3 style="margin:15px 0px;">商品信息</h3>
+				<?php if( $item['supple_order_id'] > 0){ ?>
+				&nbsp;<span style="color:red">提示：当前订单有一条补货订单信息，订单编号：{$item['supple_info']['order_num_alias']}</span>
+				<?php } ?>
 				<p style="text-aligin:right;">
-					<?php if( in_array($item['order_status_id'], array(1,4,6,10,11,12,14)) && $is_can_nowrfund_order ){ ?>
+					<?php if( in_array($item['order_status_id'], array(1,4,6,10,11,12,14)) && $is_can_nowrfund_order && $item['total'] > 0){ ?>
+
 					<a class='op btn btn-primary btn-xs' style="float:right;"  data-toggle="ajaxModal" href="javascript:;" data-href="{:U('order/oprefund_do', array('id' => $item['order_id']))}" >
 						
 						<i class="icow icow-yibiaoji" style="color: #999;display: inline-block;vertical-align: middle" title="整个订单立即退款" ></i>
 						整个订单立即退款
+						
 					</a>
+					
 					<?php } ?>
 				</p>
 				<table class="layui-table ">
@@ -592,11 +598,18 @@
 									<br/><br/>
 									<a class="btn btn-primary btn-xs " href="{:U('order/oprefund', array('id' => $item['order_id'], 'ref_id' => $goods['refund_info']['ref_id'] ))}" >退款详情</a>
 									
-								<?php  }else if($goods['is_refund_state'] == 0 && in_array( $item['order_status_id'], array(1,4,6,10,11,12,14)) && $is_can_nowrfund_order   ){ ?>
+								<?php  }else if($goods['is_refund_state'] == 0 && in_array( $item['order_status_id'], array(1,4,6,10,11,12,14)) && $is_can_nowrfund_order){ ?>
+								<?php if( $item['total'] > 0 ){ ?>
 									<a class='btn op btn-primary btn-xs'  data-toggle="ajaxModal" href="javascript:;" data-href="{:U('order/oprefund_goods_do', array('id' => $item['order_id'], 'order_goods_id' => $goods['order_goods_id'] ))}" >
 										<i class="icow icow-yibiaoji" style="color: #999;display: inline-block;vertical-align: middle" title="后台商品退款" ></i>
 										后台商品退款
 									</a>
+								<?php }else{ ?>
+								<a class='btn op btn-gray btn-xs' href="javascript:;">
+									<i style="color: #999;display: inline-block;vertical-align: middle" title="补货单无法退款" ></i>
+									补货单无法退款
+									</a>
+								<?php } ?>
 								<?php } ?>
 							</td>
 							

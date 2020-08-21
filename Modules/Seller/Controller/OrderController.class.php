@@ -36,34 +36,58 @@ class OrderController extends CommonController{
 	 */
 	public function supple_order(){
 
-		$gpc = I('request');
-
-		$gpc = [
-			'order_id' => 29075,
-			'goods' => [
-				[
-					'goods_id' => 982, //商品id
-					'quantity' => 2, // 发货数量
-				],
-				[
-					'goods_id' => 983, //商品id
-					'quantity' => 3, // 发货数量
-				],
-			],
-		];
+		$gpc = I('request.');
+		//show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
+// echo '<pre>';
+// dump($gpc);exit;
+// 		$gpc = [
+// 			'order_id' => 29075,
+// 			'goods' => [
+// 				[
+// 					'goods_id' => 982, //商品id
+// 					'quantity' => 2, // 发货数量
+// 					'reason' => 1, // 原因
+// 				],
+// 				[
+// 					'goods_id' => 983, //商品id
+// 					'quantity' => 3, // 发货数量
+// 					'reason' => 2, // 发货数量
+// 				],
+// 			],
+// 		];
+		$i = 0;
+		foreach ($gpc['goods'] as $k => $v) {
+			if($v['quantity'] > 0){
+				$i++;
+			}
+		}
+		if($i == 0){
+			show_json(0, '补货数量合计不能为零!');
+		}
+// show_json(0, '未找到订单!');
+// 		$reasons = ['补发','破损','其他'];
 //dump($gpc);exit;
 
 		// 获取原order信息
 		$old_order_info = M('lionfish_comshop_order')->where( array('order_id' => $gpc['order_id']) )->find();
+		if(empty($old_order_info)){
+			show_json(0, '未找到订单!');
+		}
+		if($old_order_info['is_supple'] > 0){ //如果已补货
+			show_json(0, '订单已补货1次，无法再次补货！');
+		}
+			
+		
+
 
 		// 创建 order_all 订单
 		$order_all_data = array();
 		$order_all_data['member_id'] = $old_order_info['member_id'];
 		$order_all_data['order_num_alias'] = build_order_no($old_order_info['member_id']);
 		$order_all_data['transaction_id'] = '';
-		$order_all_data['order_status_id'] = 3;
+		$order_all_data['order_status_id'] = 1;
 		$order_all_data['is_pin'] = $order['is_pin'];
-		$order_all_data['paytime'] = 0;
+		$order_all_data['paytime'] = time();
 		$order_all_data['total_money'] = 0;
 		$order_all_data['addtime'] = time();
 		$order_all_data['extra'] = 1;
@@ -88,7 +112,7 @@ class OrderController extends CommonController{
 	    $order['shipping_country_id']=$old_order_info['shipping_country_id'];
 	    $order['shipping_province_id']=$old_order_info['shipping_province_id'];
 	    $order['shipping_tel']=$old_order_info['shipping_tel'];
-	    $order['order_status_id'] = 3;
+	    $order['order_status_id'] = 1;
 		$order['voucher_id']=$old_order_info['voucher_id'];	
 		$order['voucher_credit']=$old_order_info['voucher_credit'];
 		$order['is_free_shipping_fare']=$old_order_info['is_free_shipping_fare'];			
@@ -102,16 +126,18 @@ class OrderController extends CommonController{
 	    $order['user_agent']=$old_order_info['user_agent'];
 	    $order['shipping_method']=0;//快递id
 	    $order['delivery']=$old_order_info['delivery'];
-	    $order['payment_code']=$old_order_info['payment_method'];
 	    $order['address_id']=$old_order_info['address_id'];
 	    $order['comment']=$old_order_info['comment'];
+	    $order['payment_code']=$old_order_info['payment_code'];
 		$order['score_for_money']=0;
 	    $order['store_id'] = $old_order_info['store_id'];
 		$order['supply_id'] = $old_order_info['supply_id'];
 		$order['head_id'] = $old_order_info['head_id'];
 		$order['fullreduction_money'] = 0;
-		$man_total_free = $old_order_info['man_total_free'];
+		$order['remarksaler'] = '当前订单是由系统生成的订单号为'.$old_order_info['order_num_alias'].'的补货订单';
 		$order_id = M('lionfish_comshop_order')->add($order);
+
+		M('lionfish_comshop_order')->where( array('order_id' => $gpc['order_id']) )->save( array('supple_order_id' => $order_id) );
 
 		// 创建order_relate表（order与order_all的关系表）数据
 		$order_relate_data = array();
@@ -125,7 +151,7 @@ class OrderController extends CommonController{
 		foreach ($old_order_goods_data as $old_val) {
 			foreach ($gpc['goods'] as $val) {
 				// 如果有补货
-				if($val['goods_id'] == $old_val['goods_id'] && $val['quantity'] > 0){
+				if($val['goods_id'] == $old_val['goods_id'] && (int)$val['quantity'] > 0){
 					$order_goods_data = array();
 					$order_goods_data['order_id'] = $order_id; // 取上面生成的order表的id数据
 					$order_goods_data['goods_id'] = $val['goods_id'];
@@ -148,12 +174,12 @@ class OrderController extends CommonController{
 					$order_goods_data['goods_type'] = $old_val['goods_type'];
 					$order_goods_data['price'] = 0; // $old_val['price'];
 					$order_goods_data['oldprice'] = 0; // $old_val['oldprice'];
-					$order_goods_data['total'] = $old_val['total'];
-					$order_goods_data['old_total'] = $old_val['old_total'];
+					$order_goods_data['total'] = 0;
+					$order_goods_data['old_total'] = 0;
 					$order_goods_data['is_vipcard_buy'] = 0;
 					$order_goods_data['is_level_buy'] = 0;	
 					$order_goods_data['rela_goodsoption_valueid'] = $old_val['rela_goodsoption_valueid'];
-					$order_goods_data['comment'] = $old_val['comment'];
+					$order_goods_data['comment'] = '补货原因：'.$reasons[$val['reason']];
 					$order_goods_data['is_statements_state'] = 0;
 					$order_goods_data['statements_end_time'] = 0;
 					$order_goods_data['addtime'] = time();
@@ -162,45 +188,9 @@ class OrderController extends CommonController{
 			}
 			
 		}
-		//dump($old_order_goods_data);exit;
-		// 创建order_goods表数据
-		/*foreach($gpc['goods'] as $val){
-			$order_goods_data = array();
-			$order_goods_data['order_id'] = $order_id;
-			$order_goods_data['goods_id'] = $val['goods_id'];
-			$order_goods_data['quantity'] = $val['quantity'];
-			$order_goods_data['store_id'] = $goods_info['store_id'];
-			$order_goods_data['supply_id'] = $supply_id_info['supply_id'];
-			$order_goods_data['name'] = addslashes($goods['name']);
-			$order_goods_data['model'] = $codes;
-			$order_goods_data['commiss_one_money'] = $commiss_one_money;
-			$order_goods_data['commiss_two_money'] = $commiss_two_money;
-			$order_goods_data['commiss_three_money'] = $commiss_three_money;
-			$order_goods_data['commiss_fen_one_money'] = $commiss_fen_one_money;
-			$order_goods_data['commiss_fen_two_money'] = $commiss_fen_two_money;
-			$order_goods_data['commiss_fen_three_money'] = $commiss_fen_three_money;
-			$order_goods_data['head_disc'] = $goods['header_disc'];
-			$order_goods_data['member_disc'] = $goods['member_disc'];
-			$order_goods_data['level_name'] = $goods['level_name'];
-			$order_goods_data['is_pin'] = $is_pin;
-			$order_goods_data['goods_images'] = $goods_info['image'];
-			$order_goods_data['goods_type'] = $type;
-			$order_goods_data['price'] = $goods['price'];
-			$order_goods_data['oldprice'] = $goods['price'];
-			$order_goods_data['total'] = $goods['total'];
-			$order_goods_data['old_total'] = $goods['total'];
-			$order_goods_data['is_vipcard_buy'] = 0;
-			$order_goods_data['is_level_buy'] = 0;	
-			$order_goods_data['quantity'] = $goods['quantity'];
-			$order_goods_data['rela_goodsoption_valueid'] = $goods['option'] == 'undefined' ? '':$goods['option'];
-			$order_goods_data['comment'] = $goods['comment'];
-			$order_goods_data['is_statements_state'] = 0;
-			$order_goods_data['statements_end_time'] = 0;
-			$order_goods_data['addtime'] = time();
-			$order_goods_id = M('lionfish_comshop_order_goods')->add($order_goods_data);
-		}*/
 
-		dump($order_all_id);dump($order_id);exit;
+		show_json(1, array('url' => $_SERVER['HTTP_REFERER']));
+		
 	}
 
      public function index(){
@@ -1587,6 +1577,12 @@ class OrderController extends CommonController{
 		
 		
 		$item = M('lionfish_comshop_order')->where( array('order_id' => $id ) )->find();
+
+		//-------------- by lucas 【补货单信息】 End --------------------------
+		if($item['supple_order_id']){
+			$item['supple_info'] = M('lionfish_comshop_order')->where( array('order_id' => $item['supple_order_id'] ) )->find();
+		}
+		//-------------- by lucas 【补货单信息】 End --------------------------
 
 		if($item['type'] == 'pintuan'){			
 			
