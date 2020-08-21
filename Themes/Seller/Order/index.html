@@ -107,6 +107,7 @@
 		width:auto!important;
 	}
 	.list-tb-div th .tDiv{color:#000;}
+	.j-replenishing{padding: 20px;}
 </style>
 
 </head>
@@ -647,8 +648,7 @@
 											
 											<?php }elseif( $item['order_status_id'] == 14 && ($item['delivery'] == 'express') ){ ?>
 												<a class="btn btn-primary btn-xs deldom" href="javascript:;" data-href="{:U('order/opreceive', array('id' => $item['order_id']))}" data-confirm="确认订单收货吗？">确认收货</a><br />
-												
-												
+
 											<?php }elseif( $item['order_status_id'] == 4 || $item['order_status_id'] == 6 ){ ?>
 											<!--已发货-->
 												<?php if( $item['order_status_id'] == 4){ ?>
@@ -672,7 +672,8 @@
 												
 												<?php  }else{  ?>
 												  
-												  <a class="btn btn-primary btn-xs deldom"  style="display:none;" href="javascript:;" data-href="{:U('order/opfinish', array('id' => $item['order_id']))}" data-confirm="确认完成订单吗？">确认完成</a>
+												  <a class="btn btn-primary btn-xs deldom"  style="display:none;" href="javascript:;" data-href="{:U('order/opfinish', array('id' => $item['order_id']))}" data-confirm="确认完成订单吗？">确认完成</a><br />
+												  <a class="btn btn-primary btn-xs replenishing" data-id="{$item['order_id']}" href="javascript:;">补货</a>
 												<?php } ?>
 											<?php }elseif($item['order_status_id'] == 3){ ?>
 
@@ -730,9 +731,6 @@
 		</div>
 	</div>
 </div>
-
-
-
 <script src="/layuiadmin/layui/layui.js"></script>
 
 <script>
@@ -751,7 +749,25 @@ var $;
 layui.use(['jquery', 'layer','form'], function(){ 
   $ = layui.$;
   var form = layui.form;
-
+    // 补货
+	$(".replenishing").click(function(){
+		var data_id = $(this).attr('data-id');
+		layer.open({
+		        type: 2
+		        ,title: '补货单' //不显示标题栏
+		        ,closeBtn: false
+		        ,area: ['800px','500px']
+		        ,shade: 0.8
+		        ,id: 'LAY_layuipro' //设定一个id，防止重复弹出
+		        ,btn: false
+		        ,btnAlign: 'c'
+		        ,moveType: 1 //拖拽模式，0或者1
+		        ,content: '{:U('order/sup_detail', array('ok' => 1))}/id/'+data_id
+		        ,success: function(layero){
+		          
+		        }
+		      });
+	})
   	$(".batchprocess").click(function () {
     	var that = $(this);
     	var ids_arr = [];

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <?php $shoname_name = D('Home/Front')->get_config_by_name('shoname'); ?>
+  <title><?php echo $shoname; ?></title>
+  <link rel="shortcut icon" href="" />
+        
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+  <link rel="stylesheet" href="/layuiadmin/style/admin.css" media="all">
+ 
+<!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+<!--[if lt IE 9]>
+  <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+  <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->  
+
+<link href="./resource/css/bootstrap.min.css?v=201903260001" rel="stylesheet">
+<link href="./resource/css/common.css?v=201903260001" rel="stylesheet">
+<script type="text/javascript">
+	window.sysinfo = {
+	<?php if (!empty($_W['uniacid']) ){ ?>'uniacid': '{$_W['uniacid']}',<?php } ?>
+	
+	<?php if( !empty($_W['acid'])  ){ ?>'acid': '{$_W['acid']}',<?php } ?>
+	
+	<?php if (!empty($_W['openid']) ) { ?>'openid': '{$_W['openid']}',<?php } ?>
+	
+	<?php if( !empty($_W['uid']) ) {  ?>'uid': '{$_W['uid']}',<?php } ?>
+	
+	'isfounder': <?php if (!empty($_W['isfounder']) ) { ?>1<?php  }else{  ?>0<?php } ?>,
+	
+	'siteroot': '{$_W['siteroot']}',
+			'siteurl': '{$_W['siteurl']}',
+			'attachurl': '{$_W['attachurl']}',
+			'attachurl_local': '{$_W['attachurl_local']}',
+			'attachurl_remote': '{$_W['attachurl_remote']}',
+			'module' : {'url' : '<?php if( defined('MODULE_URL') ) { ?>{MODULE_URL}<?php } ?>', 'name' : '<?php if (defined('IN_MODULE') ) { ?>{IN_MODULE}<?php } ?>'},
+	'cookie' : {'pre': ''},
+	'account' : {:json_encode($_W['account'])},
+	};
+</script>
+
+<script type="text/javascript" src="./resource/js/lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="./resource/js/lib/bootstrap.min.js"></script>
+<script type="text/javascript" src="./resource/js/app/util.js?v=201903260001"></script>
+<script type="text/javascript" src="./resource/js/app/common.min.js?v=201903260001"></script>
+<script type="text/javascript" src="./resource/js/require.js?v=201903260001"></script>
+<script type="text/javascript" src="./resource/js/lib/jquery.nice-select.js?v=201903260001"></script>
+<link rel="stylesheet" href="/layuiadmin/layui/css/layui.css" media="all">
+<link href="/static/css/snailfish.css" rel="stylesheet">
+<style>
+	.modal-footer{
+		position: fixed;
+		bottom:20px;
+		left: 50%;
+		margin-left: -75px;
+		border-top: none;
+	}
+	body{
+		min-width: 100px;
+		overflow:auto;
+	}
+</style>
+
+</head>
+<body>
+	<form action="" class="layui-form" lay-filter="example" method="post" >
+		<input type="hidden" name="order_id" value="{$item['order_id']}" />
+		<div style="padding:0 20px;">
+			<table class="layui-table" style="padding-bottom: 90px;">
+				<thead>
+				<tr class="trorder" style="background: #fff">
+					<th width="10%"  class="" style="text-align: right;padding-right: 0">
+						商品标题
+					</th>
+					<th width="40%">
+						
+					</th>
+					<th width="25%">
+						补货数量
+					</th>
+					<th width="25%">
+						补货原因
+					</th>
+				</tr>
+				</thead>
+				<tbody>
+
+				<?php $i =0; ?>
+				<?php $member_youhui = 0; ?>
+				<?php $total_refund_money = 0; ?>
+				
+				<?php foreach( $order_goods as  $goods  ){ ?>
+					<?php $member_youhui += ($goods['old_total'] - $goods['total']); ?>
+					<?php $total_refund_money += ($goods['has_refund_money']); ?>
+					<tr class="trorder" style="background: #fff">
+						<td style="text-align: right;padding-right: 0">
+							<img src="{:tomedia($goods['goods_images'])}" style='width:52px;height:52px;border:1px solid #efefef; padding:1px;' >
+						</td>
+						<td>
+							<a target="_blank" href="{:U('goods/edit', array('id' => $goods['goods_id']))}"title="查看">{$goods['name']}</a>
+							<input type="hidden" name="goods_id[{$i}]" value="{$goods['goods_id']}" />
+						  
+						</td>
+						<td>
+							<input type="text" class="layui-input" name="quantity[{$i}]" value="" placeholder="请输入补货数量">
+						</td>
+						<td>
+							<select name="reson[{$i}]" lay-ignore="" class="layui-input layui-unselect">
+								<option value="0">补发</option>
+								<option value="1">破损</option>
+								<option value="2">其它</option>
+							   
+							</select>
+						</td>
+					</tr>
+					<?php $i++; ?>
+				<?php } ?>
+				</tbody>
+			</table>
+			<div class="modal-footer">
+				<button class="btn btn-primary j-submit" type="submit" id="ck_opgoodsrefund">提交</button>
+				<button data-dismiss="modal" class="btn btn-default j-cancel" type="button">取消</button>
+			</div>
+		</form>
+	</div>
+<script src="/layuiadmin/layui/layui.js"></script>
+
+<script>
+	layui.config({
+		base: '/layuiadmin/' //静态资源所在路径
+	}).extend({
+		index: 'lib/index' //主入口模块
+	}).use('index');
+</script>
+
+<script>
+//由于模块都一次性加载，因此不用执行 layui.use() 来加载对应模块，直接使用即可：
+var layer = layui.layer;
+var $;
+layui.use(['jquery', 'layer','form'], function(){ 
+  $ = layui.$;
+  var form = layui.form;
+  var index = parent.layer.getFrameIndex(window.name);
+   $(".j-cancel,.j-submit").click(function(){
+	   parent.layer.close(index);//关闭当前页
+   });
+  });
+</script>
+</body>
