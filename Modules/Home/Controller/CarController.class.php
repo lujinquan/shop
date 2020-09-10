@@ -2500,7 +2500,7 @@ class CarController extends CommonController {
 		$today_time = time();
 		
 		$arr = array('天','一','二','三','四','五','六');
-//p($goods);exit;	
+
 		$pick_up_arr = array();
 		foreach($goods as $key => $good)
 		{
@@ -2580,7 +2580,7 @@ class CarController extends CommonController {
 			}
 			
 		} 
-//dump($goods);exit;		
+		
 		//暂时关闭自提代码
 		/**
 		if(!empty($pick_up))
@@ -2734,6 +2734,7 @@ class CarController extends CommonController {
 
 		//--------------- by lucas start -------------
 		$need_data['delivery_date'] = $delivery_date;
+		$need_data['mode_type'] = isset($community_head_group['mode_type'])?$community_head_group['mode_type']:1;
 		//--------------- by lucas end --------------
 		
 		$need_data['open_score_buy_score'] = $open_score_buy_score;//1开启积分抵扣
@@ -3013,7 +3014,7 @@ class CarController extends CommonController {
 public function sub_order()
 {
 	$gpc = I('request.');
-	
+
 	$token = $gpc['token'];
 	
 	$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
@@ -3074,7 +3075,11 @@ public function sub_order()
 	}
 
 	$data_s  = array();
-	$data_s['pay_method'] = $gpc['wxpay'];
+	//-------------- by lucas 【支付方式  xxpay 或者 wxpay （原来接收的参数是注释里面的，有问题） 2020-09-09 15:45:41】 End --------------------------
+	$data_s['pay_method'] = $gpc['pay_method'];
+	//$data_s['pay_method'] = $gpc['wxpay'];
+
+	//-------------- by lucas 【支付方式  xxpay 或者 wxpay 2020-09-09 15:45:41】 End --------------------------
 	$data_s['buy_type'] = isset($gpc['buy_type']) ? $gpc['buy_type'] : 'dan';
 	$data_s['pick_up_id'] = $gpc['pick_up_id'];
 	$data_s['dispatching'] = $gpc['dispatching'];
@@ -4105,9 +4110,11 @@ public function sub_order()
 			
 			D('Admin/Member')->sendMemberPointChange($member_id,$del_integral, 1 ,'积分兑换商品', 'integral_exchange', $oid ,$order_goods_tp['order_goods_id']);
 		}
-		
-		if( $order['type'] == 'ignore' || $pay_total<=0 || ($is_yue_open == 1 && $ck_yupay == 1 && $member_info['account_money'] >= $pay_total) )
+
+		//-------------- by lucas 【如果是余额支付才扣钱，如果是线下支付（即线下支付）xxpay则不扣钱 2020-09-09 14:17:39】 Start
+		if( $order['type'] == 'ignore' || $pay_total<=0 || ($is_yue_open == 1 && $ck_yupay == 1 && $member_info['account_money'] >= $pay_total) || ($is_yue_open == 1 && $ck_yupay == 1 && $pay_method == 'xxpay'))
 		{
+			//-------------- by lucas 【如果是余额支付才扣钱，如果是线下支付（即线下支付）xxpay则不扣钱 2020-09-09 14:17:39】 End
 			/****
 			//暂时关闭
 			
@@ -4121,7 +4128,7 @@ public function sub_order()
 			***/
 			
 			if($ck_yupay == 1 && $pay_total >0 && $order['type'] != 'ignore')
-			{
+			{ 
 				//开始余额支付
 				$member_charge_flow_data = array();
 				$member_charge_flow_data['formid'] = '';
@@ -4130,7 +4137,12 @@ public function sub_order()
 				$member_charge_flow_data['money'] = $pay_total;
 				$member_charge_flow_data['state'] = 3;
 				$member_charge_flow_data['charge_time'] = time();
-				$member_charge_flow_data['remark'] = '会员前台余额支付';
+				if ($pay_method != 'xxpay') {
+					$member_charge_flow_data['remark'] = '会员前台余额支付';
+				} else {
+					$member_charge_flow_data['remark'] = '会员前台线下支付';
+				}
+				
 				$member_charge_flow_data['add_time'] = time();
 				
 				M('lionfish_comshop_member_charge_flow')->add($member_charge_flow_data);
@@ -4140,15 +4152,19 @@ public function sub_order()
 				
 				
 				//开始处理扣钱
-				M('lionfish_comshop_member')->where( array('member_id' => $member_id) )->setInc('account_money',-$pay_total);
 				
-				$mb_info = M('lionfish_comshop_member')->field('account_money')->where( array('member_id' =>$member_id ) )->find();
+				//-------------- by lucas 【如果是余额支付才扣钱，如果是线下支付（即线下支付）xxpay则不扣钱 2020-09-09 14:17:39】 Start
+				if ($pay_method != 'xxpay') {
+					M('lionfish_comshop_member')->where( array('member_id' => $member_id) )->setInc('account_money',-$pay_total);
+				
+					$mb_info = M('lionfish_comshop_member')->field('account_money')->where( array('member_id' =>$member_id ) )->find();
 
-				M('lionfish_comshop_member_charge_flow')->where( array('id' => $charge_flow_id ) )->save( array('operate_end_yuer' => $mb_info['account_money']) );
+					M('lionfish_comshop_member_charge_flow')->where( array('id' => $charge_flow_id ) )->save( array('operate_end_yuer' => $mb_info['account_money']) );
+				}
+				//-------------- by lucas 【如果是余额支付才扣钱，如果是xxpay则不扣钱 2020-09-09 14:17:39】 End
 				
 			}
-			
-			
+			//echo $oid;dump($order);exit;
 			//lionfish_comshop_order_all can_yupay
 			
 			//开始处理订单状态
@@ -4182,12 +4198,23 @@ public function sub_order()
 					if( $order && $order['order_status_id'] == 3)
 					{
 						$o = array();
-						$o['payment_code'] = 'yuer';
+						//--------------------- by lucas Start 余额支付显示yuer,线下支付显示yd------------
+						if ($pay_method == 'xxpay') {
+							$o['payment_code'] = 'xx';
+						}else{
+							$o['payment_code'] = 'yuer';
+						}
+						//--------------------- by lucas End 余额支付显示yuer,线下支付显示yd------------
 						$o['order_id']=$order['order_id'];
 						$o['order_status_id'] =  $order['is_pin'] == 1 ? 2:1;
 						$o['date_modified']=time();
 						$o['pay_time']=time();
-						$o['transaction_id'] = $is_integral ==1? '积分兑换':'余额支付';
+						if ($pay_method == 'xxpay') {
+							$o['transaction_id'] = '线下支付';
+						}else{
+							$o['transaction_id'] = $is_integral ==1? '积分兑换':'余额支付';
+						}
+						
 						//-------------- bu lucas --------------------
 						$o['delivery_date']=$order_all['delivery_date'];
 						//-------------- bu lucas --------------------
@@ -4317,7 +4344,7 @@ public function sub_order()
 			
 			var_dump($array);die();
 		}
-		else{
+		else{ 
 			
 			$fee = $pay_total;
 			$appid = D('Home/Front')->get_config_by_name('wepro_appid');
@@ -4446,6 +4473,11 @@ public function sub_order()
 		$data['is_go_orderlist'] = $is_just_1;
 
 		$data['is_spike'] = $is_spike;
+		// --  by lucas Start 如果选择线下支付，则直接将has_yupay改成1，（如果has_yupay为0或空时，小程序端将会调起微信支付）2020-09-10 12:17:21 --
+		if($pay_method == 'xxpay'){
+			$data['has_yupay'] = 1;
+		}
+		// --  by lucas End 如果选择线下支付，则直接将has_yupay改成1，（如果has_yupay为0或空时，小程序端将会调起微信支付）2020-09-10 12:17:21 --
 		echo json_encode($data);
 		die();	
 	}else{

@@ -19,8 +19,15 @@
                     <div class="form-group">
                         <label class="col-sm-2 control-label must">配送方式</label>
                         <div class="col-sm-9 col-xs-12">
-                            <label class="radio-inline coupon-radio send-type"><input type="radio" name="send_type" value="1"  title="按周期配送" <?php if($group['send_type'] == 1){; ?>checked<?php }; ?> />按周期配送</label>
-                            <label class="radio-inline coupon-radio send-type"><input type="radio" name="send_type" value="0"  title="按星期配送" <?php if($group['send_type'] == 0){; ?>checked<?php }; ?>/>按星期配送</label>
+                            <label class="radio-inline coupon-radio send-type"><input type="radio" name="send_type" value="1"  title="按周期配送" <?php if($group['send_type'] == 1 || !isset($group['send_type'])){; ?>checked<?php }; ?> />按周期配送</label>
+                            <label class="radio-inline coupon-radio send-type"><input type="radio" name="send_type" value="0"  title="按星期配送" <?php if(isset($group['send_type']) && $group['send_type'] == 0){; ?>checked<?php }; ?>/>按星期配送</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label must">支付模式</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <label class="radio-inline coupon-radio mode_type"><input type="radio" name="mode_type" value="1"  title="默认模式" <?php if($group['mode_type'] == 1 || !isset($group['mode_type'])){; ?>checked<?php }; ?> />默认模式</label>
+                            <label class="radio-inline coupon-radio mode_type"><input type="radio" name="mode_type" value="0"  title="食堂模式" <?php if(isset($group['mode_type']) && $group['mode_type'] == 0){; ?>checked<?php }; ?>/>食堂模式</label>
                         </div>
                     </div>
                     <div class="form-group">

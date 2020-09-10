@@ -66,7 +66,7 @@ class CommunityController extends CommonController {
 		$where .= ' and o.order_status_id = 4 ';
 		
 		
-		$sql = "select o.order_id,o.order_num_alias,o.date_added,o.delivery,o.is_pin,o.is_zhuli,o.shipping_fare,o.voucher_credit,o.store_id,o.total,o.order_status_id,o.lottery_win,o.type,os.name as status_name 
+		$sql = "select o.order_id,o.order_num_alias,o.payment_code,o.date_added,o.delivery,o.is_pin,o.is_zhuli,o.shipping_fare,o.voucher_credit,o.store_id,o.total,o.order_status_id,o.lottery_win,o.type,os.name as status_name 
 				from ".C('DB_PREFIX')."lionfish_comshop_order as o , 
                 ".C('DB_PREFIX')."lionfish_comshop_order_status as os 
 	                    where     o.delivery != 'express' and o.order_status_id = os.order_status_id {$where}  
@@ -74,9 +74,13 @@ class CommunityController extends CommonController {
 	  
 	    $list =  M()->query($sql);
 	   
-	    //createTime
+	    $payment_code = '';
+
 	    foreach($list as $key => $val)
 	    {
+	    	if ($val['payment_code'] == 'xx') {
+	    		$payment_code = 'xx';
+	    	}
 			$val['checked'] = 1;
 			if($val['delivery'] == 'pickup')
 			{
@@ -249,6 +253,7 @@ class CommunityController extends CommonController {
 			$need_data = array('code' => 1);
 		}
 		
+		$need_data['payment_code'] = $payment_code;
 		echo json_encode( $need_data );
 		die();
 		

@@ -535,6 +535,8 @@ class CommunityheadController extends CommonController {
 
 		if (IS_POST) {
 			$send_type = trim($_GPC['send_type']);
+			$mode_type = trim($_GPC['mode_type']);
+			//dump($mode_type);exit;
 			$groupname = trim($_GPC['groupname']);
 			if(!$groupname){
 				show_json(0,  array('message' => '名称不能为空') );die();
@@ -548,6 +550,7 @@ class CommunityheadController extends CommonController {
 				$close_order_date = substr($close_order_date,0,13).':00:00';
 				$data = array( 
 					'send_type' => $send_type,
+					'mode_type' => $mode_type,
 					'groupname' =>  $groupname,
 					'close_order_time' => strtotime($close_order_date) ,
 					'send_order_time' => trim(strtotime($_GPC['send_order_time'])) ,
@@ -567,6 +570,7 @@ class CommunityheadController extends CommonController {
 				}
 				$data = array( 
 					'send_type' => $send_type,
+					'mode_type' => $mode_type,
 					'groupname' => $groupname ,
 					'close_order_time' => strtotime($close_order_date) ,
 					'date_nodes' =>  implode(',',$item_checkbox),

@@ -2182,7 +2182,6 @@ class UserController extends CommonController {
 		}
 		
 		$member_id = $weprogram_token['member_id'];
-		
 		if($member_id){
 			
 			$member_info = M('lionfish_comshop_member')->where( array('member_id' => $member_id) )->find();
@@ -2231,8 +2230,6 @@ class UserController extends CommonController {
 			$refund_send_count = D('Home/Frontorder')->get_member_order_count($member_id," and order_status_id in(7,12,13) ");
 			
 			$head_info = D('Home/Front')->get_member_community_info($member_id);
-			
-			
 			
 			if( empty($head_info) )
 			{

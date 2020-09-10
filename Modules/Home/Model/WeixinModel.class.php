@@ -172,7 +172,9 @@ class WeixinModel{
 			//$this->refundOrder_success($order_info,$openId);
 			//检测是否有需要退回积分的订单
 		}
-		else if($order_info['payment_code'] == 'admin'){
+		//-------------- by lucas 【线下支付的退款流程和后台退款流程一样，不减余额 2020-09-09 16:18:20】 Start
+		else if($order_info['payment_code'] == 'admin' || $order_info['payment_code'] == 'xx'){
+		//-------------- by lucas 【线下支付的退款流程和后台退款流程一样，不减余额 2020-09-09 16:18:20】 End
 			 
 			if($order_info['order_status_id'] == 12)
 			{

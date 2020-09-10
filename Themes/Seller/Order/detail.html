@@ -161,6 +161,10 @@
 										<span class="text-default">
 											<?php if( $item['payment_code'] == ''){ ?>未付款<?php } ?>
 											<?php if( $item['payment_code'] == 'yuer'){ ?>余额支付<?php } ?>
+											<?php if( $item['payment_code'] == 'xx'){ ?>线下支付<?php } ?>
+											<?php if( $item['payment_code'] == 'ps'){ ?>POS机支付<?php } ?>
+											<?php if( $item['payment_code'] == 'jh'){ ?>聚合支付<?php } ?>
+											<?php if( $item['payment_code'] == 'xj'){ ?>现金支付<?php } ?>
 											<?php if( $item['payment_code'] == 'admin'){ ?>后台付款<?php } ?>
 											<?php if( $item['payment_code'] == 'weixin'){ ?>微信支付<?php } ?>
 										</span>

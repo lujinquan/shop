@@ -763,6 +763,18 @@ class OrderModel{
 									case 'yuer':
 										$paytype='余额支付';
 										break;
+									case 'xx':
+										$paytype='线下支付';
+										break;
+									case 'ps':
+										$paytype='POSS支付';
+										break;
+									case 'jh':
+										$paytype='聚合支付';
+										break;
+									case 'xj':
+										$paytype='现金支付';
+										break;
 									case 'weixin':
 										$paytype='微信支付';
 									break;

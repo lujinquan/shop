@@ -480,7 +480,14 @@
 										<?php if( $item['order_status_id'] != 3 && $item['order_status_id'] != 5){ ?>
 											<?php if( $item['payment_code']=='yuer'){ ?>
 											   <span> <i class="text-warning" style="font-size: 17px;"></i><span>余额支付</span></span>
-											
+											<?php }else if( $item['payment_code']=='xx' ){ ?>
+											   <span> <i class=" text-danger" style="font-size: 17px"></i>线下支付</span>
+											<?php }else if( $item['payment_code']=='ps' ){ ?>
+											   <span> <i class=" text-danger" style="font-size: 17px"></i>POS机支付</span>
+											<?php }else if( $item['payment_code']=='jh' ){ ?>
+											   <span> <i class=" text-danger" style="font-size: 17px"></i>聚合支付</span>
+											<?php }else if( $item['payment_code']=='xj' ){ ?>
+											   <span> <i class=" text-danger" style="font-size: 17px"></i>现金支付</span>
 											<?php }else if( $item['payment_code']=='admin' ){ ?>
 											   <span> <i class=" text-danger" style="font-size: 17px"></i>后台付款</span>
 											<?php  }else{  ?>
@@ -491,6 +498,14 @@
 											
 											<?php if($item['payment_code']=='yuer'){ ?>
 											    <span> <i class="text-warning" style="font-size: 17px;"></i><span>余额支付</span></span>
+											<?php }elseif($item['payment_code']=='xx'){ ?>
+											    <span> <i class=" text-danger" style="font-size: 17px"></i>线下支付</span>
+											<?php }elseif($item['payment_code']=='ps'){ ?>
+											    <span> <i class=" text-danger" style="font-size: 17px"></i>POS机支付</span>
+											<?php }elseif($item['payment_code']=='jh'){ ?>
+											    <span> <i class=" text-danger" style="font-size: 17px"></i>聚合支付</span>
+											<?php }elseif($item['payment_code']=='xj'){ ?>
+											    <span> <i class=" text-danger" style="font-size: 17px"></i>现金支付</span>
 											<?php }elseif($item['payment_code']=='admin'){ ?>
 											    <span> <i class=" text-danger" style="font-size: 17px"></i>后台付款</span>
 											<?php }else if($item['payment_code']=='weixin'){ ?>

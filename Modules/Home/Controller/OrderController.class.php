@@ -1494,6 +1494,7 @@ class OrderController extends CommonController {
 		$order_data = $gpc['order_data'];
 		$token = $gpc['token'];
 		
+		$pay_method = $gpc['pay_method'];
 		
 		$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
 		
@@ -1555,7 +1556,7 @@ class OrderController extends CommonController {
 		{
 			foreach($list as $val)
 			{
-				D('Home/Frontorder')->receive_order($val['order_id']);
+				D('Home/Frontorder')->receive_order($val['order_id'],false,$pay_method);
 				if($is_member_hexiao)
 				{
 					$pickup_member_record_data = array();
