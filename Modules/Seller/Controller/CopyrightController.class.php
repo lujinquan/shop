@@ -146,7 +146,9 @@ class CopyrightController extends CommonController{
 			$param['user_tool_icons']['i7'] = trim($data['user_tool_icon7']);
 			$param['user_tool_icons']['i8'] = trim($data['user_tool_icon8']);
 			$param['user_tool_icons']['i9'] = trim($data['user_tool_icon9']);
+			$param['user_tool_icons']['i11'] = trim($data['user_tool_icon11']);
 			$param['user_tool_icons'] = serialize($param['user_tool_icons']);
+
 
 			D('Seller/Config')->update($param);
 			
@@ -179,6 +181,8 @@ class CopyrightController extends CommonController{
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_tool_icon8']), ROOT_PATH.'static/images/serviceIcon.png');
 			@unlink(ROOT_PATH.'static/images/aboutUsIcon.png');
 			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_tool_icon9']), ROOT_PATH.'static/images/aboutUsIcon.png');
+			@unlink(ROOT_PATH.'static/images/cards.png');
+			copy(ROOT_PATH.'Uploads/image/'.trim($data['user_tool_icon11']), ROOT_PATH.'static/images/cards.png');
 			//-------------- by lucas 【自定义设置图片同步到服务器供小程序初始化调用】 End --------------------------
 
 			show_json(1, array('url' => $_SERVER['HTTP_REFERER']));

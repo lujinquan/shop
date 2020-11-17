@@ -2652,4 +2652,34 @@ function sellerLog($content='default', $type=-1)
     $data['add_time'] = time();
     M('seller_log')->add($data);
 }
+
+/**
+ * 随机字符串
+ * @param int $length 长度
+ * @param int $type 类型(0：混合；1：纯数字)
+ * @return string
+ */
+function batch_random($length = 16, $type = 1, $num = 1) {
+    $count = 0;
+    $return = array();
+    $seed = base_convert(md5(microtime() . $_SERVER['DOCUMENT_ROOT']), 16, $type ? 10 : 35);
+    $seed = $type ? (str_replace('0', '', $seed) . '012340567890') : ($seed . 'zZ' . strtoupper($seed));
+    while ($count < $num) {
+        if ($type) {
+            $hash = '';
+        } else {
+            $hash = chr(rand(1, 26) + rand(0, 1) * 32 + 64);
+            $length--;
+        }
+        $max = strlen($seed) - 1;
+        for ($i = 0; $i < $length; $i++) {
+            $hash .= $seed{mt_rand(0, $max)};
+        }
+        if(!in_array($hash,$return)){
+            $return[] = $hash;
+        }
+        $count = count($return);
+    }
+    return $return;
+}
 ?>

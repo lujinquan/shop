@@ -2077,8 +2077,261 @@ class UserController extends CommonController {
 		}
 		
 	}
-	
-	
+
+    /**
+     * 用户获取有效的储值卡相关信息
+     * =====================================
+     * @author  Lucas
+     * email:   598936602@qq.com
+     * Website  address:  www.mylucas.com.cn
+     * =====================================
+     * 创建时间: 2020-11-15 15:24:35
+     * @return  返回值
+     * @version 版本  1.0
+     */
+    public function get_active_recharge_card()
+    {
+        $_GPC = I('request.');
+        $token =  $_GPC['token'];
+
+        $weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
+        if(  empty($weprogram_token) ||  empty($weprogram_token['member_id']) )
+        {
+            echo json_encode( array('code' => 1) );
+            die();
+        }
+
+        $list = M('lionfish_comshop_member_recharge_card')->where( array('deletetime'=>0,'expire_time'=>array('GT',time()-86400)) )->field('cardmark,cardname,valuemoney,from_unixtime(expire_time, \'%Y-%m-%d\') as expire_time,card_describe')->order('id desc')->select();
+        if(empty($list)){
+            echo json_encode( array('code' => 1,'data'=>array(), 'msg' => '没有有效的储值卡数据') );
+            die();
+        }else{
+            echo json_encode( array('code' => 0,'data'=>$list) );
+            die();
+        }
+    }
+
+    /**
+     * 验证用户使用储值卡充值密码是否正确
+     * =====================================
+     * @author  Lucas
+     * email:   598936602@qq.com
+     * Website  address:  www.mylucas.com.cn
+     * =====================================
+     * 创建时间: 2020-11-15 15:24:35
+     * @return  返回值
+     * @version 版本  1.0
+     */
+    public function check_user_bind_recharge_card()
+    {
+        $_GPC = I('request.');
+        $token =  $_GPC['token'];
+
+        $weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
+        if(  empty($weprogram_token) ||  empty($weprogram_token['member_id']) )
+        {
+            echo json_encode( array('code' => 1) );
+            die();
+        }
+
+        $member_id = $weprogram_token['member_id'];
+
+        $cardmark = $_GPC['cardmark']; //储蓄卡标识
+        $password = $_GPC['password']; //储蓄卡标识
+        if(empty($cardmark) || empty($password)){
+            echo json_encode( array('code' => 1 , 'msg' => '标识或密码不能为空') );
+            die();
+        }
+        $where = '1';
+        $where .= " and c.cardmark = '".$cardmark."'";
+        $where .= " and cr.password = '".$password."'";
+
+        $sql = "select cr.*,c.cardname,c.password_type,c.valuemoney,c.cardmark,c.addtime,c.expire_time,c.deletetime,m.username,m.telephone from ".C('DB_PREFIX'). "lionfish_comshop_member_recharge_card_record as cr left join "
+            .C('DB_PREFIX')."lionfish_comshop_member_recharge_card as c on cr.recharge_card_id = c.id left join ".C('DB_PREFIX')."lionfish_comshop_member as m on cr.member_id = m.member_id where ".$where;
+        $list = M()->query($sql);
+
+        if(empty($list)){
+//            S('user_bind_recharge_card_member_id_'.$member_id,null);
+//            echo json_encode( array('code' => 1 , 'msg' => '密码或标识错误') );
+            $cache_times = S('user_bind_recharge_card_member_id_'.$member_id);
+//            $cache = S(array('member_id_'.$member_id=>'xcache','expire'=>60));
+            if(empty($cache_times)){
+                $cache_times = 1;
+                $left_times = 10 - $cache_times;
+                S('user_bind_recharge_card_member_id_'.$member_id,1,24*3600);
+                echo json_encode( array('code' => 1 , 'msg' => '密码错误，今天还剩'.$left_times.'次输入机会') );
+                die();
+            }else{
+                if($cache_times > 10){
+                    echo json_encode( array('code' => 1 , 'msg' => '今天密码输入机会已用完') );
+                    die();
+                }
+                $cache_times++;
+                $left_times = 10 - $cache_times;
+                S('user_bind_recharge_card_member_id_'.$member_id,$cache_times);
+                if($left_times > 0){
+                    echo json_encode( array('code' => 1 , 'msg' => '密码错误，今天还剩'.$left_times.'次输入机会') );
+                    die();
+                }else{
+                    echo json_encode( array('code' => 1 , 'msg' => '密码错误，今天密码输入机会已用完') );
+                    die();
+                }
+            }
+
+            die();
+        }else{
+            $info = $list[0];
+            if($info['deletetime']){
+                echo json_encode( array('code' => 1 , 'msg' => '当前储值卡已被销毁') );
+                die();
+            }
+            if(time() > $info['expire_time'] + 86400){
+                echo json_encode( array('code' => 1 , 'msg' => '当前储值卡已过期') );
+                die();
+            }
+            if(time() > $info['expire_time'] + 86400){
+                echo json_encode( array('code' => 1 , 'msg' => '当前储值卡已过期') );
+                die();
+            }
+            if(!empty($info['username'])){
+                $username = mb_substr($info['username'],0,1).'*'.mb_substr($info['username'],-1,1);
+                if(empty($info['telephone'])){
+                    $telephone = '';
+                }else{
+                    $telephone = mb_substr($info['telephone'],0,3).'****'.mb_substr($info['telephone'],7);
+                }
+                echo json_encode( array('code' => 2 , 'msg'=> '此卡已被使用','username' => $username, 'telephone' => $telephone) );
+                die();
+            }
+
+
+            // 开始充值
+            echo json_encode( array('code' => 0 , 'msg' => '验证成功') );
+            die();
+        }
+    }
+
+    /**
+     * 用户使用储值卡充值
+     * =====================================
+     * @author  Lucas
+     * email:   598936602@qq.com
+     * Website  address:  www.mylucas.com.cn
+     * =====================================
+     * 创建时间: 2020-11-15 15:24:35
+     * @return  返回值
+     * @version 版本  1.0
+     */
+	public function user_bind_recharge_card()
+    {
+        $_GPC = I('request.');
+        $token =  $_GPC['token'];
+
+        $weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
+        if(  empty($weprogram_token) ||  empty($weprogram_token['member_id']) )
+        {
+            echo json_encode( array('code' => 1) );
+            die();
+        }
+
+        $member_id = $weprogram_token['member_id'];
+
+        $cardmark = $_GPC['cardmark']; //储蓄卡标识
+        $password = $_GPC['password']; //储蓄卡标识
+        if(empty($cardmark) || empty($password)){
+            echo json_encode( array('code' => 1 , 'msg' => '标识或密码不能为空') );
+            die();
+        }
+        $where = '1';
+        $where .= " and c.cardmark = '".$cardmark."'";
+        $where .= " and cr.password = '".$password."'";
+
+        $sql = "select cr.*,c.cardname,c.password_type,c.valuemoney,c.cardmark,c.addtime,c.expire_time,c.deletetime,m.username,m.telephone from ".C('DB_PREFIX'). "lionfish_comshop_member_recharge_card_record as cr left join "
+            .C('DB_PREFIX')."lionfish_comshop_member_recharge_card as c on cr.recharge_card_id = c.id left join ".C('DB_PREFIX')."lionfish_comshop_member as m on cr.member_id = m.member_id where ".$where;
+        $list = M()->query($sql);
+
+        if(empty($list)){
+//            S('user_bind_recharge_card_member_id_'.$member_id,null);
+//            echo json_encode( array('code' => 1 , 'msg' => '密码或标识错误') );
+            $cache_times = S('user_bind_recharge_card_member_id_'.$member_id);
+//            $cache = S(array('member_id_'.$member_id=>'xcache','expire'=>60));
+            if(empty($cache_times)){
+                $cache_times = 1;
+                $left_times = 10 - $cache_times;
+                S('user_bind_recharge_card_member_id_'.$member_id,1,24*3600);
+                echo json_encode( array('code' => 1 , 'msg' => '密码错误，今天还剩'.$left_times.'次输入机会') );
+                die();
+            }else{
+                if($cache_times > 10){
+                    echo json_encode( array('code' => 1 , 'msg' => '今天密码输入机会已用完') );
+                    die();
+                }
+                $cache_times++;
+                $left_times = 10 - $cache_times;
+                S('user_bind_recharge_card_member_id_'.$member_id,$cache_times);
+                if($left_times > 0){
+                    echo json_encode( array('code' => 1 , 'msg' => '密码错误，今天还剩'.$left_times.'次输入机会') );
+                    die();
+                }else{
+                    echo json_encode( array('code' => 1 , 'msg' => '密码错误，今天密码输入机会已用完') );
+                    die();
+                }
+            }
+
+            die();
+        }else{
+            $info = $list[0];
+            if($info['deletetime']){
+                echo json_encode( array('code' => 1 , 'msg' => '当前储值卡已被销毁') );
+                die();
+            }
+            if(time() > $info['expire_time'] + 86400){
+                echo json_encode( array('code' => 1 , 'msg' => '当前储值卡已过期') );
+                die();
+            }
+            if(time() > $info['expire_time'] + 86400){
+                echo json_encode( array('code' => 1 , 'msg' => '当前储值卡已过期') );
+                die();
+            }
+            if(!empty($info['username'])){
+                $username = mb_substr($info['username'],0,1).'*'.mb_substr($info['username'],-1,1);
+                if(empty($info['telephone'])){
+                    $telephone = '';
+                }else{
+                    $telephone = mb_substr($info['telephone'],0,3).'****'.mb_substr($info['telephone'],7);
+                }
+                echo json_encode( array('code' => 2 , 'msg'=> '此卡已被使用','username' => $username, 'telephone' => $telephone) );
+                die();
+            }
+
+
+            // 开始充值
+            $re = M('lionfish_comshop_member')->where( array('member_id' => $member_id) )->setInc('account_money',$info['valuemoney']);
+
+            if($re){
+                $curr_time = time();
+                // 销毁储值卡
+                M('lionfish_comshop_member_recharge_card_record')->where( array('id' => $info['id'] ) )->save(['sign_time'=>$curr_time,'member_id'=>$member_id]);
+                // 充值流水
+                $member_info = M('lionfish_comshop_member')->field('account_money')->where( array('member_id' => $member_id) )->find();
+                $flow_data = array();
+                $flow_data['member_id'] = $member_id;
+                $flow_data['money'] = $info['valuemoney'];
+                $flow_data['state'] = 12;
+                $flow_data['remark'] = '会员储值卡线下充值';
+                $flow_data['charge_time'] = $curr_time;
+                $flow_data['add_time'] = $curr_time;
+                $flow_data['operate_end_yuer'] = $member_info['account_money'];
+                M('lionfish_comshop_member_charge_flow')->add($flow_data);
+                echo json_encode( array('code' => 0 , 'msg' => '充值成功') );
+                die();
+            }else{
+                echo json_encode( array('code' => 1 , 'msg' => '充值失败') );
+                die();
+            }
+        }
+    }
+
 	//end...
 	
 	//----begin---
@@ -2125,7 +2378,7 @@ class UserController extends CommonController {
 	    $list = array();
 
 		$sql = 'select * from  '.C('DB_PREFIX')."lionfish_comshop_member_charge_flow  
-			where member_id = ".$member_id."  and (state=1 or state=3 or state=4 or state=5 or state=8  or state=9 or state=10  or state=11) order by id desc limit {$offset},{$per_page}";
+			where member_id = ".$member_id."  and (state=1 or state=3 or state=4 or state=5 or state=8  or state=9 or state=10  or state=11 or state=12) order by id desc limit {$offset},{$per_page}";
 
 		$list = M()->query($sql);
 		
@@ -2174,32 +2427,33 @@ class UserController extends CommonController {
 		
 		
 		$weprogram_token = M('lionfish_comshop_weprogram_token')->field('member_id')->where( array('token' => $token) )->find();
-		
+
 		if(  empty($weprogram_token) ||  empty($weprogram_token['member_id']) )
 		{
-			//echo json_encode( array('code' => 1) );
-			//die();
+			echo json_encode( array('code' => 1) );
+			die();
 		}
-		
+//		echo '<pre>';
+//		echo $token;exit;
 		$member_id = $weprogram_token['member_id'];
 		if($member_id){
-			
+
 			$member_info = M('lionfish_comshop_member')->where( array('member_id' => $member_id) )->find();
-			
-			
+
+
 			$member_info['full_user_name'] = base64_decode($member_info['full_user_name']);
-			
+
 			// AFTER TO DO .
 			$member_level_list = array();
 			$level_name = '';
-			
+
 			$is_show_member_level = D('Home/Front')->get_config_by_name('is_show_member_level');
-			$member_level_arr = array( 
+			$member_level_arr = array(
 									0 => array('level_name' => '普通会员', 'discount' => 100),
 								);
 
 			$mb_level_list = M('lionfish_comshop_member_level')->where(1)->order('id asc')->select();
-			
+
 			if( !empty($mb_level_list) )
 			{
 				foreach( $mb_level_list as $val )
@@ -2207,17 +2461,17 @@ class UserController extends CommonController {
 					$tmp = array();
 					$tmp['level_name'] = $val['levelname'];
 					$tmp['discount'] = $val['discount'];
-					
+
 					$member_level_arr[$val['id']] = $tmp;
 				}
 			}
-			
+
 			$member_info['is_show_member_level'] = $is_show_member_level;//是否显示会员等级信息
 			$member_info['member_level_info'] = $member_level_arr[ $member_info['level_id'] ];
-			
-			
+
+
 			$opencommiss = D('Home/Front')->get_config_by_name('commiss_level');
-			
+
 			//待付款数量
 			$wait_pay_count = D('Home/Frontorder')->get_member_order_count($member_id," and order_status_id =3 ");
 			//待配送数量
@@ -2228,9 +2482,9 @@ class UserController extends CommonController {
 			$has_get_count = D('Home/Frontorder')->get_member_order_count($member_id," and order_status_id in(6,11) ");
 			//售后退款
 			$refund_send_count = D('Home/Frontorder')->get_member_order_count($member_id," and order_status_id in(7,12,13) ");
-			
+
 			$head_info = D('Home/Front')->get_member_community_info($member_id);
-			
+
 			if( empty($head_info) )
 			{
 				$member_info['is_head'] = 0;
@@ -2246,47 +2500,47 @@ class UserController extends CommonController {
 					$member_info['is_head'] = 3;
 				}
 			}
-			
-			
+
+
 			$member_info['wait_pay_count'] = $wait_pay_count;
 			$member_info['wait_send_count'] = $wait_send_count;
 			$member_info['wait_get_count'] = $wait_get_count;
 			$member_info['has_get_count'] = $has_get_count;
-			
+
 			//判断是否有提货码，没有就生成 hexiao_qrcod
 			//  lionfish_comshop/moduleA/groupCenter/pendingDeliveryOrders?memberId=49
-			
+
 			if( empty($member_info['hexiao_qrcod']))
 			{
 				$path = "lionfish_comshop/moduleA/groupCenter/pendingDeliveryOrders";
 				$hexiao_qrcod = D('Home/Pingoods')->_get_commmon_wxqrcode($path, $member_id);
-				
+
 				if( empty($hexiao_qrcod) )
 				{
 					$member_info['hexiao_qrcod'] = '';
 				}else{
 					M('lionfish_comshop_member')->where( array('member_id' => $member_id ) )->save( array('hexiao_qrcod' => $hexiao_qrcod) );
-				
+
 					$member_info['hexiao_qrcod'] =  tomedia($hexiao_qrcod);
 				}
-				
+
 			}else{
 				$member_info['hexiao_qrcod'] =  tomedia($member_info['hexiao_qrcod']);
 			}
-			
-			
-			
-			
-		
+
+
+
+
+
 			$supp_info = M('lionfish_comshop_supply')->where( array('member_id' => $member_id) )->find();
-			
+
 			$is_supply = 0; //未申请 2审核通过 1审核中
 			if( !empty($supp_info) ){
 				$is_supply = ($supp_info['state'] == 1) ? 2 : 1;
 			}
-			
-			
-			
+
+
+
 
 			$is_show_auth_mobile = D('Home/Front')->get_config_by_name('is_show_auth_mobile');
 			if( empty($is_show_auth_mobile) )
@@ -2294,118 +2548,118 @@ class UserController extends CommonController {
 				$is_show_auth_mobile = 0;
 			}
 
-			
-			
-			
+
+
+
 			//分销等级，如果是0，那么就是未开启分销
 			$commiss_level = D('Home/Front')->get_config_by_name('commiss_level');
 			if( empty($commiss_level) )
 			{
 				$commiss_level = 0;
 			}
-			
+
 			//是否需要分享多少人成为分销
 			$commiss_sharemember_need = D('Home/Front')->get_config_by_name('commiss_sharemember_need');
-			
+
 			//分享多少个人成为分销商
 			$commiss_share_member_update = D('Home/Front')->get_config_by_name('commiss_share_member_update');
-			
+
 			//是否需要填写表单
 			$commiss_biaodan_need = D('Home/Front')->get_config_by_name('commiss_biaodan_need');
-			
+
 			//是否需要审核
 			$commiss_become_condition = D('Home/Front')->get_config_by_name('commiss_become_condition');
-			
-			
+
+
 			//自定义表单格式
 			$commiss_diy_form = D('Home/Front')->get_config_by_name('commiss_diy_form');
-			
-			
+
+
 			$commiss_diy_name = D('Home/Front')->get_config_by_name('commiss_diy_name');
-			
-			
+
+
 			$share_member_count = M('lionfish_comshop_member')->where( "share_id={$member_id} and (agentid =0 or agentid={$member_id} )" )->count();
-			
+
 			$create_time = strtotime( date('Y-m-d').' 00:00:00' );
-			
+
 			$today_share_member_count = M('lionfish_comshop_member')->where( "share_id={$member_id} and (agentid =0 or agentid={$member_id}) and create_time>={$create_time}" )->count();
-			
-			
+
+
 			$create_y_time = $create_time - 86400;
 			$create_end_time = $create_time;
-			
+
 			$yestoday_share_member_count = M('lionfish_comshop_member')->where( "share_id={$member_id} and (agentid =0 or agentid={$member_id}) and create_time>={$create_y_time} and create_time < {$create_end_time}" )->count();
-			
+
 			//佣金团收益金额， 已结算多少钱，未结算多少钱
 			$pintuan_money = 0;
 			$pintuan_hasstatement_money = 0;
 			$pintuan_unstatement_money =0;
-			 
-			
+
+
 			$pin_commiss = M('lionfish_comshop_pintuan_commiss')->where( array('member_id' => $member_id ) )->find();
-			
+
 			if( !empty($pin_commiss) )
 			{
-				$pintuan_money = $pin_commiss['money'] + $pin_commiss['dongmoney']+ $pin_commiss['getmoney']; 
+				$pintuan_money = $pin_commiss['money'] + $pin_commiss['dongmoney']+ $pin_commiss['getmoney'];
 			}
-			
+
 			$tp_hasstatement_money = M('lionfish_comshop_pintuan_commiss_order')->where( array('member_id' => $member_id, 'state' => 1) )->sum('money');
-			
+
 			if( !empty($tp_hasstatement_money) && $tp_hasstatement_money > 0 )
 			{
 				$pintuan_hasstatement_money = $tp_hasstatement_money;
 			}
-			
+
 			$tp_unstatement_money = M('lionfish_comshop_pintuan_commiss_order')->where( array('member_id' => $member_id,'state' => 0 ) )->sum('money');
-			
+
 			if( !empty($tp_unstatement_money) && $tp_unstatement_money > 0 )
 			{
 				$pintuan_unstatement_money = $tp_unstatement_money;
 			}
-			
+
 			$result = array();
 			$result['code'] = 0;
 			$result['data'] = $member_info;
-			
+
 			$result['is_supply'] = $is_supply;
-			
+
 			$result['is_show_auth_mobile'] = $is_show_auth_mobile;
-			
-			
+
+
 			$result['commiss_level'] = $commiss_level;
-			
+
 			$result['share_member_count'] = $share_member_count;
 			$result['today_share_member_count'] = $today_share_member_count;
 			$result['yestoday_share_member_count'] = $yestoday_share_member_count;
-			
+
 			$result['commiss_sharemember_need'] = $commiss_sharemember_need;
 			$result['commiss_share_member_update'] = $commiss_share_member_update;
 			$result['commiss_biaodan_need'] = $commiss_biaodan_need;
 			$result['commiss_diy_form'] = unserialize($commiss_diy_form);
-			
+
 			$result['commiss_become_condition'] = $commiss_become_condition;
-			
+
 			$result['pintuan_money'] = $pintuan_money;
 			$result['pintuan_hasstatement_money'] = $pintuan_hasstatement_money;
 			$result['pintuan_unstatement_money'] = $pintuan_unstatement_money;
-			
+
 			//是否开启供应商手机端 member_id
 			$supply_is_open_mobilemanage = D('Home/Front')->get_config_by_name('supply_is_open_mobilemanage');
-		
+
 			if( empty($supply_is_open_mobilemanage) || $supply_is_open_mobilemanage == 0 )
 			{
 				$supply_is_open_mobilemanage = 0;
 			}
-			
+
 			$result['is_open_supplymobile'] = 0;
-			
+
 			$supply_info = M('lionfish_comshop_supply')->where( array('member_id' => $member_id) )->find();
-			
+
 			if( !empty($supply_info) &&  $supply_info['state'] == 1 && $supply_info['type'] == 1 && $supply_info['is_open_mobilemanage'] == 1 )
 			{
 				$result['is_open_supplymobile'] = 1;
 			}
-			
+
 		} else {
 			$result = array();
 			$result['code'] = 0;
@@ -2416,7 +2670,8 @@ class UserController extends CommonController {
 		$is_open_vipcard_buy = D('Home/Front')->get_config_by_name('is_open_vipcard_buy');
 		$modify_vipcard_name = D('Home/Front')->get_config_by_name('modify_vipcard_name');
 		$modify_vipcard_logo = D('Home/Front')->get_config_by_name('modify_vipcard_logo');
-		
+        //判断是否开启了 储值卡 is_open_recharge_card
+        $is_open_recharge_card = D('Home/Front')->get_config_by_name('is_open_recharge_card');
 		$modify_vipcard_name = empty($modify_vipcard_name) ? '天机会员': $modify_vipcard_name;
 		
 		if( !empty($modify_vipcard_logo) )
@@ -2427,7 +2682,7 @@ class UserController extends CommonController {
 		$result['is_open_vipcard_buy'] = $is_open_vipcard_buy;
 		$result['modify_vipcard_name'] = $modify_vipcard_name;
 		$result['modify_vipcard_logo'] = $modify_vipcard_logo;
-		
+        $result['is_open_recharge_card'] = $is_open_recharge_card;
 		$result['is_vip_card_member'] = 0;
 		
 		if( !empty($is_open_vipcard_buy) && $is_open_vipcard_buy == 1 )

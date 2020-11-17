@@ -138,6 +138,9 @@
 				<li  <?php if($state=='10'){ ?>class="layui-this"<?php } ?> >
 					<a href="{:U('marketing/recharge_diary', array('state' => 10))}">团长提现到余额（{$count_status_10}）</a>
 				</li>
+				<li  <?php if($state=='12'){ ?>class="layui-this"<?php } ?> >
+					<a href="{:U('marketing/recharge_diary', array('state' => 12))}">储值卡充值（{$count_status_12}）</a>
+				</li>
 		  </ul>
 		</div>
 		<div class="layui-card-body" style="padding:15px;">
@@ -224,6 +227,8 @@
 											分销提现到余额
 										<?php }else if( $row['state'] == 10 ){ ?>
 											团长提现到余额	
+										<?php }else if( $row['state'] == 12 ){ ?>
+											储值卡充值	
 										<?php } ?>
 									</td>
 									<td>
@@ -242,6 +247,8 @@
 										<?php }else if( $row['state'] == 9 ){ ?>
 											<span class="line-text">收入</span>
 										<?php }else if( $row['state'] == 10 ){ ?>
+											<span class="line-text">收入</span>	
+										<?php }else if( $row['state'] == 12 ){ ?>
 											<span class="line-text">收入</span>	
 										<?php } ?>
 										
@@ -263,6 +270,8 @@
 										<?php }else if( $row['state'] == 8 ){ ?>
 											-{$row['money']}
 										<?php }else if( $row['state'] == 9 ){ ?>
+											<span class="line-text">+{$row['money']}</span>
+										<?php }else if( $row['state'] == 12 ){ ?>
 											<span class="line-text">+{$row['money']}</span>
 										<?php } ?>
 									</td>

@@ -619,8 +619,10 @@ class MarketingController extends CommonController{
 		$count_status_9 = M('lionfish_comshop_member_charge_flow')->where( array('state' => 9) )->count();
 		
 		$count_status_10 = M('lionfish_comshop_member_charge_flow')->where( array('state' => 10) )->count();
+
+        $count_status_12 = M('lionfish_comshop_member_charge_flow')->where( array('state' => 12) )->count();
 		
-		
+//		dump($list);exit;
 		$this->list = $list;
 		$this->pager = $pager;
 		$this->all_count = $all_count;
@@ -631,6 +633,7 @@ class MarketingController extends CommonController{
 		$this->count_status_8 = $count_status_8;
 		$this->count_status_9 = $count_status_9;
 		$this->count_status_10 = $count_status_10;
+        $this->count_status_12 = $count_status_12;
 		
 		$this->display();
 	}

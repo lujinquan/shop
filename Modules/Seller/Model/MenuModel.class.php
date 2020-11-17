@@ -685,6 +685,16 @@ class MenuModel{
 								array('title' => '会员卡设置', 'route' => 'vipcard/config', 'desc' => ''),
 							)
 						),
+                        array(
+                            'title' => '储值卡管理',
+                            'route' => 'rechargecard/index',
+                            'items' => array(
+                                array('title' => '储值卡', 'route' => 'rechargecard/index', 'desc' => ''),
+                                array('title' => '领取明细', 'route' => 'rechargecard/receive', 'desc' => ''),
+//                                array('title' => '购买会员订单', 'route' => 'vipcard/order', 'desc' => ''),
+//                                array('title' => '会员卡设置', 'route' => 'vipcard/config', 'desc' => ''),
+                            )
+                        ),
 					)
 			),
 			'delivery'  => array(

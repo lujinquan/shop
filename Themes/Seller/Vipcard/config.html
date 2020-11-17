@@ -122,6 +122,17 @@
                         </label>
                     </div>
                 </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">储值卡功能开关</label>
+                    <div class="layui-input-block">
+                        <label class='radio-inline'>
+                            <input type='radio' name='data[is_open_recharge_card]' lay-filter="openvipcardbuy" value='0' <?php if( !empty($data) && $data['is_open_recharge_card'] ==0 ){ ?>checked <?php } ?> title="不开启" /> 
+                        </label>
+                        <label class='radio-inline'>
+                            <input type='radio' name='data[is_open_recharge_card]' lay-filter="openvipcardbuy"  value='1' <?php if( empty($data) || $data['is_open_recharge_card'] ==1 ){ ?>checked <?php } ?> title="开启" /> 
+                        </label>
+                    </div>
+                </div>
 				
 				
 				
