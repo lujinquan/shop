@@ -78,7 +78,7 @@
         				 <div class="layui-from-item">
         					 <label class="layui-form-label">储值卡名称:</label>
         					  <div class="layui-input-block">
-        					   <input type="text" name="data[cardname]" lay-verify="required" autocomplete="off" placeholder="请输入储值卡名称" value="{$item['cardname']}" class="layui-input">
+        					   <input type="text" name="data[cardname]" <?php if($record){ ?> readonly <?php } ?> lay-verify="required" autocomplete="off" placeholder="请输入储值卡名称" value="{$item['cardname']}" class="layui-input <?php if($record){ ?> layui-bg-gray <?php } ?>">
         					 </div>
         				 </div>
         				 <div class="layui-from-item">
@@ -125,7 +125,7 @@
         				 <div class="layui-from-item">
         					 <label class="layui-form-label">有效期:</label>
         					  <div class="layui-input-block">
-        					   <input type="text" name="data[expire_time]" id="date" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" value="{:date('Y-m-d',$item['expire_time'])}" class="layui-input">
+        					   <input type="text" name="data[expire_time]" <?php if($record){ ?> readonly <?php }else{ ?> id="date" lay-verify="date" placeholder="yyyy-MM-dd" <?php } ?> autocomplete="off" value="{:date('Y-m-d',$item['expire_time'])}" class="layui-input <?php if($record){ ?> layui-bg-gray <?php } ?>">
         					 </div>
         				 </div>
         			  </div>

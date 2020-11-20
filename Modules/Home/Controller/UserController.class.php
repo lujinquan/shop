@@ -2151,7 +2151,7 @@ class UserController extends CommonController {
         $list = M()->query($sql);
 
         if(empty($list)){
-//            S('user_bind_recharge_card_member_id_'.$member_id,null);
+//           S('user_bind_recharge_card_member_id_'.$member_id,null);
 //            echo json_encode( array('code' => 1 , 'msg' => '密码或标识错误') );
             $cache_times = S('user_bind_recharge_card_member_id_'.$member_id);
 //            $cache = S(array('member_id_'.$member_id=>'xcache','expire'=>60));
@@ -2159,21 +2159,23 @@ class UserController extends CommonController {
                 $cache_times = 1;
                 $left_times = 10 - $cache_times;
                 S('user_bind_recharge_card_member_id_'.$member_id,1,24*3600);
-                echo json_encode( array('code' => 1 , 'msg' => '密码错误，今天还剩'.$left_times.'次输入机会') );
+                echo json_encode( array('code' => 1 , 'msg' => '储值码错误，今天还剩'.$left_times.'次输入机会') );
                 die();
             }else{
                 if($cache_times > 10){
-                    echo json_encode( array('code' => 1 , 'msg' => '今天密码输入机会已用完') );
+                	S('user_bind_recharge_card_member_id_'.$member_id,10,24*3600);
+                    echo json_encode( array('code' => 1 , 'msg' => '今天储值码输入机会已用完，请在'.date('Y-m-d H:i',strtotime('+1 day')).'分后再试') );
                     die();
                 }
                 $cache_times++;
                 $left_times = 10 - $cache_times;
                 S('user_bind_recharge_card_member_id_'.$member_id,$cache_times);
                 if($left_times > 0){
-                    echo json_encode( array('code' => 1 , 'msg' => '密码错误，今天还剩'.$left_times.'次输入机会') );
+                    echo json_encode( array('code' => 1 , 'msg' => '储值码错误，今天还剩'.$left_times.'次输入机会') );
                     die();
                 }else{
-                    echo json_encode( array('code' => 1 , 'msg' => '密码错误，今天密码输入机会已用完') );
+                	S('user_bind_recharge_card_member_id_'.$member_id,10,24*3600);
+                    echo json_encode( array('code' => 1 , 'msg' => '今天储值码输入机会已用完，请在'.date('Y-m-d H:i',strtotime('+1 day')).'分后再试') );
                     die();
                 }
             }

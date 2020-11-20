@@ -106,23 +106,30 @@
 
 <div class="layui-fluid">
     <div class="layui-card">
-        <div class="layui-card-header layui-elem-quote">当前位置：<span class="line-text">领取明细管理</span></div>
+        <div class="layui-card-header layui-elem-quote">当前位置：<span class="line-text">【{$list[0]['cardname']}】明细</span></div>
         <div class="layui-card-body" style="padding:15px;">
             <form action="" method="get" class="form-horizontal form-search layui-form" role="form">
                 <input type="hidden" name="c" value="rechargecard" />
                 <input type="hidden" name="a" value="detail" />
 
-
-                <!-- <div class="layui-form-item">
+                <div class="layui-form-item">
                     <div class="layui-inline">
                         <div class="layui-input-inline">
-                            <input type="text" class="layui-input" name='keyword' value="{$_GPC['keyword']}" placeholder="输入关键词然后回车">
+                            <input type="text" class="layui-input" name='telephone' value="{$_GPC['telephone']}" placeholder="输入手机号然后回车">
                         </div>
+                        <div class="layui-input-inline">
+                            <select name='is_use' class='layui-input layui-unselect' style="width:80px;"  >
+                                <option value=''>使用状态</option>
+                                <option value='2' <?php if( $_GPC['is_use']=='2'){ ?>selected<?php } ?>>未使用</option>
+                                <option value='1' <?php if( $_GPC['is_use']=='1'){ ?>selected<?php } ?>>已使用</option>
+                            </select>
+                        </div>
+                        <input type="hidden" name="id" value="{$_GPC['id']}" />
                         <div class="layui-input-inline">
                             <button class="layui-btn layui-btn-sm"  type="submit"> 搜索</button>
                         </div>
                     </div>
-                </div> -->
+                </div>
 
             </form>
             <form action="" class="layui-form" lay-filter="example" method="post" >
@@ -142,15 +149,15 @@
                             <tr>
                                 <th style="width:25px;"><input type='checkbox' name="checkall" lay-skin="primary" lay-filter="checkboxall"  /></th>
                                 <th style="width:80px;">ID</th>
-                                <th style="width: 180px;">储值卡名称</th>
+
                                 <th style="width: 150px;">标识</th>
                                 <th style="width: 150px;">储值卡金额</th>
                                 <th style="width: 150px;">储值卡密码</th>
-                                <th style="width: 150px;">领取时间</th>
+                                <th style="width: 150px;">创建时间</th>
                                 <th style="width: 150px;">用户名</th>
                                 <th style="width: 150px;">用户电话</th>
 
-
+                                <th style="width: 150px;">领取时间</th>
 
                             </tr>
                             </thead>
@@ -164,9 +171,7 @@
                                 <td>
                                     {$item['id']}
                                 </td>
-                                <td>
-                                    {$item['cardname']}
-                                </td>
+
                                 <td>
                                     {$item['cardmark']}
                                 </td>
@@ -177,8 +182,8 @@
                                     {$item['password']}
                                 </td>
                                 <td>
-                                	<?php if($item['sign_time']){ ?>
-                                    <?php echo date('Y-m-d H:i:s',$item['sign_time']); ?>
+                                    <?php if($item['addtime']){ ?>
+                                    <?php echo date('Y-m-d H:i:s',$item['addtime']); ?>
                                     <?php }; ?>
                                 </td>
                                 <td>
@@ -187,7 +192,11 @@
                                 <td>
                                     {$item['telephone']}
                                 </td>
-
+                                <td>
+                                    <?php if($item['sign_time']){ ?>
+                                    <?php echo date('Y-m-d H:i:s',$item['sign_time']); ?>
+                                    <?php }; ?>
+                                </td>
 
                             </tr>
                             <?php } ?>

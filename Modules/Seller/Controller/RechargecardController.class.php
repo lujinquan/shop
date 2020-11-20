@@ -112,13 +112,23 @@ class RechargecardController extends CommonController{
         $condition = " 1 ";
         $condition .= " and c.id = ".$_GPC['id']." ";
 
-        if (!empty($_GPC['keyword'])) {
-            $_GPC['keyword'] = trim($_GPC['keyword']);
-            $condition .= ' and cardname like "%'.$_GPC['keyword'].'%"';
+        if (!empty($_GPC['telephone'])) {
+            $_GPC['telephone'] = trim($_GPC['telephone']);
+            $condition .= ' and m.telephone like "%'.$_GPC['telephone'].'%"';
+        }
+        if (!empty($_GPC['is_use'])) {
+            if($_GPC['is_use'] == 1){
+                $condition .= ' and cr.member_id > 0 ';
+            }elseif($_GPC['is_use'] == 2){
+                $condition .= ' and cr.member_id = 0 ';
+            }
+//            $_GPC['telephone'] = trim($_GPC['telephone']);
+
         }
         $sql = "select cr.*,c.cardname,c.password_type,c.valuemoney,c.cardmark,c.addtime,c.expire_time,m.username,m.telephone from ".C('DB_PREFIX'). "lionfish_comshop_member_recharge_card_record as cr left join "
             .C('DB_PREFIX')."lionfish_comshop_member_recharge_card as c on cr.recharge_card_id = c.id left join "
             .C('DB_PREFIX')."lionfish_comshop_member as m on cr.member_id = m.member_id where ".$condition." order by sign_time desc limit " . (($pindex - 1) * $psize) . "," . $psize;
+//        var_dump($sql);exit;
         $list = M()->query($sql);
         foreach ($list as $k => &$v) {
             $len = strlen($v['password']);
@@ -155,6 +165,10 @@ class RechargecardController extends CommonController{
         if (!empty($id)) {
 
             $item = M('lionfish_comshop_member_recharge_card')->where( array('id' => $id ) )->find();
+
+            $record = M('lionfish_comshop_member_recharge_card_record')->where( array('recharge_card_id' => $id, 'sign_time' => array('GT',0), 'member_id' => array('GT',0) ) )->find();
+
+            $this->record = $record;
 
             $this->item = $item;
         }
