@@ -175,7 +175,9 @@
 										<?php }else if( $row['state'] == 10 ){ ?>
 											团长提现到余额	
 										<?php }else if( $row['state'] == 11 ){ ?>
-											拼团佣金提现到余额											
+											拼团佣金提现到余额
+										<?php }else if( $row['state'] == 12 ){ ?>
+										储值卡充值
 										<?php } ?>
 									</td>
 									<td>
@@ -200,7 +202,9 @@
 											<span class="line-text">+{$row['money']}</span>
 										<?php }else if( $row['state'] == 11 ){ ?>
 											<span class="line-text">+{$row['money']}</span>
-										<?php } ?>	
+										<?php }else if( $row['state'] == 12 ){ ?>
+											<span class="line-text">+{$row['money']}</span>
+										<?php } ?>
 									</td>
 									<td> 
 										{$row['operate_end_yuer']}
