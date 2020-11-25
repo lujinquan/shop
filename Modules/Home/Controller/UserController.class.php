@@ -2202,12 +2202,15 @@ class UserController extends CommonController {
                 }else{
                     $telephone = mb_substr($info['telephone'],0,3).'****'.mb_substr($info['telephone'],7);
                 }
+                if(empty($username)){
+                    $username = $info['username'];
+                }
                 echo json_encode( array('code' => 2 , 'msg'=> '此卡已被使用','username' => $username, 'telephone' => $telephone) );
                 die();
             }
 
 
-            // 开始充值
+            // 验证成功
             echo json_encode( array('code' => 0 , 'msg' => '验证成功') );
             die();
         }
@@ -2308,11 +2311,17 @@ class UserController extends CommonController {
 
 
             // 开始充值
+            $record_info = M('lionfish_comshop_member_recharge_card_record')->where( array('id' => $info['id'] ) )->field('sign_time,member_id')->find();
+            if(!empty($record_info['sign_time'])){
+                echo json_encode( array('code' => 1 , 'msg'=> '请勿重复使用') );
+                die();
+            }
+
             $re = M('lionfish_comshop_member')->where( array('member_id' => $member_id) )->setInc('account_money',$info['valuemoney']);
 
             if($re){
                 $curr_time = time();
-                // 销毁储值卡
+                // 绑定信息写入储值卡记录
                 M('lionfish_comshop_member_recharge_card_record')->where( array('id' => $info['id'] ) )->save(['sign_time'=>$curr_time,'member_id'=>$member_id]);
                 // 充值流水
                 $member_info = M('lionfish_comshop_member')->field('account_money')->where( array('member_id' => $member_id) )->find();
