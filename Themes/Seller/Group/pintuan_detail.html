@@ -230,7 +230,7 @@
 											<td><?php echo date('Y-m-d H:i:s',$v['date_added']); ?></td>
 											<td>{$v['province_name']}-{$v['city_name']}-{$v['area_name']}-{$v['shipping_address']}</td>
 											<td>
-											  <a lay-href="{:U('order/detail', array('id' => $v['order_id']))}" target="_blank" class="btn btn-success btn-sm">查看订单</a>
+											  <a href="{:U('order/detail', array('id' => $v['order_id']))}" class="btn btn-success btn-sm">查看订单</a>
 											</td>
 										 </tr>
 										 <?php } ?>

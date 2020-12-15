@@ -947,8 +947,8 @@ class GroupController extends CommonController{
 	    }
 		
 		$this->order_status_arr = $order_status_arr;
-	     
-	    include $this->display();
+	    
+	    $this->display();
 		
 	}
 	
