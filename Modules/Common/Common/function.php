@@ -29,6 +29,9 @@ function ihttp_get($url) {
 function strexists($string, $find) {
     return !(strpos($string, $find) === FALSE);
 }
+function halt($data){
+    return dump($data);exit;
+}
 function all_qiniu() {
     include_once ROOT_PATH . 'Modules/Lib/Qiniu/autoload.php';
     //qiniu_accesskey

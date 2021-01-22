@@ -4110,9 +4110,9 @@ public function sub_order()
 			
 			D('Admin/Member')->sendMemberPointChange($member_id,$del_integral, 1 ,'积分兑换商品', 'integral_exchange', $oid ,$order_goods_tp['order_goods_id']);
 		}
-
+// dump($order['type']);dump($pay_total);dump($is_yue_open);dump($ck_yupay);dump($pay_method);exit;
 		//-------------- by lucas 【如果是余额支付才扣钱，如果是线下支付（即线下支付）xxpay则不扣钱 2020-09-09 14:17:39】 Start
-		if( $order['type'] == 'ignore' || $pay_total<=0 || ($is_yue_open == 1 && $ck_yupay == 1 && $member_info['account_money'] >= $pay_total) || ($is_yue_open == 1 && $ck_yupay == 1 && $pay_method == 'xxpay'))
+		if( $order['type'] == 'ignore' || $pay_total<=0 || ($is_yue_open == 1 && $ck_yupay == 1 && $member_info['account_money'] >= $pay_total) || ($is_yue_open == 1 && $ck_yupay >= 1 && $pay_method == 'xxpay'))
 		{
 			//-------------- by lucas 【如果是余额支付才扣钱，如果是线下支付（即线下支付）xxpay则不扣钱 2020-09-09 14:17:39】 End
 			/****
@@ -4127,7 +4127,7 @@ public function sub_order()
 			
 			***/
 			
-			if($ck_yupay == 1 && $pay_total >0 && $order['type'] != 'ignore')
+			if($ck_yupay >= 1 && $pay_total >0 && $order['type'] != 'ignore')
 			{ 
 				//开始余额支付
 				$member_charge_flow_data = array();
@@ -4344,7 +4344,7 @@ public function sub_order()
 			
 			var_dump($array);die();
 		}
-		else{ 
+		else{
 			
 			$fee = $pay_total;
 			$appid = D('Home/Front')->get_config_by_name('wepro_appid');
