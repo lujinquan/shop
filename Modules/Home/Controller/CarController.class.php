@@ -3006,6 +3006,8 @@ class CarController extends CommonController {
 		$need_data['is_need_subscript'] = $is_need_subscript;
 		$need_data['need_subscript_template'] = $need_subscript_template;
 		
+		// 告诉小程序，是否可以使用线下支付模式
+		$need_data['can_xxpay'] = $need_data['mode_type'] == 1 ? 0 : 1;
 		
 		echo json_encode($need_data);
 		die();
