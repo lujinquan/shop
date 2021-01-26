@@ -3079,6 +3079,11 @@ public function sub_order()
 	$data_s  = array();
 	//-------------- by lucas 【支付方式  xxpay 或者 wxpay （原来接收的参数是注释里面的，有问题） 2020-09-09 15:45:41】 End --------------------------
 	$data_s['pay_method'] = $gpc['pay_method'];
+
+	if(empty($gpc['pay_method'])){
+		echo json_encode( array('code' => 2, 'msg' => '请选择支付方式') );
+		die();
+	}
 	//$data_s['pay_method'] = $gpc['wxpay'];
 
 	//-------------- by lucas 【支付方式  xxpay 或者 wxpay 2020-09-09 15:45:41】 End --------------------------
