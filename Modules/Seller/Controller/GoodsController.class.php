@@ -23,12 +23,11 @@ class GoodsController extends CommonController{
 	}
 	
 	public function index(){
-	    
+
 		$pindex = I('get.page', 1);
 		$psize = 20;
-		
-		
-		
+
+
 		$starttime_arr = I('get.time');
 		
 		$starttime = isset($starttime_arr['start']) ? strtotime($starttime_arr['start']) : strtotime(date('Y-m-d'.' 00:00:00'));
@@ -279,14 +278,16 @@ class GoodsController extends CommonController{
 					ORDER BY  '.$sort_way.'  ';
 			}
 
-            if(I('export') != 1) { // 如果导出excel 就显示全部
+            //type=all时，导出的是上架中的商品；不为all时是全部的商品
+            if(I('export') != 1 && I('export_edit') != 1) { // 如果导出excel(商品列表/用于修改的列表) 就显示全部
                 $sql .= ' limit ' . (($pindex - 1) * $psize) . ',' . $psize;
             }
 			//$sql .= ' limit ' . (($pindex - 1) * $psize) . ',' . $psize;
 
 			
 			$list = M()->query($sql);
-			
+
+
 			$open_redis_server = D('Home/Front')->get_config_by_name('open_redis_server');
 			
 			if( isset($open_redis_server) && $open_redis_server >0 )
@@ -296,7 +297,8 @@ class GoodsController extends CommonController{
 			    $open_redis_server = 0;
 			}
 			$this->open_redis_server = $open_redis_server;
-			
+
+			//对$list的查询结果进行补充（通过查询其他关联表）
 			foreach ($list as $key => &$value ) {
 				
 				$price_arr = D('Home/pingoods')->get_goods_price($value['id']);
@@ -375,7 +377,7 @@ class GoodsController extends CommonController{
 				
 				$value['head_count'] = $head_count;
                 $value['option'] = [];
-                if(I('get.export') > 0) {// 商品列表到处excel时要导出规格
+                if(I('get.export') > 0) {// 商品列表导出excel时要导出规格
                     $value['option'] = M('lionfish_comshop_goods_option_item_value')->where('goods_id = "'.$value['id'].'"')->field('id,title,productprice,marketprice,card_price,stock,title,goodssn,costprice,weight')->select();
                     if($value['option'] === null){
                         $value['option'] = [];
@@ -413,6 +415,12 @@ class GoodsController extends CommonController{
 		}
 		unset($value);
 
+        //----- HRC 处理excel导入的数据 ------
+        if(IS_POST && I('post.cancelsend') == 'yes'){
+
+            $this->import_edit_excel();
+        }
+        //-----end-----
 
 		$categorys = D('Seller/GoodsCategory')->getFullCategory(true);
 		$category = array();
@@ -525,8 +533,14 @@ class GoodsController extends CommonController{
 			}
 		}
 
-        if(I('get.export') > 0) {// 商品列表到处excel
+//		dump($list); exit;
+
+        if(I('get.export') > 0) {// 商品列表导出excel
             $this->goods_listexcel($list);
+        }
+
+        if(I('get.export_edit') > 0 ){ //导出列表用于批量修改
+            $this->export_edit_excel($list);
         }
 		$this->config_data = $config_data;
 						
@@ -537,12 +551,297 @@ class GoodsController extends CommonController{
 		$this->is_vir_count = $is_vir_count;
 		$this->is_newbuy = $is_newbuy;
 		$this->is_goodsspike = $is_goodsspike;
-		
+
 		$this->display();
 	}
 
     /**
-     * 商品列表到处excel
+     * 导出商品列表用于批量修改
+     * @author HRC
+     * @param $list 商品列表集合数据 全部-根据where条件搜索获得
+     */
+	public function export_edit_excel($list)
+    {
+//        dump($list);die;
+        $printList = $list;
+        foreach($list as $key => $value) {
+            $printList[$key] = array(
+                'id' => $value['id']
+            );
+        }
+        $columns = array(
+            array(
+                'title' => '商品ID(禁止修改)',
+                'field' => 'id',
+                'width' => 24
+            ) ,
+            array(
+                'title' => '商品编码(禁止修改)',
+                'field' => 'codes',
+                'width' => 24
+            ) ,
+            array(
+                'title' => '商品名称',
+                'field' => 'goodsname',
+                'width' => 24
+            ) ,
+            array(
+                'title' => '商品成本价',
+                'field' => 'costprice',
+                'width' => 24
+            ) ,
+            array(
+                'title' => '会员卡价格',
+                'field' => 'card_price',
+                'width' => 24
+            ) ,
+            array(
+                'title' => '商品原价',
+                'field' => 'productprice',
+                'width' => 24
+            ) ,
+            array(
+                'title' => '商品库存',
+                'field' => 'total',
+                'width' => 24
+            ) ,
+            array(
+                'title' => '1上架/0下架',
+                'field' => 'grounding',
+                'width' => 24
+            ) ,
+            array(
+                'title' => '首页推荐(0:取消/1:是)',
+                'field' => 'is_index_show',
+                'width' => 24
+            ) ,
+            array(
+                'title' => '限时秒杀(0:取消/1:是)',
+                'field' => 'is_spike_buy',
+                'width' => 24
+            )
+        );
+        sellerLog('导出商品excel', 3);
+        D('Seller/Excel')->export_goods_list_edit(array(
+            'title' => '商品列表(用于批量修改)',
+            'columns' => $columns
+        ), $list);
+
+    }
+
+    /**
+     * 导入批量修改后的excel - by HRC
+     */
+    public function import_edit_excel()
+    {
+
+        $_GPC = I('request.');
+
+        $type = $_GPC['type'];
+
+        $fext = substr($_FILES['excelfile']['name'], strrpos($_FILES['excelfile']['name'], '.') + 1);
+
+
+        if( $fext == 'csv' )
+        {
+            $file_name = $_FILES['excelfile']['tmp_name'];
+            $file = fopen($file_name,'r');
+
+            $rows = array();
+            $i =0;
+            while ($data = fgetcsv($file)) {
+
+                $rows[] = eval('return '.iconv('gbk','utf-8',var_export($data,true)).';');
+
+            }
+
+        }else{
+
+            $rows = D('Seller/Excel')->import('excelfile');
+        }
+
+
+        $err_array = array();
+
+        $quene_good_list = array();
+
+        $cache_key = md5(time().count($rows));
+
+        $j =0;
+        foreach ($rows as $rownum => $col)
+        {
+
+            $id = trim($col[0]);
+
+            if (empty($id)) {
+                $err_array[] = $id;
+                continue;
+            }
+            if($j == 0)
+            {
+                $j++;
+                continue;
+            }
+
+            $quene_good_list[]  = array(
+                'id' => $id ,
+                'codes' => $col[1],
+                'goodsname' => $col[2],
+                'costprice' => $col[3],
+                'card_price' => $col[4],
+                'productprice' => $col[5],
+                'total' => $col[6],
+                'grounding' => $col[7],
+                'is_index_show' => $col[8],
+                'is_spike_buy' => $col[9]
+            );
+
+        }
+
+        $imported = 0;
+        S('_goodquene_'.$cache_key, $quene_good_list);
+        S('_goodimport_'.$cache_key, $imported);
+
+        $this->cache_key = $cache_key;
+        $this->imported = $imported;
+        $this->type = $type;
+
+        $this->display('Goods/update_goods_excel');
+
+        die();
+    }
+
+    /**
+     * 将导入的excel数据写入数据库 - by HRC 每次写入都是循环调用该函数
+     */
+    public function do_good_queue()
+    {
+
+        $_GPC = I('request.');
+
+        $type = $_GPC['type'];
+
+        $cache_key = $_GPC['cache_key'];
+
+        $quene_good_list = S('_goodquene_'.$cache_key);
+
+        $imported = S('_goodimport_'.$cache_key);
+
+        ++$imported;
+
+        S('_goodimport_'.$cache_key, $imported);
+
+//        dump($quene_good_list); exit;
+
+        if(empty($quene_good_list)){ //没有待处理的了，更新成功
+
+            echo json_encode( array('code' => 2) );
+
+            die();
+        }
+
+        //array_shift 移除数组第一个元素，并将移除的元素值返回 类似于队列pop
+        $tmp_info = array_shift($quene_good_list);
+
+        S('_goodquene_'.$cache_key, $quene_good_list);
+
+        $tmp_info['id'] = trim($tmp_info['id']);
+
+        $tmp_info['id'] =  preg_replace("/(\s|\&nbsp\;|　|\xc2\xa0)/","",$tmp_info['id']);
+
+        $goods_info = M('lionfish_comshop_goods')->where( array('id' => $tmp_info['id'] ) )->find();
+
+        if(!empty($goods_info))
+        {
+            //检查输入值是否非法，非法则报错
+            $err_msg = '';
+
+            $err_exist = false;
+
+            $sliced_info = array_slice($tmp_info, 3);
+
+            $i = 3;
+
+            foreach($sliced_info as $k => $v){
+
+                if(!is_numeric($v)){
+
+                    $err_exist =  true;
+
+                    $err_msg .= '-- Excel中数据不合法, 输入的数据不是数值, ';
+
+                }
+
+                if($v < 0){
+
+                    if(!$err_exist){
+
+                        $err_msg .= '-- Excel中数据不合法, 输入的数据是负数, ';
+
+                        $err_exist =  true;
+
+                    } else {
+
+                        $err_msg .= '是负数, ';
+                    }
+                }
+
+                if($k == 'grounding' || $k == 'is_index_show' || $k == 'is_spike_buy'){
+
+                    if($v != 0 && $v != 1){
+
+                        if(!$err_exist){
+
+                            $err_msg .= '-- Excel中数据不合法, 输入的数据不是0或1, ';
+
+                            $err_exist =  true;
+
+                        } else {
+
+                            $err_msg .= '不是0或1, ';
+                        }
+                    }
+                }
+
+                if(!empty($err_exist)){
+
+                    $err_msg .= '坐标: '.chr(ord('A') + $i).($imported + 1).'</br>';
+                }
+
+                $err_exist = false;
+
+                ++$i;
+            }
+
+            if($err_msg){
+
+                echo json_encode( array('code' => 1, 'msg' => '商品：'.$tmp_info['goodsname'].', ID: '.$tmp_info['id'].', 修改失败, 还剩余'.count($quene_good_list).'个商品未修改。失败原因： '.'</br>'.$err_msg) );
+
+                die();
+            }
+
+            $res = array();
+            $res['is_spike_buy'] = $tmp_info['is_spike_buy'];
+            $res['id'] = $tmp_info['id'];
+            M('lionfish_comshop_good_common')->save($res);
+
+            array_pop($tmp_info);
+            M('lionfish_comshop_goods')->save($tmp_info);
+
+            echo json_encode( array('code' => 0, 'msg' => '商品：'.$tmp_info['goodsname'].", ID: ".$tmp_info['id'].", 修改成功, 还剩余".count($quene_good_list)."个商品未修改。") );
+
+            die();
+
+        } else {
+
+            echo json_encode( array('code' => 1, 'msg' => '商品：'.$tmp_info['goodsname'].", ID: ".$tmp_info['id'].", 修改失败, 本功能只能修改商品信息不能新增商品，请勿修改商品ID。还剩余".count($quene_good_list)."个商品未修改。") );
+
+            die();
+        }
+    }
+
+    /**
+     * 商品列表导出excel
      * @author 刘鑫芮 2020-03-02
      * @param $list 商品列表集合数据 全部-根据where 条件搜索的
      * */
@@ -719,7 +1018,7 @@ class GoodsController extends CommonController{
             ) ,
             array(
                 'title' => '规格编码',
-                'field' => 'option_goodssn',
+                'field' => 'codes',
                 'width' => 24
             ) ,
             array(
