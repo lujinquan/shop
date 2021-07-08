@@ -18,40 +18,61 @@ class RechargecardController extends CommonController{
 	public function index()
 	{
 		$_GPC = I('request.');
-		  
 
         $pindex    = max(1, intval($_GPC['page']));
         $psize     = 20;
 
-		$condition = " 1 ";
-        $condition .= " and deletetime = 0 ";
-		
-        if (!empty($_GPC['keyword'])) {
-            $_GPC['keyword'] = trim($_GPC['keyword']);
-            $condition .= ' and cardname like "%'.$_GPC['keyword'].'%"';
-        }
+        $condition = [
+            'deletetime' => 0
+        ];
 
-		$list = M('lionfish_comshop_member_recharge_card')->where($condition)->order('id desc')->limit( (($pindex - 1) * $psize) , $psize )->select();
-
-        foreach ($list as &$info){
-            $records = M('lionfish_comshop_member_recharge_card_record')->where( ' sign_time > 0 and member_id > 0 and recharge_card_id = '.$info['id'])->field('count(id) as ids')->find();
-            if(empty($records['ids'])){
-                $info['records'] = 0;
-            }else{
-                $info['records'] = $records['ids'];
+        if(!isset($_GPC['ids'])){
+            if (!empty($_GPC['keyword'])) {
+                $keyword = trim($_GPC['keyword']);
+                $condition['cardname'] = ['like','%'.$keyword.'%'];
             }
+        }else{
+            $ids = $_GPC['ids'];
+            if($ids != 'all'){
+                $ids = explode(',', $ids);
+                $condition['c.id'] = ['in',$ids];
+            }else{
+                if (!empty($_GPC['keyword'])) {
+                    $keyword = trim($_GPC['keyword']);
+                    $condition['cardname'] = ['like','%'.$keyword.'%'];
+                }
+            }
+            $list = M('lionfish_comshop_member_recharge_card c')->join(C('DB_PREFIX') . 'lionfish_comshop_member_recharge_card_record as r on
+         r.recharge_card_id = c.id','left')->where($condition)->field('c.*,r.password')->order('id asc')->select();
+
+            $data = [];
+            foreach ($list as $item) {
+                $data[$item['cardmark']][] = $item;
+            }
+
+            D('Seller/Excel')->exportRechargecards($data);
         }
-		
+
+        $start = ($pindex - 1) * $psize;
+        $list = M('lionfish_comshop_member_recharge_card c')->join(C('DB_PREFIX') . 'lionfish_comshop_member_level as l on
+         c.levelid = l.id','left')->where($condition)->field('c.*,l.levelname')->order('id desc')->limit( $start , $psize )->select();
+
+        $ids_map = M('lionfish_comshop_member_recharge_card_record')->where( 'sign_time > 0 and member_id > 0')
+            ->group('recharge_card_id')->getField('recharge_card_id,count(id) as records');
+        foreach ($list as &$info){
+            $info['records'] = $ids_map[$info['id']]?:0;
+        }
+
 		$total = M('lionfish_comshop_member_recharge_card')->where( $condition )->count();
 
         $pager = pagination2($total, $pindex, $psize);
 
-		
 		$this->list = $list;
+
 		$this->pager = $pager;
-		
+
 		$this->_GPC = $_GPC;
-		
+
 		$this->display();
 	}
 
@@ -70,9 +91,19 @@ class RechargecardController extends CommonController{
             $_GPC['keyword'] = trim($_GPC['keyword']);
             $condition .= ' and cardname like "%'.$_GPC['keyword'].'%"';
         }
-        $sql = "select cr.*,c.cardname,c.password_type,c.valuemoney,c.cardmark,c.addtime,c.expire_time,m.username,m.telephone from ".C('DB_PREFIX'). "lionfish_comshop_member_recharge_card_record as cr left join "
-            .C('DB_PREFIX')."lionfish_comshop_member_recharge_card as c on cr.recharge_card_id = c.id left join "
-            .C('DB_PREFIX')."lionfish_comshop_member as m on cr.member_id = m.member_id where cr.member_id > 0 order by sign_time desc limit " . (($pindex - 1) * $psize) . "," . $psize;
+        //----- HRC start -----
+        if (!empty($_GPC['expire_time'])) {
+            //日期合法性检查由日历控件完成，这里不再判断
+            $data['expire_time'] = strtotime($_GPC['expire_time']);
+
+            //在“明细”界面，仅修改子卡，不修改主卡
+            M(lionfish_comshop_member_recharge_card_record)->where(array('id' => $_GPC['itemid']))->data($data)->save();
+        }
+
+        $sql = "select cr.*,c.cardname,c.password_type,c.valuemoney,c.cardmark,c.addtime,m.username,m.telephone from " . C('DB_PREFIX') . "lionfish_comshop_member_recharge_card_record as cr left join "
+            . C('DB_PREFIX') . "lionfish_comshop_member_recharge_card as c on cr.recharge_card_id = c.id left join "
+            . C('DB_PREFIX') . "lionfish_comshop_member as m on cr.member_id = m.member_id where cr.member_id > 0 order by sign_time desc limit " . (($pindex - 1) * $psize) . "," . $psize;
+        //----- HRC end -----
         $list = M()->query($sql);
         foreach ($list as $k => &$v) {
             $len = strlen($v['password']);
@@ -88,7 +119,7 @@ class RechargecardController extends CommonController{
         .C('DB_PREFIX')."lionfish_comshop_member as m on cr.member_id = m.member_id where cr.member_id > 0 order by sign_time desc ";
         $totals = M()->query($count_sql);
 
-        $total = $totals['ids'];
+        $total = $totals[0]['ids'];
 //        dump($total);exit;
         $pager = pagination2($total, $pindex, $psize);
 
@@ -125,6 +156,15 @@ class RechargecardController extends CommonController{
 //            $_GPC['telephone'] = trim($_GPC['telephone']);
 
         }
+        //----- HRC start -----
+        if (!empty($_GPC['expire_time'])) {
+            //日期合法性检查由日历控件完成，这里不再判断
+            $data['expire_time'] = strtotime($_GPC['expire_time']);
+
+            //在“明细”界面，仅修改子卡，不修改主卡
+            M(lionfish_comshop_member_recharge_card_record)->where(array('id' => $_GPC['itemid']))->data($data)->save();
+        }
+        //----- HRC end -----
         $sql = "select cr.*,c.cardname,c.password_type,c.valuemoney,c.cardmark,c.addtime,c.expire_time,m.username,m.telephone from ".C('DB_PREFIX'). "lionfish_comshop_member_recharge_card_record as cr left join "
             .C('DB_PREFIX')."lionfish_comshop_member_recharge_card as c on cr.recharge_card_id = c.id left join "
             .C('DB_PREFIX')."lionfish_comshop_member as m on cr.member_id = m.member_id where ".$condition." order by sign_time desc limit " . (($pindex - 1) * $psize) . "," . $psize;
@@ -143,7 +183,7 @@ class RechargecardController extends CommonController{
         .C('DB_PREFIX')."lionfish_comshop_member as m on cr.member_id = m.member_id where ".$condition." order by sign_time desc ";
         $totals = M()->query($count_sql);
 
-        $total = $totals['ids'];
+        $total = $totals[0]['ids'];
         // dump($list);exit;
         $pager = pagination2($total, $pindex, $psize);
 
@@ -162,16 +202,41 @@ class RechargecardController extends CommonController{
 
         $id = intval($_GPC['id']);
 
+
+        //----- HRC start -----
         if (!empty($id)) {
+            $item = M('lionfish_comshop_member_recharge_card')->where(array('id' => $id))->find();
 
-            $item = M('lionfish_comshop_member_recharge_card')->where( array('id' => $id ) )->find();
+            $record = M('lionfish_comshop_member_recharge_card_record')->where(array('recharge_card_id' => $id, 'sign_time' => array('GT', 0), 'member_id' => array('GT', 0)))->find();
 
-            $record = M('lionfish_comshop_member_recharge_card_record')->where( array('recharge_card_id' => $id, 'sign_time' => array('GT',0), 'member_id' => array('GT',0) ) )->find();
+            $res = M('lionfish_comshop_member_level')->field('levelname')->where(array('id' => $item['levelid']))->find();
+
+            if (!$res) {
+                $res['levelname'] = '普通会员';
+            }
+
+            $item = array_merge($item, $res);
 
             $this->record = $record;
 
             $this->item = $item;
+
+        } else {
+            $res = M('lionfish_comshop_member_level')->field('id, levelname')->order('id asc')->select();
+            if (!empty($res)) {
+                foreach ($res as $k => $v) {
+                    $level[$v['id']] = $v['levelname'];
+                }
+                $level[0] = '普通会员';
+                ksort($level);
+                if ($this->item) {
+                    $this->item = array_merge($this->item, ['levelname' => $level]);
+                } else {
+                    $this->item = ['levelname' => $level];
+                }
+            }
         }
+        //----- HRC start -----
 
         if (IS_POST) {
 
@@ -227,15 +292,27 @@ class RechargecardController extends CommonController{
                 $ins_data['cardcount'] = $data['cardcount'];
                 // 储值卡添加时间
                 $ins_data['addtime'] = time();
+                //----- HRC start -----
+                // 储值卡充值送积分
+                $ins_data['open_recharge_send_score'] = $data['open_recharge_send_score'];
+                if ($ins_data['open_recharge_send_score'])
+                    $ins_data['recharge_money_for_score'] = $data['recharge_money_for_score'];
+                //储值卡会员等级
+                $ins_data['levelid'] = $data['levelid'];
+                //----- HRC end -----
             }
 
 
 
-
-            if( !empty($id) && $id > 0 )
-            {
-                M('lionfish_comshop_member_recharge_card')->where( array('id' => $id) )->save( $ins_data );
+            //----- HRC start -----
+            //编辑储值卡主卡，同时要更新子卡表，子卡若已领取则不能修改
+            if (!empty($id) && $id > 0) {
+                M('lionfish_comshop_member_recharge_card')->where(array('id' => $id))->save($ins_data);
+                $record = array();
+                $record['expire_time'] = $ins_data['expire_time'];
+                M('lionfish_comshop_member_recharge_card_record')->where(array('member_id' => 0, 'recharge_card_id' => $id))->save($record);
                 $id = $data['id'];
+            //----- HRC end -----
             }else{
                 $id = M('lionfish_comshop_member_recharge_card')->add( $ins_data );
 
@@ -256,6 +333,9 @@ class RechargecardController extends CommonController{
                     $record_data['recharge_card_id'] = $id;
                     // 储值卡密码（自动生成）
                     $record_data['password'] = $password_arr[$i];
+                    //----- HRC start -----
+                    $record_data['expire_time'] = $ins_data['expire_time'];
+                    //----- HRC end -----
                     M('lionfish_comshop_member_recharge_card_record')->add( $record_data );
                 }
 

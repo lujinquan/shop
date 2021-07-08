@@ -108,117 +108,140 @@
   <div class="layui-card">
     <div class="layui-card-header layui-elem-quote">当前位置：<span class="line-text">储值卡管理</span></div>
     <div class="layui-card-body" style="padding:15px;">
-      <form action="" method="get" class="form-horizontal form-search layui-form" role="form">
-        <input type="hidden" name="c" value="rechargecard" />
-        <input type="hidden" name="a" value="index" />
-      
-        
-        <div class="layui-form-item">
-          <div class="layui-inline">
-			  <div class="layui-input-inline">
-				<input type="text" class="layui-input" name='keyword' value="{$_GPC['keyword']}" placeholder="输入关键词然后回车">  
-			  </div>
-			  <div class="layui-input-inline">
-				<button class="layui-btn layui-btn-sm"  type="submit"> 搜索</button>
-			  </div>
-          </div>
-        </div>
-        
-      </form>
-      <form action="" class="layui-form" lay-filter="example" method="post" >
-       
-        <div class="row">
-          <div class="col-md-12">
-            <div class="page-table-header">
-              <span class="pull-right"> 
-                <a href="{:U('rechargecard/add', array('ok' => 1))}" class="layui-btn layui-btn-sm"><i class="fa fa-plus"></i> 添加储值卡</a>
+      <div class="layui-row">
+        <div class="layui-col-md12">
+          <form action="" method="get" class="form-horizontal form-search layui-form" role="form">
+            <input type="hidden" name="c" value="rechargecard" />
+            <input type="hidden" name="a" value="index" />
 
-              </span>
-              <br />
-              <div class="btn-group">
-<!--					<button class="btn btn-default btn-sm  btn-operation"  type="button" data-toggle='batch-remove' data-confirm="确认要删除吗?" data-href="{:U('rechargecard/delete')}">删除</button>-->
+
+            <div class="layui-form-item">
+              <div class="layui-inline">
+                <div class="layui-input-inline">
+                  <input type="text" class="layui-input" name='keyword' value="{$_GPC['keyword']}" placeholder="输入关键词然后回车">
+                </div>
+                <div class="layui-input-inline">
+                  <button class="layui-btn layui-btn-sm" type="submit" style="height: 34px"> 搜索 </button>
+                </div>
               </div>
             </div>
-            <table class="layui-table" lay-skin="line" lay-size="lg">
-              <thead>
-                <tr>
-                  <th style="width:25px;"><input type='checkbox' name="checkall" lay-skin="primary" lay-filter="checkboxall"  /></th>
-                  <th style="width:80px;">ID</th>
-                  <th style="width: 180px;">储值卡名称</th>
-                  <th style="width: 150px;">标识</th>
-				  <th style="width: 150px;">储值卡金额</th>
-                  <th style="width: 150px;">已使用/总数</th>
-				  <th style="width: 150px;">有效期</th>
-                  <th style="width: 150px;">创建时间</th>
-                 
-                  <th style="width: 260px;">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-              
-              <?php foreach($list as $item){ ?>
-                <tr>
-                  <td style="width:25px;">
-                    <input type='checkbox' name="item_checkbox" lay-skin="primary" value="{$item['id']}"/>
-                  </td>
-                  <td>
-                    {$item['id']}
-                  </td>
-                  <td>
-                    {$item['cardname']}
-                  </td>
-				  <td>
-                    {$item['cardmark']}
-                  </td>
-				  <td>
-                    {$item['valuemoney']}
-                  </td>
-				  <td>
-                    {$item['records']}/{$item['cardcount']}
-                  </td>
-                  <td>
-                     {:date('Y-m-d',$item['expire_time'])}
-                  </td>
-                  <td>
-                     {:date('Y-m-d H:i:s',$item['addtime'])}
-                  </td>
-				  
-                  <td style="overflow:visible;position:relative">
-
-                    <a class='layui-btn layui-btn-xs' href="{:U('rechargecard/add', array('id'=>$item['id']))}" >
-                      <i class="layui-icon layui-icon-edit"></i>编辑
-                    </a>
-
-                    <a class='layui-btn layui-btn-xs' href="{:U('rechargecard/detail',array('id'=>$item['id']))}">
-                      明细
-                    </a>
-                    <a class='layui-btn layui-btn-xs deldom' href="javascript:;" data-href="{:U('rechargecard/delete',array('id'=>$item['id']))}" data-confirm='确认要删除吗?'>
-                      <i class="layui-icon">&#xe640;</i>删除
-                    </a>
-                  </td>
-                </tr>
-              <?php } ?>
-              </tbody>
-              <tfoot>
-              <tr>
-                <td colspan="4">
-                  <div class="page-table-header">
-<!--                    <input type="checkbox" name="checkall" lay-skin="primary" lay-filter="checkboxall">-->
-                    <div class="btn-group">
-<!--                     <button class="btn btn-default btn-sm  btn-operation"  type="button" data-toggle='batch-remove' data-confirm="确认要删除吗?" data-href="{:U('rechargecard/delete')}">删除</button>-->
-                    </div>
-                  </div>
-                </td>
-                <td colspan="2" style="text-align: right">
-                  {$pager}
-                </td>
-              </tr>
-              </tfoot>
-            </table>
-          </div>
+          </form>
         </div>
-        
+        <div class="layui-col-md12">
+          <form action="" class="layui-form" lay-filter="example" method="post" >
+            <input type="hidden" name="ids" value="" />
+            <div class="page-table-header">
+              <span class="pull-right">
+                <a href="{:U('rechargecard/add', array('ok' => 1))}" class="layui-btn layui-btn-sm"><i class="fa fa-plus"></i> 添加储值卡</a>
+              </span>
+              <div class="btn-group">
+                <button class="btn btn-default btn-sm layui-btn-disabled export-select">
+                  导出选中数据
+                </button>
+                <button class="btn btn-default btn-sm export-all">
+                  导出全部数据
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <form action="" class="layui-form" lay-filter="example" method="post" >
+        <div class="layui-row">
+          <table class="layui-col-xs12 layui-col-sm12 layui-col-md12 layui-table" lay-skin="line">
+            <thead>
+            <tr>
+              <th style="width:25px;"><input type='checkbox' name="checkall" lay-skin="primary" /></th>
+              <th style="width:80px;">ID</th>
+              <th style="width: 180px;">储值卡名称</th>
+              <th style="width: 150px;">标识</th>
+              <th style="width: 150px;">储值卡金额</th>
+              <th style="width: 150px;">积分</th>
+              <th style="width: 150px;">会员等级</th>
+              <th style="width: 150px;">已使用/总数</th>
+              <th style="width: 150px;">有效期</th>
+              <th style="width: 150px;">创建时间</th>
+
+              <th style="width: 260px;">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <?php foreach($list as $item){ ?>
+            <tr>
+              <td style="width:25px;">
+                <input type='checkbox' name="item_checkbox" lay-skin="primary" value="{$item['id']}"/>
+              </td>
+              <td>
+                {$item['id']}
+              </td>
+              <td>
+                {$item['cardname']}
+              </td>
+              <td>
+                {$item['cardmark']}
+              </td>
+              <td>
+                {$item['valuemoney']}
+              </td>
+              <td>
+                {$item['valuemoney'] * $item['recharge_money_for_score']}
+              </td>
+              <td>
+                <?php if(empty($item['levelname'])) {echo '普通会员'; } else { ?>
+                {$item['levelname']}
+                <?php } ?>
+              </td>
+              <td>
+                {$item['records']}/{$item['cardcount']}
+              </td>
+              <td>
+                {:date('Y-m-d',$item['expire_time'])}
+              </td>
+              <td>
+                {:date('Y-m-d H:i:s',$item['addtime'])}
+              </td>
+
+              <td style="overflow:visible;position:relative">
+
+                <a class='layui-btn layui-btn-xs' href="{:U('rechargecard/add', array('id'=>$item['id']))}" >
+                  <i class="layui-icon layui-icon-edit"></i>编辑
+                </a>
+
+                <a class='layui-btn layui-btn-xs' href="{:U('rechargecard/detail',array('id'=>$item['id']))}">
+                  <i class="layui-icon layui-icon-list"></i>明细
+                </a>
+                <a class='layui-btn layui-btn-xs deldom' href="javascript:;" data-href="{:U('rechargecard/delete',array('id'=>$item['id']))}" data-confirm='确认要删除吗?'>
+                  <i class="layui-icon">&#xe640;</i>删除
+                </a>
+              </td>
+            </tr>
+            <?php } ?>
+            </tbody>
+            <tfoot>
+            <tr>
+              <td colspan="9">
+                <div class="page-table-header">
+                  <div class="btn-group">
+                    <button class="btn btn-default btn-sm layui-btn-disabled export-select">
+                      导出选中数据
+                    </button>
+                    <button class="btn btn-default btn-sm export-all">
+                      导出全部数据
+                    </button>
+                  </div>
+                </div>
+              </td>
+              <td colspan="2" style="text-align: right">
+                {$pager}
+              </td>
+            </tr>
+            </tfoot>
+          </table>
+        </div>
       </form>
+
     </div>
   </div>
 </div>
@@ -238,11 +261,10 @@
 var layer = layui.layer;
 var $;
 
-layui.use(['jquery', 'layer','form'], function(){ 
+layui.use(['jquery', 'layer','form'], function(){
   $ = layui.$;
-  var form = layui.form;
-  
-  
+  const form = layui.form;
+
   $('.deldom').click(function(){
     var s_url = $(this).attr('data-href');
     layer.confirm($(this).attr('data-confirm'), function(index){
@@ -272,178 +294,59 @@ layui.use(['jquery', 'layer','form'], function(){
           })
         }); 
   })
-  
-  $('.btn-operation').click(function(){
-    var ids_arr = [];
-    var obj = $(this);
-    var s_toggle = $(this).attr('data-toggle');
-    var s_url = $(this).attr('data-href');
-    
-    
+
+  $('.export-select').click(function(){
+    let ids_arr = [];
     $("input[name=item_checkbox]").each(function() {
-      
       if( $(this).prop('checked') )
       {
         ids_arr.push( $(this).val() );
       }
     })
-    if(ids_arr.length < 1)
-    {
-      layer.msg('请选择要操作的内容');
-    }else{
-      var can_sub = true;
-      if( s_toggle == 'batch-remove' )
-      {
-        can_sub = false;
-        
-        layer.confirm($(obj).attr('data-confirm'), function(index){
-           $.ajax({
-            url:s_url,
-            type:'post',
-            dataType:'json',
-            data:{ids:ids_arr},
-            success:function(info){
-            
-              if(info.status == 0)
-              {
-                layer.msg(info.result.message,{icon: 1,time: 2000});
-              }else if(info.status == 1){
-                var go_url = location.href;
-                if( info.result.hasOwnProperty("url") )
-                {
-                  go_url = info.result.url;
-                }
-                
-                layer.msg('操作成功',{time: 1000,
-                  end:function(){
-                    location.href = info.result.url;
-                  }
-                }); 
-              }
-            }
-          })
-        }); 
-      }else{
-        $.ajax({
-          url:s_url,
-          type:'post',
-          dataType:'json',
-          data:{ids:ids_arr},
-          success:function(info){
-          
-            if(info.status == 0)
-            {
-              layer.msg(info.result.message,{icon: 1,time: 2000});
-            }else if(info.status == 1){
-              var go_url = location.href;
-              if( info.result.hasOwnProperty("url") )
-              {
-                go_url = info.result.url;
-              }
-              
-              layer.msg('操作成功',{time: 1000,
-                end:function(){
-                  location.href = info.result.url;
-                }
-              }); 
-            }
-          }
-        })
-      }
-    }
+    ids_arr = ids_arr.join(",");
+    $("input[name=ids]").val(ids_arr);
   })
-  
-  form.on('switch(statewsitch)', function(data){
-    
-    var s_url = $(this).attr('data-href')
-    
-    var s_value = 1;
-    if(data.elem.checked)
-    {
-    s_value = 1;
-    }else{
-    s_value = 0;
-    }
-    
-    $.ajax({
-      url:s_url,
-      type:'post',
-      dataType:'json',
-      data:{value:s_value},
-      success:function(info){
-      
-        if(info.status == 0)
+
+  $('.export-all').click(function(){
+    $("input[name=ids]").val('all');
+  })
+
+  form.on('checkbox', function(data) {
+    if(data.elem.name == 'checkall'){
+        if(data.elem.checked)
         {
-          layer.msg(info.result.message,{icon: 1,time: 2000});
-        }else if(info.status == 1){
-          var go_url = location.href;
-          if( info.result.hasOwnProperty("url") )
-          {
-            go_url = info.result.url;
-          }
-          
-          layer.msg('操作成功',{time: 1000,
-            end:function(){
-              location.href = info.result.url;
-            }
-          }); 
+          $("input[name=item_checkbox]").each(function() {
+            $(this).prop("checked", true);
+          });
+          $("input[name=checkall]").each(function() {
+            $(this).prop("checked", true);
+          });
+          $(".export-select").removeClass("layui-btn-disabled");
+        }else{
+          $("input[name=item_checkbox]").each(function() {
+            $(this).prop("checked", false);
+          });
+          $("input[name=checkall]").each(function() {
+            $(this).prop("checked", false);
+          });
+          $(".export-select").addClass("layui-btn-disabled");
         }
-      }
-    })
-  });  
-  form.on('checkbox(checkboxall)', function(data){
-    
-    if(data.elem.checked)
-    {
-    $("input[name=item_checkbox]").each(function() {
-      $(this).prop("checked", true);
-    });
-    $("input[name=checkall]").each(function() {
-      $(this).prop("checked", true);
-    });
-    
+        form.render('checkbox');
     }else{
-    $("input[name=item_checkbox]").each(function() {
-      $(this).prop("checked", false);
-    });
-    $("input[name=checkall]").each(function() {
-      $(this).prop("checked", false);
-    });
-    }
-    
-    form.render('checkbox');
-  });
-  
-  //监听提交
-  form.on('submit(formDemo)', function(data){
-  
-   $.ajax({
-    url: data.form.action,
-    type: data.form.method,
-    data: data.field,
-    dataType:'json',
-    success: function (info) {
-      
-      if(info.status == 0)
+      const ids_arr = [];
+      $("input[name=item_checkbox]").each(function() {
+        if ( $(this).prop('checked') )
+        {
+          ids_arr.push( $(this).val() );
+        }
+      })
+      if ( ids_arr.length < 1 )
       {
-        layer.msg(info.result.message,{icon: 1,time: 2000});
-      }else if(info.status == 1){
-        var go_url = location.href;
-        if( info.result.hasOwnProperty("url") )
-        {
-          go_url = info.result.url;
-        }
-        
-        layer.msg('操作成功',{time: 1000,
-          end:function(){
-            location.href = info.result.url;
-          }
-        }); 
+        $(".export-select").addClass("layui-btn-disabled");
+      } else {
+        $(".export-select").removeClass("layui-btn-disabled");
       }
     }
-  });
-  
-    return false;
   });
 })
 
